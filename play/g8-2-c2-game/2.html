@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>氧化還原大配對</title>
+    <!-- 引入 Tailwind CSS 用於美觀樣式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 用於圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 翻牌動畫特效 CSS */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        /* 隱藏滾動條但保留功能 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        /* 禁止選取文字，避免遊戲中誤觸 */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen font-sans text-white p-4 flex flex-col items-center">
+
+    <!-- 遊戲標題與計分板 -->
+    <header class="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center mb-6 p-4 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20">
+        <div class="flex items-center gap-4 mb-4 md:mb-0">
+            <div class="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-atom text-2xl text-white fa-spin" style="--fa-animation-duration: 8s;"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
+                    氧化還原大配對
+                </h1>
+                <p class="text-sm text-gray-300">國中理化：活性、定義與應用</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="text-center">
+                <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">步數</p>
+                <p id="move-count" class="text-2xl font-mono font-bold text-blue-300">0</p>
+            </div>
+            <div class="text-center">
+                <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">進度</p>
+                <p id="progress-text" class="text-2xl font-mono font-bold text-green-300">0 / 8</p>
+            </div>
+            <button onclick="initGame()" class="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-all rounded-full text-sm font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5">
+                <i class="fa-solid fa-rotate"></i> 重置
+            </button>
+        </div>
+    </header>
+
+    <!-- 遊戲卡片區域 -->
+    <div id="game-grid" class="grid grid-cols-4 gap-3 md:gap-4 w-full max-w-4xl mx-auto perspective-1000 pb-10">
+        <!-- 卡片將由 JavaScript 動態生成 -->
+    </div>
+
+    <!-- 獲勝畫面 (預設隱藏) -->
+    <div id="win-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white text-slate-900 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-90 transition-transform duration-300 border-4 border-indigo-500">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <i class="fa-solid fa-check text-4xl text-green-600"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-2 text-indigo-900">挑戰成功！</h2>
+            <p class="text-slate-600 mb-6 text-lg">
+                恭喜你完成了氧化還原複習！<br/>
+                總共用了 <span id="final-moves" class="font-bold text-indigo-600 text-2xl">0</span> 步。
+            </p>
+            <button onclick="initGame()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 text-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <!-- 頁尾說明 -->
+    <footer class="mt-4 text-center text-slate-400 text-sm max-w-2xl px-4 pb-8">
+        <p class="mb-2 font-semibold text-slate-300 text-lg">玩法說明</p>
+        <p class="leading-relaxed">點擊翻開卡片，將相關聯的概念配對。</p>
+        <p class="leading-relaxed">例如：<span class="text-blue-300 font-bold">「氧化反應」</span> 配對 <span class="text-blue-300 font-bold">「物質與氧結合」</span></p>
+        <p class="leading-relaxed"><span class="text-orange-300 font-bold">「鎂+二氧化碳」</span> 配對 <span class="text-orange-300 font-bold">「產生黑色碳粒」</span></p>
+    </footer>
+
+    <script>
+        // --- 遊戲資料 (國中理化範圍) ---
+        const GAME_DATA = [
+            { pairId: 1, content: '氧化反應', type: 'concept', icon: 'fa-fire', color: 'text-red-500' },
+            { pairId: 1, content: '物質與氧結合', type: 'definition', iconText: '+O', color: 'text-red-500' },
+            
+            { pairId: 2, content: '還原反應', type: 'concept', icon: 'fa-rotate-left', color: 'text-blue-500' },
+            { pairId: 2, content: '氧化物失去氧', type: 'definition', iconText: '-O', color: 'text-blue-500' },
+            
+            { pairId: 3, content: '活性大 (鉀/鎂)', type: 'concept', icon: 'fa-bolt', color: 'text-yellow-500' },
+            { pairId: 3, content: '氧化物安定', type: 'definition', iconText: 'Stable', color: 'text-yellow-500' },
+            
+            { pairId: 4, content: '活性小 (黃金)', type: 'concept', icon: 'fa-shield-halved', color: 'text-gray-400' },
+            { pairId: 4, content: '氧化物不安定', type: 'definition', iconText: 'Unstable', color: 'text-gray-400' },
+            
+            { pairId: 5, content: '鎂 + 二氧化碳', type: 'equation', icon: 'fa-flask', color: 'text-orange-500' },
+            { pairId: 5, content: '產生黑色碳粒', type: 'observation', icon: 'fa-circle', color: 'text-slate-800' },
+            
+            { pairId: 6, content: '高爐煉鐵', type: 'application', icon: 'fa-industry', color: 'text-slate-500' },
+            { pairId: 6, content: '煤焦(C)當還原劑', type: 'concept', iconText: 'C', color: 'text-slate-500' },
+
+            { pairId: 7, content: '漂白水(次氯酸鈉)', type: 'application', icon: 'fa-droplet', color: 'text-cyan-500' },
+            { pairId: 7, content: '氧化型漂白', type: 'concept', icon: 'fa-wand-magic-sparkles', color: 'text-cyan-500' },
+            
+            { pairId: 8, content: '食品抗氧化劑', type: 'application', icon: 'fa-leaf', color: 'text-green-500' },
+            { pairId: 8, content: '維生素 C、E', type: 'example', iconText: 'Vit C', color: 'text-green-500' },
+        ];
+
+        // --- 遊戲狀態 ---
+        let cards = []; // 存儲當前卡片狀態
+        let flippedCards = []; // 當前翻開的卡片
+        let matchedCount = 0; // 已配對組數
+        let moves = 0; // 步數
+        let isProcessing = false; // 是否正在處理動畫(鎖定點擊)
+
+        const gridEl = document.getElementById('game-grid');
+        const movesEl = document.getElementById('move-count');
+        const progressEl = document.getElementById('progress-text');
+        const winModalEl = document.getElementById('win-modal');
+        const finalMovesEl = document.getElementById('final-moves');
+
+        // --- 初始化遊戲 ---
+        function initGame() {
+            // 重置數據
+            matchedCount = 0;
+            moves = 0;
+            flippedCards = [];
+            isProcessing = false;
+            
+            // 更新 UI
+            movesEl.innerText = '0';
+            progressEl.innerText = `0 / ${GAME_DATA.length / 2}`;
+            winModalEl.classList.add('hidden');
+            winModalEl.classList.remove('opacity-100');
+
+            // 複製並洗牌
+            const shuffled = [...GAME_DATA]
+                .sort(() => Math.random() - 0.5)
+                .map((item, index) => ({
+                    ...item,
+                    id: index,
+                    isFlipped: false,
+                    isMatched: false
+                }));
+            
+            cards = shuffled;
+            renderGrid();
+        }
+
+        // --- 渲染卡片 ---
+        function renderGrid() {
+            gridEl.innerHTML = ''; // 清空
+            
+            cards.forEach(card => {
+                // 創建卡片容器
+                const cardContainer = document.createElement('div');
+                cardContainer.className = `relative aspect-[3/4] cursor-pointer group perspective-1000 no-select transition-all duration-500 ${card.isMatched ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100'}`;
+                cardContainer.onclick = () => handleCardClick(card.id);
+
+                // 創建翻轉層
+                const flipper = document.createElement('div');
+                flipper.className = `w-full h-full duration-500 preserve-3d transition-transform shadow-xl rounded-xl ${card.isFlipped ? 'rotate-y-180' : ''}`;
+
+                // --- 正面 (蓋著的樣子) ---
+                const front = document.createElement('div');
+                front.className = 'absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-600 to-blue-800 rounded-xl border-2 border-indigo-400/30 flex items-center justify-center transform group-hover:scale-105 transition-transform';
+                front.innerHTML = `
+                    <div class="w-full h-full absolute opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
+                    <i class="fa-solid fa-atom text-4xl text-white/40 animate-pulse"></i>
+                    <div class="absolute bottom-3 text-xs text-white/30 font-mono tracking-widest">REDOX</div>
+                `;
+
+                // --- 背面 (翻開的樣子) ---
+                const back = document.createElement('div');
+                back.className = 'absolute w-full h-full backface-hidden rotate-y-180 bg-white rounded-xl border-2 border-white flex flex-col items-center justify-center p-2 text-center shadow-lg';
+                
+                // 決定圖示內容 (Icon Class 或 文字)
+                let iconHtml = '';
+                if (card.icon) {
+                    iconHtml = `<i class="fa-solid ${card.icon} text-3xl ${card.color} mb-3"></i>`;
+                } else if (card.iconText) {
+                    iconHtml = `<div class="text-xl font-black ${card.color} mb-3 border-2 border-current rounded-lg px-2 py-1">${card.iconText}</div>`;
+                }
+
+                // 下方的分類條
+                let barColor = 'bg-gray-400';
+                if(card.type === 'concept') barColor = 'bg-blue-400';
+                if(card.type === 'definition') barColor = 'bg-green-400';
+                if(card.type === 'equation') barColor = 'bg-orange-400';
+                if(card.type === 'application') barColor = 'bg-purple-400';
+
+                back.innerHTML = `
+                    ${iconHtml}
+                    <p class="font-bold text-slate-800 leading-tight ${card.content.length > 8 ? 'text-sm' : 'text-base'}">${card.content}</p>
+                    <div class="mt-3 h-1.5 w-8 rounded-full ${barColor}"></div>
+                `;
+
+                flipper.appendChild(front);
+                flipper.appendChild(back);
+                cardContainer.appendChild(flipper);
+                gridEl.appendChild(cardContainer);
+            });
+        }
+
+        // --- 點擊處理 ---
+        function handleCardClick(id) {
+            if (isProcessing) return; // 動畫中鎖定
+            
+            const cardIndex = cards.findIndex(c => c.id === id);
+            const card = cards[cardIndex];
+
+            // 如果已經翻開或已經配對，則無視
+            if (card.isFlipped || card.isMatched) return;
+
+            // 翻牌
+            cards[cardIndex].isFlipped = true;
+            flippedCards.push(card);
+            
+            // 重新渲染該卡片狀態 (優化：只重新渲染整個網格是比較簡單的做法，對於小遊戲效能影響不大)
+            renderGrid();
+
+            // 檢查是否翻了兩張
+            if (flippedCards.length === 2) {
+                moves++;
+                movesEl.innerText = moves;
+                isProcessing = true; // 鎖定點擊
+                checkForMatch();
+            }
+        }
+
+        // --- 配對檢查 ---
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.pairId === card2.pairId;
+
+            if (isMatch) {
+                // 配對成功
+                setTimeout(() => {
+                    // 更新數據
+                    cards.forEach(c => {
+                        if (c.id === card1.id || c.id === card2.id) {
+                            c.isMatched = true;
+                        }
+                    });
+                    matchedCount++;
+                    progressEl.innerText = `${matchedCount} / ${GAME_DATA.length / 2}`;
+                    flippedCards = [];
+                    isProcessing = false;
+                    renderGrid(); // 觸發消失動畫
+
+                    // 檢查勝利
+                    if (matchedCount === GAME_DATA.length / 2) {
+                        showWin();
+                    }
+                }, 600);
+            } else {
+                // 配對失敗
+                setTimeout(() => {
+                    // 蓋回去
+                    cards.forEach(c => {
+                        if (c.id === card1.id || c.id === card2.id) {
+                            c.isFlipped = false;
+                        }
+                    });
+                    flippedCards = [];
+                    isProcessing = false;
+                    renderGrid(); // 觸發蓋牌動畫
+                }, 1200);
+            }
+        }
+
+        // --- 顯示勝利畫面 ---
+        function showWin() {
+            setTimeout(() => {
+                finalMovesEl.innerText = moves;
+                winModalEl.classList.remove('hidden');
+                // 為了讓 CSS transition 生效，需要一點延遲
+                setTimeout(() => {
+                    winModalEl.classList.add('opacity-100');
+                    winModalEl.querySelector('div').classList.remove('scale-90');
+                    winModalEl.querySelector('div').classList.add('scale-100');
+                }, 50);
+            }, 500);
+        }
+
+        // --- 啟動遊戲 ---
+        initGame();
+
+    </script>
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

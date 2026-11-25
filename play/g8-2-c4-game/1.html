@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化學速率與平衡觀念挑戰</title>
+    <style>
+        :root {
+            /* 速率與平衡風格：活力橘配穩定紫 */
+            --primary-color: #e67e22; /* 速率 */
+            --secondary-color: #8e44ad; /* 平衡 */
+            --bg-color: #fcf3cf; /* 淡淡的米黃色背景 */
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#f1c40f 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 嵌入高度優化 */
+            min-height: 90vh; 
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-color);
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(230, 126, 34, 0.15);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: 6px solid var(--primary-color);
+        }
+
+        /* 進度條 */
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        h1 {
+            color: #d35400;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.05);
+        }
+
+        .score-board {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            background: #fdfefe;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 50px;
+            border: 1px solid #ecf0f1;
+        }
+
+        .question-box {
+            font-size: 1.3rem;
+            font-weight: 600;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            padding: 20px;
+            background: #fff9e6;
+            border-radius: 15px;
+            border: 2px dashed #f39c12;
+            color: #2c3e50;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .btn {
+            border: none;
+            padding: 15px 0;
+            font-size: 1.8rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 130px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-true {
+            background-color: #fff;
+            border: 3px solid #27ae60;
+            color: #27ae60;
+        }
+
+        .btn-false {
+            background-color: #fff;
+            border: 3px solid #c0392b;
+            color: #c0392b;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-true:hover { background-color: #eafaf1; }
+        .btn-false:hover { background-color: #fdedec; }
+
+        /* 回饋區塊 */
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.4s;
+            text-align: left;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .feedback.correct {
+            background-color: #dff9fb;
+            color: #16a085;
+            border-left: 5px solid #16a085;
+        }
+        .feedback.wrong {
+            background-color: #fadbd8;
+            color: #c0392b;
+            border-left: 5px solid #c0392b;
+        }
+
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3);
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background-color: #d35400;
+        }
+
+        .result-screen {
+            display: none;
+        }
+        
+        /* 平衡動畫 */
+        .balance-anim {
+            font-size: 5rem;
+            margin: 20px 0;
+            display: inline-block;
+            animation: swing 2s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes swing {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- 遊戲進行畫面 -->
+    <div id="quiz-screen">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <h1>⚡ 速率與平衡大挑戰</h1>
+        <div class="score-board">目前得分: <span id="score">0</span></div>
+        
+        <div class="question-box">
+             <span id="question-text">題目載入中...</span>
+        </div>
+
+        <div class="btn-container" id="options">
+            <button class="btn btn-true" onclick="checkAnswer(true)">
+                <span>⭕</span> 對
+            </button>
+            <button class="btn btn-false" onclick="checkAnswer(false)">
+                <span>❌</span> 錯
+            </button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">下一題 ➜</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="result-screen" class="result-screen">
+        <h1>挑戰完成！</h1>
+        <div class="balance-anim">⚖️</div>
+        <h2 id="final-score" style="font-size: 2.5rem; color: var(--text-color);"></h2>
+        <p id="comment" style="font-size: 1.2rem; color: #666;"></p>
+        <button class="btn" style="background:var(--primary-color); color:white; border:none; margin-top:20px; width: auto; padding: 12px 30px;" onclick="restartGame()">再試一次</button>
+    </div>
+</div>
+
+<script>
+    // --- 題目資料 (從您的資料與生成的內容整合) ---
+    let questions = [
+        {
+            q: "將貝殼磨成粉末後再加入鹽酸，產生氣泡的速率會比使用整塊貝殼快，這是因為粉末的總表面積較大，增加了粒子碰撞的機會。",
+            a: true,
+            explain: "【正確】反應物的顆粒越小，總表面積（接觸面積）越大，粒子間有效碰撞的頻率增加，反應速率變快。"
+        },
+        {
+            q: "溫度升高通常會使反應速率變快，其最主要的原因是因為高溫「降低了反應所需的門檻（活化能）」，使得反應更容易進行。",
+            a: false,
+            explain: "【錯誤】溫度升高是增加粒子的「動能（運動速度）」與碰撞頻率；「催化劑」的主要功能才是降低活化能。"
+        },
+        {
+            q: "在雙氧水製氧的實驗中加入二氧化錳當作催化劑，反應結束後，二氧化錳的質量會因為參與反應而減少。",
+            a: false,
+            explain: "【錯誤】催化劑雖然參與反應過程，但在反應前後其質量與化學性質不變，不會被消耗。"
+        },
+        {
+            q: "在「硫代硫酸鈉與鹽酸」的反應實驗中，將反應溶液的溫度提高，會發現產生黃色硫沉澱遮住瓶底十字記號所需的時間變短。",
+            a: true,
+            explain: "【正確】溫度越高，反應速率越快。反應速率越快，生成固定量產物（遮住十字）所需的時間越短。"
+        },
+        {
+            q: "將原本濃度 1.0 M 的鹽酸加水稀釋成 0.1 M 後，再與大小相同的鎂帶反應，產生氫氣氣泡的速率會明顯變慢。",
+            a: true,
+            explain: "【正確】濃度越高，單位體積內的粒子數越多，碰撞機會增加，反應速率越快。稀釋後濃度降低，速率變慢。"
+        },
+        {
+            q: "當密閉容器內的可逆反應達到「平衡狀態」時，代表正反應與逆反應都已經完全停止，且反應物與生成物的濃度必定相等。",
+            a: false,
+            explain: "【錯誤】化學平衡是「動態平衡」，正、逆反應速率相等（仍在進行中），且反應物與生成物濃度保持「定值」，但兩者濃度不一定相等。"
+        },
+        {
+            q: "在黃色的鉻酸鉀（K₂CrO₄）溶液中加入少許硫酸（H⁺），溶液顏色會轉變為橘紅色，這是因為酸性環境促使平衡向生成二鉻酸根的方向移動。",
+            a: true,
+            explain: "【正確】加入酸（增加 H⁺）會使平衡向右移動（生成橘紅色的二鉻酸根 Cr₂O₇²⁻）。"
+        },
+        {
+            q: "「增加壓力（縮小容器體積）」這種改變條件的方法，對於所有狀態（包含固態、液態、氣態）的化學反應，都能顯著增加反應速率。",
+            a: false,
+            explain: "【錯誤】壓力（或體積）的改變主要影響「氣體」反應的速率；對於只有固體或液體的反應，壓力改變的影響極微。"
+        },
+        {
+            q: "在可逆反應中加入催化劑，除了可以加快反應速率、縮短達到平衡所需的時間外，也能改變平衡的位置，使生成物的產量增加。",
+            a: false,
+            explain: "【錯誤】催化劑只能改變反應速率（縮短達平衡時間），「不能」改變平衡位置，因此無法增加產物的產量（總產量不變）。"
+        },
+        {
+            q: "反應物的「本性」也是影響反應速率的重要因素，例如活性大的鉀金屬與水反應極為劇烈，而鐵生鏽則相對緩慢。",
+            a: true,
+            explain: "【正確】反應物的本性（活性大小）是影響反應速率的內在因素，活性越大，反應速率越快。"
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const totalQuestions = questions.length;
+    const scorePerQuestion = Math.round(100 / totalQuestions);
+
+    const questionText = document.getElementById('question-text');
+    const scoreDisplay = document.getElementById('score');
+    const progressBar = document.getElementById('progressBar');
+    const feedbackDiv = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    const optionsDiv = document.getElementById('options');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+
+    // ★★★ 隨機洗牌函式 ★★★
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function loadQuestion() {
+        feedbackDiv.style.display = 'none';
+        nextBtn.style.display = 'none';
+        optionsDiv.style.pointerEvents = 'auto'; 
+        optionsDiv.style.opacity = '1';
+        
+        // 更新進度條
+        const progress = (currentQuestionIndex / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // 顯示題目 (自動加上題號 Q1, Q2)
+        questionText.innerText = `Q${currentQuestionIndex + 1}. ${questions[currentQuestionIndex].q}`;
+    }
+
+    function checkAnswer(userAnswer) {
+        const currentQ = questions[currentQuestionIndex];
+        const isCorrect = (userAnswer === currentQ.a);
+
+        optionsDiv.style.pointerEvents = 'none';
+        optionsDiv.style.opacity = '0.6';
+
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            score += scorePerQuestion;
+            // 滿分修正
+            if (currentQuestionIndex === totalQuestions - 1 && score >= 98) score = 100;
+
+            scoreDisplay.innerText = score;
+            feedbackDiv.className = 'feedback correct';
+            feedbackDiv.innerHTML = `<strong>🎉 觀念正確！</strong><br>${currentQ.explain}`;
+        } else {
+            feedbackDiv.className = 'feedback wrong';
+            feedbackDiv.innerHTML = `<strong>💥 觀念修正：</strong><br>${currentQ.explain}`;
+        }
+
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+            loadQuestion();
+        } else {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        progressBar.style.width = '100%';
+        document.getElementById('final-score').innerText = `${score} 分`;
+        
+        let comment = "";
+        if(score === 100) comment = "太神了！速率與平衡大師就是你！⚡⚖️";
+        else if(score >= 80) comment = "優秀！勒沙特列原理你懂的！👍";
+        else if(score >= 60) comment = "及格囉！小心那些反直覺的陷阱題！🧐";
+        else comment = "別灰心！再複習一下影響速率的五大因素！💪";
+        
+        document.getElementById('comment').innerText = comment;
+    }
+
+    function restartGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreDisplay.innerText = "0";
+        quizScreen.style.display = 'block';
+        resultScreen.style.display = 'none';
+        
+        // ★★★ 重新開始時，再次洗牌 ★★★
+        shuffleArray(questions);
+        
+        loadQuestion();
+    }
+
+    // 啟動遊戲 (先洗牌)
+    shuffleArray(questions);
+    loadQuestion();
+
+</script>
+
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

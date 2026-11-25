@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化學平衡觀念檢測</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .option-btn { transition: all 0.2s; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const questions = [
+            {
+                id: 1,
+                title: "平衡的定義",
+                question: "當一個可逆反應達到「化學平衡」時，下列哪一個敘述是正確的？",
+                options: [
+                    "反應完全停止，正逆反應速率皆為零",
+                    "反應物與生成物的濃度相等",
+                    "反應物與生成物的濃度維持定值，不再隨時間改變",
+                    "正反應速率大於逆反應速率"
+                ],
+                correct: 2,
+                explanation: "化學平衡是「動態平衡」。雖然巨觀上濃度不再改變（維持定值），但微觀上正反應與逆反應仍以「相等」的速率持續進行中，並未停止。"
+            },
+            {
+                id: 2,
+                title: "勒沙特列原理 - 濃度",
+                question: "已知鉻酸鉀在酸性溶液中的平衡： 2CrO₄²⁻(黃色) + 2H⁺ ⇌ Cr₂O₇²⁻(橘紅色) + H₂O。若在溶液中加入氫氧化鈉(NaOH)，顏色會如何變化？",
+                options: [
+                    "變為黃色",
+                    "變為橘紅色",
+                    "顏色不變",
+                    "產生無色沉澱"
+                ],
+                correct: 0,
+                explanation: "加入 NaOH 會解離出 OH⁻，OH⁻ 會與反應物中的 H⁺ 中和生成水，導致 H⁺ 濃度下降。根據勒沙特列原理，平衡會向左移動（補充 H⁺），因此黃色的 CrO₄²⁻ 增加。"
+            },
+            {
+                id: 3,
+                title: "勒沙特列原理 - 氣體壓力",
+                question: "對於氣體反應 N₂(g) + 3H₂(g) ⇌ 2NH₃(g)，若將反應容器的體積壓縮變小（壓力增大），平衡將如何移動？",
+                options: [
+                    "向左移動（生成 N₂ 和 H₂）",
+                    "向右移動（生成 NH₃）",
+                    "不移動",
+                    "無法判斷"
+                ],
+                correct: 1,
+                explanation: "當壓力增大（體積變小）時，平衡會傾向「氣體係數和較小」的一方移動，以減少氣體粒子數來抵消壓力。左邊係數和為 1+3=4，右邊為 2，故平衡向右移動。"
+            },
+            {
+                id: 4,
+                title: "勒沙特列原理 - 溫度",
+                question: "已知 N₂O₄(g) + 熱 ⇌ 2NO₂(g)。若將裝有此混合氣體的燒瓶浸泡在熱水中，顏色會如何變化？",
+                options: [
+                    "顏色變深（紅棕色變深）",
+                    "顏色變淺（趨近無色）",
+                    "顏色不變",
+                    "先變淺再變深"
+                ],
+                correct: 0,
+                explanation: "此反應為吸熱反應（熱在左邊）。升高溫度如同加入反應物，平衡會向右移動（吸熱方向），生成更多的紅棕色 NO₂，導致顏色變深。"
+            },
+            {
+                id: 5,
+                title: "催化劑的影響",
+                question: "關於催化劑對可逆反應的影響，下列何者正確？",
+                options: [
+                    "催化劑可以改變平衡常數 (K值)",
+                    "催化劑可以使產物的產量增加",
+                    "催化劑可以同時增加正反應與逆反應的速率",
+                    "催化劑只對正反應有效"
+                ],
+                correct: 2,
+                explanation: "催化劑能降低活化能，同等程度地加快正反應與逆反應的速率，因此只能縮短「達到平衡所需的時間」，但不能改變平衡位置或產量，也不會改變平衡常數。"
+            },
+            {
+                id: 6,
+                title: "固體對平衡的影響",
+                question: "在密閉容器中進行反應：CaCO₃(s) ⇌ CaO(s) + CO₂(g)。若在定溫下加入更多的 CaCO₃ 固體，對平衡有何影響？",
+                options: [
+                    "平衡向右移動，產生更多 CO₂",
+                    "平衡向左移動",
+                    "平衡不移動",
+                    "正反應速率變快"
+                ],
+                correct: 2,
+                explanation: "增加純固體或純液體的量，並不會改變其濃度（密度是定值），因此不會影響化學平衡的位置。只要固體還存在，平衡就不受加入量的影響。"
+            },
+            {
+                id: 7,
+                title: "惰性氣體的影響",
+                question: "在定溫、定容（體積固定）的條件下，對平衡系統加入氦氣(He)，下列敘述何者正確？",
+                options: [
+                    "總壓力增加，平衡向氣體係數小的一方移動",
+                    "總壓力增加，但各反應物分壓不變，平衡不移動",
+                    "反應速率變快",
+                    "平衡常數改變"
+                ],
+                correct: 1,
+                explanation: "雖然加入惰性氣體會使總壓力增加，但在「定容」下，原本反應成分的莫耳數與體積都沒變，所以各成分的「分壓」（或濃度）維持不變，因此平衡不會移動。"
+            },
+            {
+                id: 8,
+                title: "呼吸作用與平衡",
+                question: "人體血液中的酸鹼平衡可簡化為：H⁺(aq) + HCO₃⁻(aq) ⇌ H₂CO₃(aq) ⇌ H₂O(l) + CO₂(g)。當一個人過度換氣（快速深呼吸，呼出大量 CO₂）時，血液pH值會如何變化？",
+                options: [
+                    "pH值上升（變鹼）",
+                    "pH值下降（變酸）",
+                    "pH值不變",
+                    "血液會凝固"
+                ],
+                correct: 0,
+                explanation: "呼出大量 CO₂ 導致血液中 CO₂ 濃度下降。根據勒沙特列原理，平衡會向右移動以補充 CO₂。這會消耗掉左邊的 H⁺，導致 H⁺ 濃度降低，pH 值因此上升（呼吸性鹼中毒）。"
+            },
+            {
+                id: 9,
+                title: "平衡常數 K",
+                question: "關於平衡常數 K，下列哪一個操作會改變 K 的數值？",
+                options: [
+                    "加入催化劑",
+                    "改變容器體積（壓力）",
+                    "改變各物質的濃度",
+                    "改變溫度"
+                ],
+                correct: 3,
+                explanation: "平衡常數 K 只受「溫度」影響。濃度、壓力、催化劑的改變會使平衡移動，但最終達到新平衡時，其濃度比值（K值）在定溫下是不變的。"
+            },
+            {
+                id: 10,
+                title: "哈柏法製氨",
+                question: "工業製氨 N₂ + 3H₂ ⇌ 2NH₃ + 熱。為了得到最高的產率，理論上應該選擇什麼樣的條件？",
+                options: [
+                    "高溫、高壓",
+                    "高溫、低壓",
+                    "低溫、高壓",
+                    "低溫、低壓"
+                ],
+                correct: 2,
+                explanation: "此反應為放熱且氣體係數和減少（4→2）的反應。根據勒沙特列原理：1. 低溫有利於放熱反應（向右）。2. 高壓有利於氣體係數小的一方（向右）。故低溫高壓理論上產率最高（但實務上需考量速率，溫度不能太低）。"
+            }
+        ];
+
+        const QuizApp = () => {
+            const [currentQIndex, setCurrentQIndex] = useState(0);
+            const [score, setScore] = useState(0);
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [isAnswered, setIsAnswered] = useState(false);
+            const [showResult, setShowResult] = useState(false);
+
+            const currentQ = questions[currentQIndex];
+
+            const handleOptionClick = (index) => {
+                if (isAnswered) return;
+                setSelectedOption(index);
+                setIsAnswered(true);
+                if (index === currentQ.correct) {
+                    setScore(score + 1);
+                }
+            };
+
+            const nextQuestion = () => {
+                if (currentQIndex < questions.length - 1) {
+                    setCurrentQIndex(currentQIndex + 1);
+                    setSelectedOption(null);
+                    setIsAnswered(false);
+                } else {
+                    setShowResult(true);
+                }
+            };
+
+            const restartQuiz = () => {
+                setCurrentQIndex(0);
+                setScore(0);
+                setSelectedOption(null);
+                setIsAnswered(false);
+                setShowResult(false);
+            };
+
+            if (showResult) {
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen p-4 fade-in">
+                        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border-t-8 border-blue-500">
+                            <h2 className="text-3xl font-bold text-slate-800 mb-2">測驗完成！</h2>
+                            <p className="text-slate-500 mb-6">你的化學平衡觀念如何呢？</p>
+                            
+                            <div className="mb-8">
+                                <div className="text-6xl font-black text-blue-600 mb-2">{score} / {questions.length}</div>
+                                <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">總得分</div>
+                            </div>
+
+                            <p className="mb-8 text-lg">
+                                {score === 10 ? "太強了！你是化學平衡大師！👑" :
+                                 score >= 8 ? "觀念很清楚喔！繼續保持！👍" :
+                                 score >= 6 ? "還不錯，再複習一下錯的題目吧！💪" :
+                                 "加油！勒沙特列原理可能還需要多想一下喔！📚"}
+                            </p>
+
+                            <button 
+                                onClick={restartQuiz}
+                                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all shadow-lg"
+                            >
+                                再挑戰一次
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="max-w-2xl mx-auto p-4 md:p-8 flex flex-col min-h-screen justify-center">
+                    
+                    {/* 進度條 */}
+                    <div className="mb-6">
+                        <div className="flex justify-between text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">
+                            <span>Question {currentQIndex + 1}</span>
+                            <span>Total {questions.length}</span>
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div 
+                                className="h-full bg-blue-500 transition-all duration-300"
+                                style={{ width: `${((currentQIndex + 1) / questions.length) * 100}%` }}
+                            ></div>
+                        </div>
+                    </div>
+
+                    {/* 題目卡片 */}
+                    <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden fade-in">
+                        <div className="p-6 md:p-8 bg-slate-50 border-b border-slate-100">
+                            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full mb-3">
+                                {currentQ.title}
+                            </span>
+                            <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-relaxed">
+                                {currentQ.question}
+                            </h2>
+                        </div>
+
+                        {/* 選項區 */}
+                        <div className="p-6 md:p-8 space-y-3">
+                            {currentQ.options.map((option, index) => {
+                                let btnClass = "w-full text-left p-4 rounded-xl border-2 font-medium text-lg relative ";
+                                
+                                if (isAnswered) {
+                                    if (index === currentQ.correct) {
+                                        btnClass += "border-green-500 bg-green-50 text-green-800";
+                                    } else if (index === selectedOption) {
+                                        btnClass += "border-red-500 bg-red-50 text-red-800";
+                                    } else {
+                                        btnClass += "border-slate-100 text-slate-400 opacity-50 cursor-not-allowed";
+                                    }
+                                } else {
+                                    btnClass += "border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 cursor-pointer shadow-sm hover:shadow-md";
+                                }
+
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleOptionClick(index)}
+                                        disabled={isAnswered}
+                                        className={btnClass}
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <span>{option}</span>
+                                            {isAnswered && index === currentQ.correct && (
+                                                <span className="text-green-600">
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                                </span>
+                                            )}
+                                            {isAnswered && index === selectedOption && index !== currentQ.correct && (
+                                                <span className="text-red-600">
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </span>
+                                            )}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* 即時回饋區 */}
+                        {isAnswered && (
+                            <div className="p-6 md:p-8 bg-slate-50 border-t border-slate-100 animate-in slide-in-from-bottom-2 duration-300">
+                                <div className={`p-4 rounded-xl mb-4 ${selectedOption === currentQ.correct ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}`}>
+                                    <div className="font-bold text-lg mb-1 flex items-center gap-2">
+                                        {selectedOption === currentQ.correct ? '🎉 答對了！' : '😅 答錯了...'}
+                                    </div>
+                                    <div className="text-sm md:text-base opacity-90 leading-relaxed">
+                                        <span className="font-bold bg-white/50 px-1 rounded mr-1">解析</span>
+                                        {currentQ.explanation}
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={nextQuestion}
+                                    className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2 text-lg"
+                                >
+                                    {currentQIndex === questions.length - 1 ? "查看總分" : "下一題 ➜"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<QuizApp />);
+    </script>
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

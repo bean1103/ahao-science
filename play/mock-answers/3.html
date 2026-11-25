@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿豪自然的第三次複習考自然科詳解網站(康版)</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #020202;
+            color: #94a3b8;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .hormone-gradient {
+            background: linear-gradient(135deg, #ff0000 0%, #7e22ce 50%, #eab308 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .neon-border {
+            position: relative;
+        }
+        .neon-border::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, #dc2626, #7e22ce, #eab308, #10b981);
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.3;
+            border-radius: inherit;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect, useRef } = React;
+
+        const App = () => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [displayId, setDisplayId] = useState(null);
+            const resultRef = useRef(null);
+            const topRef = useRef(null);
+
+            const examData = [
+                { id: 1, ans: "A", source: "114 自然 3 上 — 7-1 宇宙與太陽系", keyPoint: "衛星的定義與天體層級", detail: "繞行行星運行的天體稱為「衛星」。(A)衛星；(B)恆星；(C)(D)行星。", quote: "星光不問趕路人，你的堅持終將閃耀。" },
+                { id: 2, ans: "C", source: "113 自然 2 下 — 3-1 電解質", keyPoint: "解離與導電原理", detail: "食醋與食鹽皆為電解質，溶於水後解離成離子導電，使 LED 燈發亮。", quote: "成功與電解質一樣，都需要徹底的解離與投入。" },
+                { id: 3, ans: "B", source: "112 自然 1 下 — 4-2 生物互動關係", keyPoint: "棲地與衝突關係", detail: "台灣獼猴出沒表示棲地重疊；餵食會增加衝突機會。", quote: "保持智慧，像獼猴一樣靈活應對各種難關。" },
+                { id: 4, ans: "B", source: "112 自然 1 下 — 1-3 有性生殖", keyPoint: "子宮內膜與著床位置", detail: "甲為輸卵管，乙為子宮。此藥物作用於子宮內膜，干擾胚胎著床。", quote: "精準鎖定考點，讓答案無所遁形。" },
+                { id: 5, ans: "C", source: "113 自然 2 下 — 6-1 力與平衡", keyPoint: "同一直線合力計算", detail: "合力：反向相減 4-3=1 (kgw)，方向與大者相同。", quote: "找對施力點，世界都會為你轉動。" },
+                { id: 6, ans: "A", source: "112 自然 1 上 — 6-1 呼吸與恆定", keyPoint: "呼吸構造與水分散失", detail: "(A)濕潤皮膚助於氣體交換，無法防止水分散失。", quote: "深呼吸，穩定情緒是考場必備的超能力。" },
+                { id: 7, ans: "D", source: "113 自然 2 上 — 4-4 透鏡成像", keyPoint: "凸透鏡放大鏡原理", detail: "凸透鏡可形成放大像，用於放大鏡。", quote: "放大你的優點，讓劣勢在專注中縮小。" },
+                { id: 8, ans: "C", source: "114 自然 3 上 — 7-2 晝夜與四季", keyPoint: "公轉與四季變化", detail: "6月太陽直射北半球，高緯度白晝比黑夜長。", quote: "追逐光芒的人，終會迎來最燦爛的白晝。" },
+                { id: 9, ans: "A", source: "113 自然 2 上 — 3-4 聲波傳播", keyPoint: "聲波反射與指向性", detail: "手掌圈住嘴巴利用反射將聲波集中，減少發散。", quote: "喊出你的野心，讓世界聽見你的聲音。" },
+                { id: 10, ans: "A", source: "114 自然 3 上 — 5-2 地表平衡", keyPoint: "河流侵蝕與搬運特徵", detail: "上游多巨大礫石；中下游多圓潤鵝卵石。", quote: "磨礪去稜角，是成長最必經的苦痛與美麗。" },
+                { id: 11, ans: "D", source: "113 自然 2 上 — 6-1 元素與化合物", keyPoint: "混合物與金屬性質", detail: "合金為混合物；24K金純度最高，質地最軟。", quote: "純粹的實力，是最具韌性的防禦。" },
+                { id: 12, ans: "B", source: "112 自然 1 上 — 5-2 神經系統", keyPoint: "大腦功能：智力與學習", detail: "學習與智力由大腦負責，屬於中樞神經核心。", quote: "智慧是最好的武器，思考是最高的防線。" },
+                { id: 13, ans: "B", source: "114 自然 3 上 — 7-3 日地月運動", keyPoint: "藍月現象定義", detail: "一個月內出現第二次滿月，並非指月亮變藍色。", quote: "即使是稀有的幸運，也會在不經意間降臨。" },
+                { id: 14, ans: "D", source: "113 自然 2 下 — 4-2 可逆反應", keyPoint: "勒沙特列原理：酸鹼影響", detail: "加鹼消耗 H+ 使平衡向左移動，溶液由橙色變黃色。", quote: "在劇烈的化學反應中，找回最平靜的自己。" },
+                { id: 15, ans: "D", source: "112 自然 1 下 — 4-3 生態系", keyPoint: "能量階層與傳遞", detail: "丁為生產者；乙為高階消費者，能量傳遞最少。", quote: "處於頂端的代價，是承擔更重的能量負荷。" },
+                { id: 16, ans: "D", source: "114 自然 3 上 — 3-2 力學能", keyPoint: "力學能守恆定律", detail: "高度相同位能同，力學能守恆故甲=乙=丙。", quote: "能量不滅，你現在做的功，未來都會變成能。" },
+                { id: 17, ans: "C", source: "112 自然 1 上 — 4-1 植物運輸", keyPoint: "木質部構造功能", detail: "木質部具支撐與運輸水分之功能。", quote: "向下紮根、向上生長，成就最挺拔的人生。" },
+                { id: 18, ans: "A", source: "114 自然 3 上 — 5-2 地表改變", keyPoint: "海蝕地形：海拱成因", detail: "海拱是海岸受波浪長期侵蝕與風化形成的景觀。", quote: "再堅硬的巨石，也擋不住時間與海浪的堅持。" },
+                { id: 19, ans: "B", source: "114 自然 3 上 — 5-1 地球水資源", keyPoint: "冰川地形：U形谷", detail: "U形谷為冰川侵蝕。冰川屬固態淡水(乙)。", quote: "冷靜的思考如冰川，能推動最巨大的障礙。" },
+                { id: 20, ans: "C", source: "114 自然 3 上 — 1-3 加速度", keyPoint: "加速度計算", detail: "a = (0-12)/1 = -12 m/s²。負號代表減速。", quote: "在快速的節奏中，學會精準的煞車與起步。" },
+                { id: 21, ans: "D", source: "113 自然 2 下 — 3-2 酸和鹼", keyPoint: "水溶液電中性", detail: "溶液呈電中性：陽陰離子總電量相等。", quote: "保持靈魂的電中性，不偏不倚地前行。" },
+                { id: 22, ans: "B", source: "113 自然 2 下 — 1-3 化學計量", keyPoint: "莫耳數比計算", detail: "係數比 2:1。2莫耳Cu原子最多反應生1莫耳產物。", quote: "計量人生，每一分微小的累積都是勝負關鍵。" },
+                { id: 23, ans: "B", source: "112 自然 1 上 — 2-2 細胞構造", keyPoint: "原核生物與病毒", detail: "病毒無細胞構造；藍綠菌無核，但有葉綠素。", quote: "微小卻強大，這就是生命的奧祕。" },
+                { id: 24, ans: "D", source: "112 自然 1 上 — 5-3 內分泌", keyPoint: "激素調節運輸", detail: "激素分泌後透過血液運送至目標部位。", quote: "協調好內在的化學節奏，你將無堅不摧。" },
+                { id: 25, ans: "A", source: "113 自然 2 下 — 5-3 聚合物", keyPoint: "熱塑性聚合物", detail: "PE、PVC 為鏈狀熱塑性聚合物，受熱易變形。", quote: "塑造成你想要的樣子，人生不應被輕易定型。" },
+                { id: 26, ans: "B", source: "113 自然 2 上 — 2-1 物質分類", keyPoint: "純物質與混合物", detail: "分類物質三態，實驗觀察物理及化學變化。", quote: "看透事物的本質，你就掌握了成功的鑰匙。" },
+                { id: 27, ans: "A", source: "112 自然 1 上 — 4-2 血液循環", keyPoint: "心臟構造與循環路徑", detail: "由血管連接的腔室可知甲為右心房，乙為左心房，丙為右心室，丁為左心室。藥劑被注射到人體後，經體循環的大靜脈進入心臟的順序為：右心房(甲) $\rightarrow$ 右心室(丙) $\rightarrow$ 左心房(乙) $\rightarrow$ 左心室(丁)，故選(A)。", quote: "精準掌握循環規律，讓成功的血液流遍全身。" },
+                { id: 28, ans: "A", source: "113 自然 2 下 — 5-1 有機化合物", keyPoint: "常見燃料的主要成分", detail: "(A)產生甲烷($CH_4$)；(B)產生氧氣($O_2$)；(C)產生氫氣($H_2$)；(D)產生二氧化碳($CO_2$)。天然氣的主要成分為甲烷，故選(A)。", quote: "燃燒你的鬥志，像甲烷一樣提供最強大的動能。" },
+                { id: 29, ans: "A", source: "113 自然 2 上 — 4-1 光的傳播", keyPoint: "光的直線傳播", detail: "光在均勻介質中沿直線傳播，產生影子。", quote: "追逐光的方向，陰影永遠在背後。" },
+                { id: 30, ans: "B", source: "112 自然 1 上 — 5-2 神經傳導", keyPoint: "神經傳導路徑", detail: "正確路徑：受器 $\rightarrow$ 感覺神經 $\rightarrow$ 中樞(脊髓或腦) $\rightarrow$ 運動神經 $\rightarrow$ 動器。", quote: "反應要快，路徑要對，分數才能穩穩拿回。" },
+                { id: 31, ans: "A", source: "112 自然 1 上 — 1-1 顯微鏡", keyPoint: "複式顯微鏡成像", detail: "成上下左右顛倒像。移動方向與實物相反。", quote: "微觀世界，才能擁有宏觀的視野。" },
+                { id: 32, ans: "C", source: "114 自然 3 上 — 6-1 板塊運動", keyPoint: "造山運動斷層", detail: "玉山高度增加代表板塊推擠，產生逆斷層。", quote: "足夠的推擠與壓力，方能成就壯闊的高峰。" },
+                { id: 33, ans: "C", source: "114 自然 3 上 — 1-1 直線運動", keyPoint: "x-t 圖分析", detail: "5~10分斜直線為等速；12分後趨向零點。", quote: "選定方向，然後以最穩定的步伐邁進。" },
+                { id: 34, ans: "B", source: "114 自然 3 上 — 2-3 反作用力", keyPoint: "作用力與反作用力", detail: "踢力與紙箱反饋力大小相等、方向相反。", quote: "你的每一分付出，世界都會給你同等的回響。" },
+                { id: 35, ans: "A", source: "114 自然 3 下 — 3-2 地震定義", keyPoint: "震央與震源定義", detail: "震源在地下；震央為對應地表點。", quote: "堅定的內心，是抵禦任何震盪的根基。" },
+                { id: 36, ans: "D", source: "114 自然 3 下 — 1-2 電與生活", keyPoint: "額定電壓功率", detail: "電壓未達需求，無法正常發亮(P=V²/R)。", quote: "能量不足時，沉潛是為了下一次的閃耀。" },
+                { id: 37, ans: "A", source: "113 自然 2 上 — 5-1 熱量計算", keyPoint: "熱量與質量關係", detail: "H=msΔT。質量大者上升溫度較小。", quote: "厚積而薄發，沉穩的人走得更遠。" },
+                { id: 38, ans: "C", source: "113 自然 2 下 — 6-2 壓力計算", keyPoint: "液體壓力與重量", detail: "P=h×d。總重包含水重 400g 與瓶重 160g。", quote: "學會釋放壓力，人生才能輕裝上陣。" },
+                { id: 39, ans: "C", source: "114 自然 3 上 — 3-1 功與能", keyPoint: "功的計算", detail: "W=F×S。力 30N × 位移 5M = 150 焦耳。", quote: "功不唐捐，你的每一分功都在累積動能。" },
+                { id: 40, ans: "B", source: "112 自然 1 下 — 2-3 遺傳疾病", keyPoint: "隱性遺傳分析", detail: "正常父母生患病子，雙親皆為帶因者(Aa)。", quote: "解開基因的密碼，主宰自己的命運。" },
+                { id: 41, ans: "C", source: "114 自然 3 上 — 4-4 電阻特性", keyPoint: "電阻與長度截面", detail: "電阻與長度成正比、截面積成反比。", quote: "減少阻力，你的前進速度將無人及。" },
+                { id: 42, ans: "D", source: "112 自然 1 上 — 3-2 消化作用", keyPoint: "酵素 pH 值影響", detail: "胃酸性助消化蛋白(甲)；唾液中性助澱粉(乙)。", quote: "適應環境，是強者的第一課。" },
+                { id: 43, ans: "D", source: "112 自然 1 上 — 3-2 實驗設計", keyPoint: "操縱變因控制變因", detail: "探討溫度影響，溫度為操縱變因。", quote: "掌控關鍵變因，你就能掌控全局。" },
+                { id: 44, ans: "A", source: "112 自然 1 下 — 3-5 動物分類", keyPoint: "軟體動物辨識", detail: "菊石、文蛤屬軟體動物，身體柔軟、不分節。", quote: "生命的延續，是宇宙最美的奇蹟。" },
+                { id: 45, ans: "C", source: "114 自然 3 上 — 6-3 岩層紀錄", keyPoint: "化石保存環境", detail: "化石主存於沈積岩。火成岩與變質岩易破壞遺體。", quote: "碰撞出的火花，是新世界的開端。" },
+                { id: 46, ans: "D", source: "114 自然 3 下 — 4-2 全球變遷", keyPoint: "環境永續減災", detail: "變遷、資源利用與減災管理之互動。", quote: "守護地球，就是守護我們的未來。" },
+                { id: 47, ans: "B", source: "113 自然 2 下 — 4-1 反應速率", keyPoint: "濃度溫度影響", detail: "分析數據，觀察環境變因如何加速反應。", quote: "加速你的前進，別讓夢想在等待中冷卻。" },
+                { id: 48, ans: "C", source: "113 自然 2 下 — 6-4 浮力應用", keyPoint: "阿基米德原理", detail: "浮力 = 排開液體重。浮體 B=W；沉體 B<W。", quote: "即使在逆境，也要學會優雅地浮出水面。" },
+                { id: 49, ans: "B", source: "114 自然 3 上 — 2-1 慣性定律", keyPoint: "牛頓第一運動定律", detail: "啟動球向南滾動；煞車人向原方向(東南)前移。", quote: "保持慣性，堅持朝著目標前進。" },
+                { id: 50, ans: "C", source: "114 自然 3 上 — 1-1 位移路徑", keyPoint: "路徑長與位移區別", detail: "非直線運動時，路徑長大於位移大小。", quote: "雖然彎路更長，但每一步路徑都是成長。" }
+            ];
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    const num = parseInt(searchTerm);
+                    if (num >= 1 && num <= 50) {
+                        setDisplayId(num);
+                    }
+                }
+            };
+
+            const resetSearch = () => {
+                setDisplayId(null);
+                setSearchTerm('');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            useEffect(() => {
+                if (displayId && resultRef.current) {
+                    const yOffset = -50; 
+                    const y = resultRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }, [displayId]);
+
+            const result = useMemo(() => {
+                return examData.find(d => d.id === displayId);
+            }, [displayId]);
+
+            return (
+                <div className="min-h-screen px-4 py-8 md:py-12" ref={topRef}>
+                    <div className="max-w-4xl mx-auto">
+                        
+                        {/* Header Section */}
+                        <div className="text-center mb-8 md:mb-14 animate__animated animate__fadeInDown">
+                            <div className="inline-flex items-center space-x-2 px-4 py-1 bg-white/5 rounded-full border border-white/10 mb-4">
+                                <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-[0_0_15px_rgba(220,38,38,1)]"></div>
+                                <span className="text-[11px] font-black tracking-[0.2em] text-gray-500 uppercase">阿豪自然模擬考詳解</span>
+                            </div>
+                            
+                            <h1 className="text-[32px] sm:text-[48px] md:text-[64px] font-black text-white tracking-tighter italic leading-[1.1] mb-2">
+                                <span className="inline-block">阿豪自然的</span> <span className="hormone-gradient inline-block">第三次複習考</span> <span className="inline-block">詳解</span>
+                            </h1>
+                            <p className="text-3xl sm:text-4xl md:text-6xl font-black text-gray-800 uppercase tracking-[0.1em] mt-[-5px]">
+                                康軒版本 ． 戰術核心數據
+                            </p>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="max-w-3xl mx-auto relative mb-16 animate__animated animate__fadeInUp">
+                            <div className="relative group neon-border rounded-2xl">
+                                <div className="relative flex items-center bg-[#0d0d0f] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                                    <div className="pl-6 text-red-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                    </div>
+                                    <input 
+                                        type="number" 
+                                        placeholder="輸入題號 (1 - 50) 並按 Enter" 
+                                        className="w-full bg-transparent border-none py-6 md:py-10 px-4 text-xl md:text-3xl font-black text-white focus:outline-none placeholder-gray-900"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                    />
+                                    {searchTerm && (
+                                        <button onClick={resetSearch} className="pr-8 text-red-600 hover:text-white transition-colors font-black uppercase text-xs tracking-widest">CLEAR</button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Result Display Area */}
+                        <div className="min-h-[650px]">
+                            {result ? (
+                                <div 
+                                    ref={resultRef}
+                                    className="bg-[#0d0d0f] rounded-[2rem] md:rounded-[3rem] border border-white/5 shadow-[0_45px_100px_-20px_rgba(0,0,0,1)] overflow-hidden animate__animated animate__zoomIn animate__faster"
+                                >
+                                    
+                                    {/* Card Header */}
+                                    <div className="p-6 md:p-12 border-b border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent relative">
+                                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-purple-600 to-amber-600"></div>
+                                        
+                                        <div className="flex flex-col lg:flex-row items-center justify-start gap-4 md:gap-10">
+                                            <div className="flex flex-col items-center lg:items-start bg-red-950/40 px-8 py-5 rounded-[2rem] border border-red-500/30 shadow-lg shadow-red-900/20">
+                                                <span className="text-[12px] font-black text-red-400 uppercase tracking-[0.3em] mb-1">ID</span>
+                                                <h2 className="text-7xl md:text-8xl font-black text-red-600 italic tracking-tighter drop-shadow-[0_0_20px_rgba(220,38,38,0.5)] leading-none">
+                                                    #{String(result.id).padStart(2, '0')}
+                                                </h2>
+                                            </div>
+
+                                            <div className="flex flex-col items-center lg:items-start bg-amber-950/40 px-10 py-5 rounded-[2rem] border border-amber-500/30 shadow-lg shadow-amber-900/20">
+                                                <span className="text-[12px] font-black text-amber-400 uppercase tracking-[0.3em] mb-1">ANS</span>
+                                                <div className="text-7xl md:text-8xl font-black text-amber-500 drop-shadow-[0_0_20px_rgba(245,158,11,0.5)] leading-none">
+                                                    {result.ans}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col flex-grow items-center lg:items-start bg-blue-950/40 px-8 py-6 rounded-[2rem] border border-blue-500/30 shadow-lg shadow-blue-900/20 w-full lg:w-auto">
+                                                <span className="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mb-3">SOURCE MODULE</span>
+                                                <div className="text-2xl md:text-3xl font-black text-blue-300 leading-tight italic text-center lg:text-left">
+                                                    {result.source}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Card Content */}
+                                    <div className="p-8 md:p-12 space-y-12">
+                                        <section className="animate__animated animate__fadeInLeft">
+                                            <div className="flex items-center space-x-3 mb-4 text-emerald-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                                                <span className="text-sm font-black uppercase tracking-[0.3em]">Core Knowledge Unit</span>
+                                            </div>
+                                            <div className="p-6 md:p-8 bg-emerald-500/5 rounded-3xl border border-emerald-500/20 text-2xl md:text-3xl font-black text-emerald-400 italic leading-snug tracking-tight">
+                                                {result.keyPoint}
+                                            </div>
+                                        </section>
+
+                                        <section className="animate__animated animate__fadeInLeft animate__delay-1s">
+                                            <div className="flex items-center space-x-3 mb-5 text-gray-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-amber-500"><polyline points="20 6 9 17 4 12"/></svg>
+                                                <span className="text-sm font-black uppercase tracking-[0.3em]">Tactical Briefing</span>
+                                            </div>
+                                            <p className="text-xl md:text-2xl font-medium text-gray-300 leading-relaxed italic border-l-4 border-gray-800 pl-6 md:pl-10">
+                                                {result.detail}
+                                            </p>
+                                        </section>
+
+                                        <div className="pt-12 border-t border-white/5 space-y-12">
+                                            <p className="text-3xl md:text-5xl font-black bg-gradient-to-r from-red-400 via-amber-400 to-emerald-400 bg-clip-text text-transparent leading-tight tracking-tighter py-2">
+                                                {result.quote}
+                                            </p>
+                                            
+                                            <button 
+                                                onClick={resetSearch}
+                                                className="w-full py-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl flex items-center justify-center space-x-6 group transition-all duration-500 shadow-xl"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="text-red-600 group-hover:-translate-y-3 transition-transform duration-500"><path d="m18 15-6-6-6 6"/></svg>
+                                                <span className="text-lg font-black uppercase tracking-[0.5em] text-gray-400 group-hover:text-white group-hover:scale-105 transition-all">回到查詢頁面</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-24 md:py-48 border-2 border-dashed border-white/5 rounded-[3rem] md:rounded-[4rem] opacity-20 grayscale animate__animated animate__fadeIn">
+                                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-gray-800 flex items-center justify-center mb-12 animate-pulse">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-800 rotate-45"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    </div>
+                                    <p className="text-lg md:text-2xl font-black tracking-[1em] uppercase">Tactical System Ready</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-24 md:mt-48 pt-12 border-t border-white/5 text-center">
+                            <p className="text-[13px] font-black tracking-[0.7em] text-gray-800 uppercase">
+                                Optimized for Google Sites // ah-hao science // v4.6 Strategic Edition
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

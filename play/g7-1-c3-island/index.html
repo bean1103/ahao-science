@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阿豪老師的七年級自然C3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Sites 穩定相容版：使用 r128 傳統全域載入，不使用 import -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+
+  <style>
+    body { margin: 0; overflow: hidden; font-family: 'Helvetica Neue', Arial, 'LiHei Pro', '微軟正黑體', sans-serif; }
+    #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+    #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+    .pointer-events-auto { pointer-events: auto; }
+    
+    .panel-enter { transform: translateX(100%); transition: transform 0.3s ease-out; }
+    .panel-enter-active { transform: translateX(0); }
+    .panel-exit { transform: translateX(0); transition: transform 0.3s ease-in; }
+    .panel-exit-active { transform: translateX(100%); }
+    
+    @media (max-width: 768px) {
+      .panel-enter { transform: translateY(100%); }
+      .panel-enter-active { transform: translateY(0); }
+      .panel-exit { transform: translateY(0); }
+      .panel-exit-active { transform: translateY(100%); }
+    }
+
+    .quiz-option { cursor: pointer; transition: all 0.2s; border: 2px solid #d1d5db; }
+    .quiz-option:hover { background-color: #f3f4f6; }
+    .quiz-option.selected { border-color: #2f7a6b; background-color: #e5f2f0; }
+    .quiz-option.correct { border-color: #10b981; background-color: #d1fae5; color: #065f46; }
+    .quiz-option.wrong { border-color: #ef4444; background-color: #fee2e2; color: #991b1b; }
+
+    .text-hc { color: #111827; } 
+    .text-hc-muted { color: #374151; }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    .mascot { animation: float 3s ease-in-out infinite; }
+
+    /* 3D 膠囊狀標籤 */
+    .island-label {
+      background-color: #ffffff;
+      color: #333333;
+      padding: 8px 18px;
+      border-radius: 25px;
+      font-weight: 900;
+      font-size: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 2px solid transparent;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .island-label:hover {
+      transform: scale(1.08);
+      background-color: #2f7a6b;
+      color: white;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+    .island-label.center-label {
+      border: 2px solid #d9792f;
+      color: #111827;
+    }
+    .island-label.center-label:hover {
+      background-color: #d9792f;
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-[#dcebee] transition-colors duration-500" id="theme-body">
+
+  <div id="canvas-container"></div>
+
+  <div id="ui-layer" class="flex flex-col justify-between">
+    <header class="p-4 flex justify-between items-start pointer-events-auto">
+      <div>
+        <h1 class="text-2xl font-bold text-[#2f7a6b] drop-shadow-md bg-white/90 px-4 py-2 rounded-lg inline-block border border-gray-200">阿豪老師的七年級自然C3</h1>
+        <p class="text-hc-muted font-bold mt-2 drop-shadow bg-white/80 px-3 py-1 rounded inline-block text-sm border border-gray-200">課程群島 3D 探索</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button onclick="toggleTheme()" class="bg-white/90 hover:bg-gray-100 text-[#2f7a6b] font-bold py-2 px-4 rounded shadow border border-gray-200 transition">切換晝夜/底色</button>
+        <button onclick="toggleMotion()" class="bg-white/90 hover:bg-gray-100 text-gray-700 font-bold py-2 px-4 rounded shadow border border-gray-200 transition">減少動態</button>
+        <button onclick="resetCamera()" class="bg-[#d9792f] hover:bg-[#c26a27] text-white font-bold py-2 px-4 rounded shadow transition">回到全景</button>
+      </div>
+    </header>
+
+    <div class="absolute bottom-6 left-6 pointer-events-auto flex items-end">
+      <!-- Google Sites 不易讀取本機圖片，使用純程式碼繪製魔法師圖示 -->
+      <div class="mascot w-28 h-28 bg-white rounded-full border-4 border-[#2f7a6b] flex items-center justify-center overflow-hidden shadow-xl z-20">
+        <svg viewBox="0 0 100 100" class="w-24 h-24">
+          <circle cx="50" cy="40" r="25" fill="#fca5a5" />
+          <path d="M 25 40 Q 50 10 75 40 L 85 20 L 15 20 Z" fill="#4b5563" />
+          <circle cx="40" cy="35" r="3" fill="#1f2937" />
+          <circle cx="60" cy="35" r="3" fill="#1f2937" />
+          <path d="M 45 45 Q 50 50 55 45" stroke="#1f2937" stroke-width="2" fill="none" />
+          <path d="M 30 65 L 70 65 L 80 100 L 20 100 Z" fill="#2f7a6b" />
+          <path d="M 75 60 L 95 40" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="bg-white p-3 rounded-xl rounded-bl-none shadow-lg ml-4 mb-8 border-2 border-gray-300 max-w-xs" id="mascot-dialog">
+        <p class="text-hc font-bold text-sm leading-relaxed">歡迎來到七年級自然C3！點擊群島或是空中的標籤開始探索吧！</p>
+      </div>
+    </div>
+
+    <!-- 內容面板 -->
+    <div id="content-panel" class="absolute top-0 right-0 h-full w-full md:w-[400px] bg-white/95 backdrop-blur shadow-2xl p-6 overflow-y-auto pointer-events-auto panel-enter transform translate-x-full md:translate-y-0 translate-y-full flex flex-col hidden border-l border-gray-200">
+      <button onclick="closePanel()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-3xl font-bold transition">&times;</button>
+      
+      <div id="panel-content" class="mt-4 flex-grow"></div>
+
+      <div class="mt-6 border-t border-gray-300 pt-4">
+        <button onclick="startQuiz()" class="w-full bg-[#d9792f] hover:bg-[#c26a27] text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-transform transform hover:-translate-y-1 text-lg">
+          開始隨堂測驗 📝
+        </button>
+      </div>
+    </div>
+
+    <!-- 測驗彈跳視窗 -->
+    <div id="quiz-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto hidden flex items-center justify-center z-50 transition-opacity">
+      <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6 m-4 flex flex-col max-h-[90vh]">
+        <div class="flex justify-between items-center border-b border-gray-300 pb-3 mb-4">
+          <h2 id="quiz-title" class="text-2xl font-bold text-hc">隨堂測驗</h2>
+          <button onclick="closeQuiz()" class="text-gray-400 hover:text-red-500 text-3xl font-bold transition">&times;</button>
+        </div>
+        
+        <div id="quiz-progress" class="text-sm text-gray-600 font-bold mb-3 bg-gray-100 px-3 py-1 rounded inline-block w-max">題數: 1 / 5</div>
+        
+        <div class="overflow-y-auto flex-grow pr-2">
+          <p id="quiz-question" class="text-xl font-bold text-hc mb-5 leading-relaxed"></p>
+          <div id="quiz-options" class="flex flex-col gap-3"></div>
+          
+          <div id="quiz-feedback" class="mt-5 p-4 rounded-lg hidden font-bold text-lg text-center shadow-inner"></div>
+          <div id="quiz-explanation" class="mt-3 p-4 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg hidden text-base font-bold leading-relaxed shadow-sm"></div>
+        </div>
+
+        <div class="mt-6 border-t border-gray-300 pt-4 flex justify-end gap-3">
+          <button id="btn-quiz-action" onclick="handleQuizAction()" class="bg-[#2f7a6b] text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-[#245e52] transition-colors disabled:opacity-50 text-lg" disabled>送出答案</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 傳統載入腳本，不再使用 import 語法，所有 THREE 功能皆直接從全域取得
+    const islandData = [
+      {
+        id: "center", name: "C3 生物體的營養", type: "總複習島", color: 0xffd700, pos: [0, 0, 0], scale: 1.8,
+        intro: "總複習島：跨課綜合測驗與學習進度展示。",
+        points: ["匯聚 3-1 到 3-4 的所有精華，準備好接受最終的基會試煉了嗎？", "點擊下方按鈕進行跨單元綜合挑戰！"],
+        quiz: [] 
+      },
+      {
+        id: "island1", name: "01 3-1 食物中的養分與能量", type: "滴管與梅花盤", color: 0x4ade80, pos: [-24, 0, -18], scale: 1.1,
+        intro: "我們需要透過吃東西來獲得養分，才能維持生命。了解養分的分類與測定實驗。",
+        points: [
+          "養分分為能產生能量（醣類、蛋白質、脂質）與不能產生能量（水、礦物質、維生素）兩大類。",
+          "醣類、蛋白質、脂質皆為組成生物體的原料；細胞壁由醣類組成。",
+          "澱粉的測定：滴加碘液，若含有澱粉會從黃褐色變為藍黑色。",
+          "葡萄糖的測定：加入藍色本氏液並隔水加熱，會產生綠、黃、橙、紅的變化。"
+        ],
+        quiz: [
+          { q: "小美買了一盒珍珠粉，懷疑裡面可能滲了澱粉，她可利用下列何種試劑檢測？", options: ["碘液", "本氏液", "亞甲藍液", "酒精"], ans: 0, exp: "澱粉遇碘液會呈現藍黑色，是檢測澱粉的標準試劑。" },
+          { q: "葡萄糖能通過膜而澱粉不能，試管裝葡萄糖液並用膜密封倒置於澱粉液中，靜置後以本氏液檢測會出現何現象？", options: ["僅試管中的溶液變色", "僅燒杯中的溶液變色", "試管和燒杯中的溶液皆變色", "皆不變色"], ans: 2, exp: "葡萄糖分子小能通過膜擴散至燒杯，所以兩邊都含有葡萄糖，加本氏液加熱皆會變色。" }
+        ]
+      },
+      {
+        id: "island2", name: "02 3-2 酵素", type: "鎖與鑰匙齒輪", color: 0xfb923c, pos: [24, 0, -18], scale: 1.1,
+        intro: "吃鳳梨會「咬舌頭」是因為酵素嗎？探索代謝作用與酵素的專一性。",
+        points: [
+          "分解作用與合成作用統稱代謝作用。",
+          "酵素（酶）能參與細胞中多種反應的進行，加速代謝作用。",
+          "酵素具有「專一性」，一種酵素只能和特定的受質結合與反應。",
+          "酵素的活性會受到溫度及酸鹼性的影響，溫度過高會破壞酵素活性且無法恢復。"
+        ],
+        quiz: [
+          { q: "在製作麵包的過程中可添加澱粉酶、脂肪酶和蛋白酶，這些酵素的主成分為何？", options: ["醣類", "脂質", "蛋白質", "核酸"], ans: 2, exp: "生物體內的酵素絕大多數主要成分都是蛋白質。" },
+          { q: "將可分解蛋白質的酵素X倒放在吉利丁凍(蛋白質)上使其分解，取出後再倒放在洋菜凍(醣類)上，洋菜凍是否會被分解？", options: ["會，因酵素X可重複作用", "會，因酵素X可分解凍狀物", "不會，因酵素X被分解了", "不會，因為酵素X不能分解醣類"], ans: 3, exp: "酵素具有專一性，只能分解特定的受質(蛋白質)，無法分解醣類。" }
+        ]
+      },
+      {
+        id: "island3", name: "03 3-3 植物製造養分", type: "巨大發光葉片", color: 0x3b82f6, pos: [-20, 0, 24], scale: 1.1,
+        intro: "植物到底是吃什麼長大的？了解葉片構造與光合作用的奧秘。",
+        points: [
+          "葉片構造包含：表皮、葉肉、葉脈、氣孔。",
+          "保衛細胞可控制氣孔開閉；氣孔是氣體進出植物體的主要通道。",
+          "光合作用原料：水與二氧化碳。產物：葡萄糖、氧氣與水。",
+          "葡萄糖可供植物利用，或轉換成澱粉、纖維素、蛋白質及脂質儲存。"
+        ],
+        quiz: [
+          { q: "陽光和二氧化碳進入葉片，氧氣由葉片釋出，此生理作用最可能是下列何者？", options: ["呼吸作用", "蒸散作用", "光合作用", "觸發運動"], ans: 2, exp: "吸收二氧化碳並在光照下釋放氧氣，是典型的光合作用特徵。" },
+          { q: "下列有關綠色植物進行光合作用的敘述，何者錯誤？", options: ["不牽涉能量的轉換", "需要陽光提供能量", "產生葡萄糖和氧氣", "需要水分和二氧化碳"], ans: 0, exp: "光合作用是將光能轉換為化學能（儲存於葡萄糖中），因此牽涉能量的轉換。" }
+        ]
+      },
+      {
+        id: "island4", name: "04 3-4 人體獲得養分", type: "消化滑水道", color: 0xec4899, pos: [20, 0, 24], scale: 1.1,
+        intro: "食物進入體內後去了哪裡？認識人體消化系統與吸收的奇妙旅程。",
+        points: [
+          "消化腺分泌的消化液多含有酵素，可將大分子分解為小分子。",
+          "澱粉最終分解為葡萄糖，蛋白質分解為胺基酸，脂質分解為脂肪酸與甘油。",
+          "膽汁由肝臟分泌、儲存於膽囊，不含酵素，能將脂質乳化成小脂滴。",
+          "小腸內壁有絨毛可增加吸收面積，是吸收養分及水分的主要場所。"
+        ],
+        quiz: [
+          { q: "吃豬腳麵線時，關於食物消化過程的敘述何者正確？", options: ["麵線到達胃才開始消化", "脂肪主要在胃進行消化", "豬腳的養分到達小腸才被消化為小分子吸收", "水分只在大腸吸收"], ans: 2, exp: "豬腳富含蛋白質與脂質，雖然蛋白質在胃初步分解，但完全分解為小分子並吸收的主要場所是小腸。" },
+          { q: "若膽汁注入小腸的管道發生阻塞，下列何者最可能發生？", options: ["胰液無法排至小腸", "胃液無法分解蛋白質", "消化脂質的功能下降", "吸收葡萄糖的功能下降"], ans: 2, exp: "膽汁的功能是乳化脂質以幫助酵素作用，阻塞會導致脂質消化不良。" }
+        ]
+      }
+    ];
+
+    // v2：每座島補題（新增，請老師確認）
+    (function(){ const S=' 〔補充題〕'; const add={
+      island1:[{ q:"下列哪一種養分不能提供能量？"+S, options:["醣類","蛋白質","脂質","維生素"], ans:3, exp:"維生素、水、礦物質都不能產生能量；醣類、蛋白質、脂質可以。" },
+               { q:"用本氏液檢測葡萄糖時，要怎麼做才會看到顏色變化？"+S, options:["直接滴加即可","隔水加熱","放進冰箱冷藏","放在陽光下照射"], ans:1, exp:"本氏液要隔水加熱，含葡萄糖才會出現綠、黃、橙、紅的變化。" }],
+      island2:[{ q:"酵素在高溫下失去活性後，再把溫度降回適當溫度，會怎樣？"+S, options:["恢復原本活性","活性變成兩倍","無法恢復活性","變成醣類"], ans:2, exp:"高溫會破壞酵素的結構，活性無法再恢復。" },
+               { q:"一種酵素只能和特定的受質作用，這種特性稱為什麼？"+S, options:["專一性","可逆性","遺傳性","普遍性"], ans:0, exp:"酵素具有專一性，像鎖和鑰匙一樣，只能和特定受質結合。" }],
+      island3:[{ q:"植物進行光合作用時，需要的原料是什麼？"+S, options:["水和二氧化碳","葡萄糖和氧","澱粉和水","氧和氮"], ans:0, exp:"光合作用利用光能，把水和二氧化碳製造成葡萄糖，並釋放氧。" },
+               { q:"葉片一半遮光、一半照光，脫色後滴加碘液，照光的部分變成藍黑色，表示產生了什麼？"+S, options:["澱粉","蛋白質","脂質","維生素"], ans:0, exp:"澱粉遇碘液呈藍黑色，表示照光部分行光合作用並產生澱粉。" }],
+      island4:[{ q:"人體消化和吸收養分的主要器官是哪一個？"+S, options:["胃","小腸","大腸","食道"], ans:1, exp:"小腸有多種消化液，內壁的絨毛也能吸收大部分養分。" },
+               { q:"小腸內壁有許多絨毛，主要的好處是什麼？"+S, options:["增加吸收養分的表面積","分泌膽汁","儲存食物","把食物磨碎"], ans:0, exp:"絨毛增加了表面積，讓養分更容易被吸收。" }]
+    }; islandData.forEach(function(d){ if(add[d.id]) d.quiz = d.quiz.concat(add[d.id]); }); })();
+    const allQuiz = [];
+    islandData.slice(1).forEach(island => allQuiz.push(...island.quiz));
+    islandData[0].quiz = allQuiz.sort(() => 0.5 - Math.random()).slice(0, 10);
+
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0xdcebee, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 50, 60);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    const labelRenderer = new THREE.CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    container.appendChild(labelRenderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, labelRenderer.domElement);
+    controls.enableDamping = true;
+    controls.maxPolarAngle = Math.PI / 2.1; 
+    controls.minDistance = 20;
+    controls.maxDistance = 120;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight.position.set(20, 60, 20);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    const waterGeo = new THREE.PlaneGeometry(500, 500);
+    const waterMat = new THREE.MeshPhongMaterial({ color: 0x88ccff, transparent: true, opacity: 0.6, flatShading: true });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = -1;
+    scene.add(water);
+
+    const islands = [];
+    const centerPos = new THREE.Vector3(0, 0, 0);
+
+    function createTree(scale) {
+      const tree = new THREE.Group();
+      const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3 * scale, 0.5 * scale, 2 * scale, 5),
+        new THREE.MeshPhongMaterial({ color: 0x8b5a2b, flatShading: true })
+      );
+      trunk.position.y = 1 * scale;
+      trunk.castShadow = true;
+      
+      const leaves = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(1.5 * scale),
+        new THREE.MeshPhongMaterial({ color: 0x34d399, flatShading: true })
+      );
+      leaves.position.y = 2.8 * scale;
+      leaves.castShadow = true;
+      
+      tree.add(trunk);
+      tree.add(leaves);
+      return tree;
+    }
+
+    function createHouse(scale, roofColor) {
+      const house = new THREE.Group();
+      const base = new THREE.Mesh(
+        new THREE.BoxGeometry(2 * scale, 1.5 * scale, 2 * scale),
+        new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true })
+      );
+      base.position.y = 0.75 * scale;
+      base.castShadow = true;
+      
+      const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(1.8 * scale, 1.5 * scale, 4),
+        new THREE.MeshPhongMaterial({ color: roofColor, flatShading: true })
+      );
+      roof.position.y = 2.25 * scale;
+      roof.rotation.y = Math.PI / 4;
+      roof.castShadow = true;
+      
+      house.add(base);
+      house.add(roof);
+      return house;
+    }
+
+    islandData.forEach(data => {
+      const group = new THREE.Group();
+      const pos = new THREE.Vector3(...data.pos);
+      group.position.copy(pos);
+      group.userData = data;
+
+      const baseRadius = data.scale * 6.5;
+      const baseGeo = new THREE.CylinderGeometry(baseRadius * 0.95, baseRadius, 2, 8);
+      const baseMat = new THREE.MeshPhongMaterial({ color: 0xebd5b3, flatShading: true });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.y = 0;
+      base.castShadow = true;
+      base.receiveShadow = true;
+      group.add(base);
+
+      const grassRadius = data.scale * 6;
+      const grassGeo = new THREE.CylinderGeometry(grassRadius * 0.95, grassRadius, 1, 8);
+      const grassMat = new THREE.MeshPhongMaterial({ color: data.color, flatShading: true });
+      const grass = new THREE.Mesh(grassGeo, grassMat);
+      grass.position.y = 1.5;
+      grass.castShadow = true;
+      grass.receiveShadow = true;
+      group.add(grass);
+
+      const markerGeo = new THREE.OctahedronGeometry(data.scale * 2);
+      const markerMat = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      marker.position.y = 5 * data.scale;
+      marker.castShadow = true;
+      marker.userData.originalY = marker.position.y;
+      marker.userData.speed = Math.random() * 0.02 + 0.02;
+      marker.userData.offset = Math.random() * Math.PI * 2;
+      group.userData.marker = marker;
+      
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'island-label' + (data.id === 'center' ? ' center-label' : '');
+      labelDiv.textContent = data.name;
+      labelDiv.onpointerup = (e) => {
+        e.stopPropagation(); 
+        window.openPanel(data);
+        focusCamera(group.position);
+      };
+      
+      const islandLabel = new THREE.CSS2DObject(labelDiv);
+      islandLabel.position.set(0, data.scale * 4, 0); 
+      marker.add(islandLabel);
+      group.add(marker);
+
+      for(let i=0; i<3; i++) {
+        const tree = createTree(data.scale * 0.5);
+        const angle = Math.random() * Math.PI * 2;
+        const rad = Math.random() * (grassRadius - 2) + 1;
+        tree.position.set(Math.cos(angle) * rad, 2, Math.sin(angle) * rad);
+        group.add(tree);
+      }
+      const house = createHouse(data.scale * 0.7, data.id === 'center' ? 0xd9792f : 0xef4444);
+      house.position.set(grassRadius * 0.5, 2, grassRadius * 0.4);
+      group.add(house);
+
+      scene.add(group);
+      islands.push(group);
+
+      if (data.id !== "center") {
+        const dist = centerPos.distanceTo(pos);
+        const centerRadius = islandData[0].scale * 6.5; 
+        const islandRadius = baseRadius;
+        const bridgeLength = dist - centerRadius - islandRadius + 3;
+        
+        const bridgeGeo = new THREE.BoxGeometry(3.5, 0.8, bridgeLength);
+        const bridgeMat = new THREE.MeshPhongMaterial({ color: 0xcd853f, flatShading: true });
+        const bridge = new THREE.Mesh(bridgeGeo, bridgeMat);
+        
+        bridge.position.copy(centerPos).lerp(pos, 0.5);
+        bridge.position.y = 1.2;
+        bridge.lookAt(pos);
+        bridge.receiveShadow = true;
+        bridge.castShadow = true;
+        scene.add(bridge);
+      }
+    });
+
+    let isMotionEnabled = true;
+    const clock = new THREE.Clock();
+    let targetCameraPos = null;
+    let targetControlsPos = null;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (isMotionEnabled) {
+        const time = clock.getElapsedTime();
+        islands.forEach(island => {
+          const marker = island.userData.marker;
+          marker.position.y = marker.userData.originalY + Math.sin(time * marker.userData.speed * 100 + marker.userData.offset) * 0.5;
+          marker.rotation.y += 0.01;
+        });
+      }
+
+      if (targetCameraPos && targetControlsPos) {
+        camera.position.lerp(targetCameraPos, 0.08); 
+        controls.target.lerp(targetControlsPos, 0.08);
+        if (camera.position.distanceTo(targetCameraPos) < 0.5) {
+          targetCameraPos = null;
+          targetControlsPos = null;
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let pointerDownPos = new THREE.Vector2();
+
+    labelRenderer.domElement.addEventListener('pointerdown', (event) => {
+      pointerDownPos.set(event.clientX, event.clientY);
+    });
+
+    labelRenderer.domElement.addEventListener('pointerup', (event) => {
+      if (Math.abs(event.clientX - pointerDownPos.x) > 5 || Math.abs(event.clientY - pointerDownPos.y) > 5) return;
+
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      for (let i = 0; i < intersects.length; i++) {
+        let obj = intersects[i].object;
+        while (obj && obj !== scene) {
+          if (obj.userData && obj.userData.id) {
+            window.openPanel(obj.userData);
+            focusCamera(obj.position); 
+            return;
+          }
+          obj = obj.parent;
+        }
+      }
+    });
+
+    function focusCamera(pos) {
+      targetCameraPos = new THREE.Vector3(pos.x, pos.y + 15, pos.z + 30);
+      targetControlsPos = new THREE.Vector3(pos.x, pos.y, pos.z);
+    }
+
+    window.resetCamera = () => {
+      targetCameraPos = new THREE.Vector3(0, 50, 60);
+      targetControlsPos = new THREE.Vector3(0, 0, 0);
+    };
+
+    window.toggleMotion = () => {
+      isMotionEnabled = !isMotionEnabled;
+      const mascot = document.querySelector('.mascot');
+      if (isMotionEnabled) {
+        mascot.style.animationPlayState = 'running';
+      } else {
+        mascot.style.animationPlayState = 'paused';
+      }
+    };
+
+    const themes = [
+      { name: "海霧", bg: "#dcebee", fog: 0xdcebee },
+      { name: "晨光", bg: "#f6f0e4", fog: 0xf6f0e4 },
+      { name: "夜海", bg: "#16222e", fog: 0x16222e }
+    ];
+    let currentThemeIdx = 0;
+    window.toggleTheme = () => {
+      currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+      const t = themes[currentThemeIdx];
+      document.getElementById('theme-body').style.backgroundColor = t.bg;
+      scene.fog.color.setHex(t.fog);
+    };
+
+    let currentIslandData = null;
+
+    window.openPanel = (data) => {
+      currentIslandData = data;
+      const panel = document.getElementById('content-panel');
+      const content = document.getElementById('panel-content');
+      const dialog = document.querySelector('#mascot-dialog p');
+      
+      dialog.innerText = `這裡是「${data.name}」！請閱讀右側重點。`;
+
+      let pointsHtml = data.points.map(p => `<li class="mb-2 text-hc-muted font-semibold">${p}</li>`).join('');
+      
+      content.innerHTML = `
+        <span class="text-sm font-bold text-white bg-[#2f7a6b] px-2 py-1 rounded">${data.type}</span>
+        <h2 class="text-2xl font-black text-hc mt-3 mb-4">${data.name}</h2>
+        <p class="text-hc-muted font-bold mb-6 bg-gray-100 p-4 rounded-lg border border-gray-300 leading-relaxed">${data.intro}</p>
+        <h3 class="text-xl font-black text-[#d9792f] border-b-2 border-[#d9792f] pb-1 mb-4 inline-block">內容重點</h3>
+        <ul class="list-disc pl-5 font-medium space-y-3">
+          ${pointsHtml}
+        </ul>
+      `;
+
+      panel.classList.remove('hidden');
+      setTimeout(() => {
+        panel.classList.remove('panel-exit-active', 'panel-exit');
+        panel.classList.add('panel-enter-active');
+      }, 10);
+    };
+
+    window.closePanel = () => {
+      const panel = document.getElementById('content-panel');
+      panel.classList.remove('panel-enter-active');
+      panel.classList.add('panel-exit-active');
+      setTimeout(() => {
+        panel.classList.add('hidden');
+        panel.classList.remove('panel-exit-active');
+        panel.classList.add('panel-enter');
+      }, 300);
+      window.resetCamera();
+      document.querySelector('#mascot-dialog p').innerText = "點擊群島標籤，繼續我們的探索吧！";
+    };
+
+    let quizState = {
+      questions: [],
+      currentIndex: 0,
+      selectedOption: null,
+      isAnswered: false
+    };
+
+    window.startQuiz = () => {
+      if (!currentIslandData || currentIslandData.quiz.length === 0) return;
+      
+      quizState.questions = currentIslandData.quiz;
+      quizState.currentIndex = 0;
+      
+      document.getElementById('quiz-modal').classList.remove('hidden');
+      renderCurrentQuestion();
+    };
+
+    window.closeQuiz = () => {
+      document.getElementById('quiz-modal').classList.add('hidden');
+    };
+
+    function renderCurrentQuestion() {
+      const qData = quizState.questions[quizState.currentIndex];
+      quizState.selectedOption = null;
+      quizState.isAnswered = false;
+
+      document.getElementById('quiz-progress').innerText = `題數: ${quizState.currentIndex + 1} / ${quizState.questions.length}`;
+      document.getElementById('quiz-question').innerText = qData.q;
+      
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+      
+      qData.options.forEach((opt, idx) => {
+        const div = document.createElement('div');
+        div.className = 'quiz-option p-4 rounded-xl bg-gray-50 text-hc font-bold text-lg text-left shadow-sm';
+        div.innerText = opt;
+        div.onclick = () => selectOption(idx);
+        optionsContainer.appendChild(div);
+      });
+
+      const feedback = document.getElementById('quiz-feedback');
+      const exp = document.getElementById('quiz-explanation');
+      feedback.classList.add('hidden');
+      exp.classList.add('hidden');
+      
+      const btn = document.getElementById('btn-quiz-action');
+      btn.innerText = "送出答案";
+      btn.disabled = true;
+      btn.className = "bg-[#2f7a6b] text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-[#245e52] transition-colors disabled:opacity-50 text-lg";
+    }
+
+    window.selectOption = (index) => {
+      if (quizState.isAnswered) return;
+
+      quizState.selectedOption = index;
+      
+      const options = document.getElementById('quiz-options').children;
+      for (let i = 0; i < options.length; i++) {
+        options[i].classList.remove('selected');
+      }
+      options[index].classList.add('selected');
+      
+      document.getElementById('btn-quiz-action').disabled = false;
+    };
+
+    window.handleQuizAction = () => {
+      if (!quizState.isAnswered) {
+        checkAnswer();
+      } else {
+        quizState.currentIndex++;
+        if (quizState.currentIndex < quizState.questions.length) {
+          renderCurrentQuestion();
+        } else {
+          showFinalResult();
+        }
+      }
+    };
+
+    function checkAnswer() {
+      const qData = quizState.questions[quizState.currentIndex];
+      const isCorrect = (quizState.selectedOption === qData.ans);
+      const options = document.getElementById('quiz-options').children;
+      
+      const feedback = document.getElementById('quiz-feedback');
+      const exp = document.getElementById('quiz-explanation');
+      const btn = document.getElementById('btn-quiz-action');
+
+      feedback.classList.remove('hidden');
+
+      if (isCorrect) {
+        quizState.isAnswered = true;
+        options[quizState.selectedOption].classList.add('correct');
+        options[quizState.selectedOption].classList.remove('selected');
+        
+        feedback.innerText = "🎉 答對了！很棒喔！";
+        feedback.className = "mt-5 p-4 rounded-xl font-bold text-xl text-center shadow-inner bg-green-100 text-green-800 border-2 border-green-400";
+        
+        exp.innerText = "💡 解析：" + qData.exp;
+        exp.classList.remove('hidden');
+
+        const isLast = (quizState.currentIndex === quizState.questions.length - 1);
+        btn.innerText = isLast ? "完成測驗 🏆" : "下一題 ➡️";
+        btn.className = "bg-[#d9792f] text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-[#c26a27] transition-colors text-lg";
+      } else {
+        options[quizState.selectedOption].classList.add('wrong');
+        options[quizState.selectedOption].classList.remove('selected');
+        
+        feedback.innerText = "❌ 不對喔！再思考一下。";
+        feedback.className = "mt-5 p-4 rounded-xl font-bold text-xl text-center shadow-inner bg-red-100 text-red-800 border-2 border-red-400";
+        
+        quizState.selectedOption = null;
+        btn.disabled = true;
+        
+        setTimeout(() => {
+          for (let i = 0; i < options.length; i++) {
+             options[i].classList.remove('wrong');
+          }
+          feedback.classList.add('hidden');
+        }, 1500);
+      }
+    }
+
+    function showFinalResult() {
+      // 在 Google Sites 中加上 try-catch 防止被跨域沙盒阻擋而當機
+      try {
+        localStorage.setItem(`island_${currentIslandData.id}_completed`, 'true');
+      } catch(e) {
+        console.warn('LocalStorage is disabled in Google Sites environment.');
+      }
+      
+      document.getElementById('quiz-progress').innerText = "測驗完成！";
+      document.getElementById('quiz-question').innerText = "🏆 恭喜你完成了這座島嶼的所有測驗！知識吸收得非常紮實！";
+      document.getElementById('quiz-options').innerHTML = "";
+      document.getElementById('quiz-feedback').classList.add('hidden');
+      document.getElementById('quiz-explanation').classList.add('hidden');
+      
+      const btn = document.getElementById('btn-quiz-action');
+      btn.innerText = "關閉視窗";
+      btn.onclick = closeQuiz; 
+      
+      document.querySelector('#mascot-dialog p').innerText = `太棒了！你已經征服了「${currentIslandData.name}」！`;
+    }
+  </script>
+
+<!-- v2：全螢幕／新分頁按鈕 -->
+<style>#v2-fs{position:fixed;right:12px;bottom:12px;z-index:9999;min-height:44px;padding:8px 14px;border:3px solid #1f3b44;border-radius:999px;background:#fff;color:#17353a;font:700 14px/1.2 "Noto Sans TC","Microsoft JhengHei",sans-serif;box-shadow:0 3px 0 rgba(31,59,68,.85);cursor:pointer}#v2-fs:hover{background:#fff7d6}</style>
+<button type="button" id="v2-fs" aria-label="全螢幕或在新分頁開啟">⛶ 全螢幕</button>
+<script>(function(){var b=document.getElementById('v2-fs');b.addEventListener('click',function(){var el=document.documentElement,inF=window.self!==window.top;if(!inF&&el.requestFullscreen){el.requestFullscreen().catch(function(){window.open(location.href,'_blank')});return;}var w=window.open(location.href,'_blank');if(!w&&el.requestFullscreen)el.requestFullscreen().catch(function(){});});document.addEventListener('fullscreenchange',function(){b.textContent=document.fullscreenElement?'離開全螢幕':'⛶ 全螢幕';});})();</script>
+<a id="ahao-back" href="../../index.html#ch-7-1-3" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

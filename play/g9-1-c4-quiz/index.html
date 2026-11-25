@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自然基會試煉 9-1-C4 簡單電路</title>
+    
+    <!-- 載入 React, ReactDOM, Babel, Tailwind -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 設定 Tailwind Dark Mode 與自定義顏色 (多巴胺配色) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dopamine: {
+                            yellow: '#FFD93D',  // 充滿活力的黃
+                            pink: '#FF6B6B',    // 熱情的粉紅
+                            blue: '#4D96FF',    // 電光的藍
+                            green: '#6BCB77',   // 清新的綠
+                            cream: '#FFFBEB',   // 柔和的米白背景
+                            purple: '#A78BFA'   // 夢幻的紫
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #FFFBEB; /* 多巴胺奶油底色 */
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* 浮動動畫 */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+        
+        /* 彈出動畫 */
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-in { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* 列印設定 */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background-color: white; -webkit-print-color-adjust: exact; }
+            .break-page { page-break-after: always; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- 1. SVG 圖示元件 (通用 UI) ---
+        const Icons = {
+            Star: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-dopamine-yellow" {...props}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-5.82 3.25L7.38 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            ),
+            ChevronRight: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m9 18 6-6-6-6"/></svg>
+            ),
+            ChevronLeft: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15 18-6-6 6-6"/></svg>
+            ),
+            CheckCircle: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            ),
+            XCircle: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+            ),
+            Download: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            ),
+            Printer: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+            ),
+            Award: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            ),
+            Zap: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="currentColor" className="text-dopamine-yellow" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            )
+        };
+        const { Star, ChevronRight, ChevronLeft, CheckCircle, XCircle, Download, Printer, Award, Zap } = Icons;
+
+        // --- 2. 題目專用 SVG 繪圖元件 ---
+        const QuestionDiagram = ({ type }) => {
+            const resistorStyle = { fill: "none", stroke: "black", strokeWidth: "2" };
+            const wireStyle = { stroke: "black", strokeWidth: "2", fill: "none" };
+            const bulbStyle = { fill: "#fff9c4", stroke: "black", strokeWidth: "2" };
+            const batteryStyle = { stroke: "black", strokeWidth: "2" };
+            const switchStyle = { stroke: "black", strokeWidth: "2" };
+            const metalBlockStyle = { fill: "#bdbdbd", stroke: "black", strokeWidth: "2" };
+
+            const DrawResistor = ({ x, y, width, height }) => {
+                const spikes = 5;
+                const spikeWidth = width / spikes;
+                let path = `M ${x} ${y + height / 2}`;
+                for (let i = 0; i < spikes; i++) {
+                    path += ` L ${x + spikeWidth * (i + 0.25)} ${y} L ${x + spikeWidth * (i + 0.75)} ${y + height} `;
+                }
+                path += `L ${x + width} ${y + height / 2}`;
+                return <path d={path} fill="none" stroke="black" strokeWidth="2" />;
+            };
+
+            const DrawBattery = ({ x, y }) => (
+                <g>
+                    <line x1={x-10} y1={y} x2={x-2} y2={y} stroke="black" strokeWidth="2" />
+                    <line x1={x+2} y1={y} x2={x+10} y2={y} stroke="black" strokeWidth="2" />
+                    <line x1={x-2} y1={y-8} x2={x-2} y2={y+8} stroke="black" strokeWidth="3" />
+                    <line x1={x+2} y1={y-4} x2={x+2} y2={y+4} stroke="black" strokeWidth="3" />
+                    <text x={x-15} y={y+25} fontSize="10">1.5V</text>
+                </g>
+            );
+
+            const DrawStand = ({ x, y }) => (
+                <g>
+                    <rect x={x-15} y={y} width="30" height="40" fill="#a1887f" stroke="black" strokeWidth="2" />
+                    <line x1={x-20} y1={y+40} x2={x+20} y2={y+40} stroke="black" strokeWidth="2" />
+                </g>
+            );
+
+            switch (type) {
+                case 'static_induction': // 108年第13題
+                    return (
+                        <div className="flex justify-center my-4 bg-white p-4 rounded-3xl border-4 border-dopamine-yellow">
+                            <svg width="220" height="180" viewBox="0 0 220 180">
+                                <line x1="100" y1="10" x2="140" y2="10" stroke="black" strokeWidth="3" />
+                                <line x1="120" y1="10" x2="90" y2="100" stroke="black" strokeWidth="1" />
+                                <line x1="120" y1="10" x2="120" y2="130" stroke="gray" strokeDasharray="4 4" />
+                                <text x="125" y="125" fontSize="12" fill="gray">鉛直線</text>
+                                <circle cx="90" cy="100" r="25" fill="#f0f0f0" stroke="black" strokeWidth="2" />
+                                <text x="70" y="105" fontSize="16" fill="red" fontWeight="bold">-</text>
+                                <text x="100" y="105" fontSize="16" fill="blue" fontWeight="bold">+</text>
+                                <rect x="20" y="80" width="50" height="15" rx="4" fill="#e0f7fa" stroke="blue" strokeWidth="2" />
+                                <text x="28" y="93" fontSize="16" fill="blue" fontWeight="bold">++++</text>
+                            </svg>
+                        </div>
+                    );
+
+                case 'resistance_compare': // 108年第31題
+                    return (
+                        <div className="flex justify-center my-4 bg-white p-4 rounded-3xl border-4 border-dopamine-yellow overflow-x-auto">
+                            <svg width="400" height="150" viewBox="0 0 400 150">
+                                <g transform="translate(20,20)">
+                                    <text x="25" y="0" fontSize="14" fontWeight="bold">導體甲</text>
+                                    <rect x="10" y="20" width="40" height="20" fill="#ccc" stroke="black" />
+                                    <text x="15" y="55" fontSize="10">L, A</text>
+                                    <polyline points="0,30 10,30" {...wireStyle} />
+                                    <polyline points="50,30 60,30" {...wireStyle} />
+                                    <path d="M0 30 L0 80 L60 80 L60 30" {...wireStyle} />
+                                    <DrawBattery x={30} y={80} />
+                                    <circle cx="30" cy="30" r="10" fill="white" stroke="black" />
+                                    <text x="25" y="35" fontSize="12">A</text>
+                                </g>
+                                <g transform="translate(140,20)">
+                                    <text x="45" y="0" fontSize="14" fontWeight="bold">導體乙</text>
+                                    <rect x="10" y="20" width="80" height="20" fill="#ccc" stroke="black" />
+                                    <text x="35" y="55" fontSize="10">2L, A</text>
+                                     <polyline points="0,30 10,30" {...wireStyle} />
+                                    <polyline points="90,30 100,30" {...wireStyle} />
+                                    <path d="M0 30 L0 80 L100 80 L100 30" {...wireStyle} />
+                                    <DrawBattery x={50} y={80} />
+                                     <circle cx="50" cy="30" r="10" fill="white" stroke="black" />
+                                    <text x="45" y="35" fontSize="12">A</text>
+                                </g>
+                                <g transform="translate(280,20)">
+                                    <text x="25" y="0" fontSize="14" fontWeight="bold">導體丙</text>
+                                    <rect x="10" y="10" width="40" height="40" fill="#ccc" stroke="black" />
+                                    <text x="15" y="65" fontSize="10">L, 2A</text>
+                                    <polyline points="0,30 10,30" {...wireStyle} />
+                                    <polyline points="50,30 60,30" {...wireStyle} />
+                                    <path d="M0 30 L0 80 L60 80 L60 30" {...wireStyle} />
+                                    <DrawBattery x={30} y={80} />
+                                     <circle cx="30" cy="30" r="10" fill="white" stroke="black" />
+                                    <text x="25" y="35" fontSize="12">A</text>
+                                </g>
+                            </svg>
+                        </div>
+                    );
+
+                case 'ammeter_circuit': // 111年第47題
+                    return (
+                        <div className="flex justify-center my-4 bg-white p-4 rounded-3xl border-4 border-dopamine-yellow">
+                            <svg width="280" height="160" viewBox="0 0 280 160">
+                                <line x1="20" y1="60" x2="20" y2="100" stroke="black" strokeWidth="2" />
+                                <line x1="10" y1="70" x2="30" y2="70" stroke="black" strokeWidth="3" />
+                                <line x1="15" y1="90" x2="25" y2="90" stroke="black" strokeWidth="5" />
+                                <polyline points="20,70 20,30 80,30" {...wireStyle} />
+                                <polyline points="20,90 20,130 200,130" {...wireStyle} />
+                                <circle cx="200" cy="130" r="15" fill="white" stroke="black" strokeWidth="2" />
+                                <text x="193" y="135" fontSize="16" fontWeight="bold">乙</text>
+                                <polyline points="215,130 240,130 240,30 180,30" {...wireStyle} />
+                                <line x1="180" y1="30" x2="180" y2="50" {...wireStyle} />
+                                <DrawResistor x={160} y={50} width={40} height={20} />
+                                <text x="175" y="85" fontSize="14">丁</text>
+                                <line x1="180" y1="70" x2="180" y2="130" {...wireStyle} />
+                                <line x1="80" y1="30" x2="80" y2="50" {...wireStyle} />
+                                <DrawResistor x={60} y={50} width={40} height={20} />
+                                <text x="75" y="85" fontSize="14">丙</text>
+                                <line x1="80" y1="70" x2="80" y2="90" {...wireStyle} />
+                                <circle cx="80" cy="105" r="15" fill="white" stroke="black" strokeWidth="2" />
+                                <text x="73" y="110" fontSize="16" fontWeight="bold">甲</text>
+                                <line x1="80" y1="120" x2="80" y2="130" {...wireStyle} />
+                            </svg>
+                        </div>
+                    );
+
+                case 'switch_circuit': // 109年第40題
+                    return (
+                        <div className="flex justify-center my-4 bg-white p-4 rounded-3xl border-4 border-dopamine-yellow">
+                            <svg width="300" height="180" viewBox="0 0 300 180">
+                                <text x="10" y="20" fontSize="12">圖(二十九)</text>
+                                <line x1="30" y1="80" x2="30" y2="100" stroke="black" strokeWidth="2" />
+                                <line x1="20" y1="85" x2="40" y2="85" stroke="black" strokeWidth="3" />
+                                <line x1="25" y1="95" x2="35" y2="95" stroke="black" strokeWidth="5" />
+                                <polyline points="30,85 30,40 70,40" {...wireStyle} />
+                                <text x="75" y="35" fontSize="14">S1</text>
+                                <line x1="70" y1="40" x2="95" y2="30" {...switchStyle} />
+                                <line x1="100" y1="40" x2="120" y2="40" {...wireStyle} />
+                                <circle cx="135" cy="40" r="15" {...bulbStyle} />
+                                <text x="128" y="45" fontSize="14">甲</text>
+                                <line x1="150" y1="40" x2="180" y2="40" {...wireStyle} />
+                                <polyline points="30,95 30,140 70,140" {...wireStyle} />
+                                <text x="75" y="135" fontSize="14">S2</text>
+                                <line x1="70" y1="140" x2="95" y2="130" {...switchStyle} />
+                                <line x1="100" y1="140" x2="120" y2="140" {...wireStyle} />
+                                <circle cx="135" cy="140" r="15" {...bulbStyle} />
+                                <text x="128" y="145" fontSize="14">乙</text>
+                                <line x1="150" y1="140" x2="180" y2="140" {...wireStyle} />
+                                <line x1="180" y1="40" x2="180" y2="140" {...wireStyle} />
+                                <line x1="180" y1="90" x2="210" y2="90" {...wireStyle} />
+                                <text x="215" y="85" fontSize="14">S3</text>
+                                <line x1="210" y1="90" x2="235" y2="80" {...switchStyle} />
+                                <line x1="240" y1="90" x2="260" y2="90" {...wireStyle} />
+                                <text x="265" y="85" fontSize="14">S4</text>
+                                <line x1="260" y1="90" x2="285" y2="80" {...switchStyle} />
+                                <polyline points="290,90 290,160 10,160 10,140 30,140" {...wireStyle} />
+                            </svg>
+                        </div>
+                    );
+
+                case 'contact_steps': // 110年第29題
+                    return (
+                        <div className="flex justify-center my-4 bg-white p-4 rounded-3xl border-4 border-dopamine-yellow overflow-x-auto">
+                            <svg width="380" height="100" viewBox="0 0 380 100">
+                                <g transform="translate(30, 10)">
+                                    <rect x="-15" y="0" width="30" height="30" {...metalBlockStyle} />
+                                    <text x="-8" y="20" fontSize="12">甲</text>
+                                    <DrawStand x={0} y={30} />
+                                    <text x="-5" y="90" fontSize="14" fontWeight="bold">①</text>
+                                </g>
+                                <g transform="translate(100, 10)">
+                                    <rect x="-15" y="0" width="30" height="30" {...metalBlockStyle} />
+                                    <text x="-8" y="20" fontSize="12">甲</text>
+                                    <rect x="-25" y="-10" width="30" height="6" fill="#424242" />
+                                    <text x="-25" y="-15" fontSize="14" fill="red" fontWeight="bold">- -</text>
+                                    <DrawStand x={0} y={30} />
+                                    <text x="-5" y="90" fontSize="14" fontWeight="bold">②</text>
+                                </g>
+                                <g transform="translate(170, 10)">
+                                    <rect x="-15" y="0" width="30" height="30" {...metalBlockStyle} />
+                                    <text x="-8" y="20" fontSize="12">甲</text>
+                                    <text x="-5" y="-5" fontSize="14" fill="red" fontWeight="bold">-</text>
+                                    <DrawStand x={0} y={30} />
+                                    <text x="-5" y="90" fontSize="14" fontWeight="bold">③</text>
+                                </g>
+                                <g transform="translate(250, 10)">
+                                    <rect x="-15" y="0" width="30" height="30" {...metalBlockStyle} />
+                                    <text x="-8" y="20" fontSize="12">甲</text>
+                                    <DrawStand x={0} y={30} />
+                                    <rect x="15" y="0" width="30" height="30" {...metalBlockStyle} />
+                                    <text x="22" y="20" fontSize="12">乙</text>
+                                    <DrawStand x={30} y={30} />
+                                    <text x="5" y="-5" fontSize="14" fill="red" fontWeight="bold">- -</text>
+                                    <text x="10" y="90" fontSize="14" fontWeight="bold">④</text>
+                                </g>
+                                <g transform="translate(340, 10)">
+                                    <g transform="translate(-20,0)">
+                                        <rect x="-15" y="0" width="30" height="30" {...metalBlockStyle} />
+                                        <text x="-8" y="20" fontSize="12">甲</text>
+                                        <text x="-5" y="-5" fontSize="14" fill="red" fontWeight="bold">-</text>
+                                        <DrawStand x={0} y={30} />
+                                    </g>
+                                    <g transform="translate(20,0)">
+                                        <rect x="-15" y="0" width="30" height="30" {...metalBlockStyle} />
+                                        <text x="-8" y="20" fontSize="12">乙</text>
+                                        <text x="-5" y="-5" fontSize="14" fill="red" fontWeight="bold">-</text>
+                                        <DrawStand x={0} y={30} />
+                                    </g>
+                                    <text x="-5" y="90" fontSize="14" fontWeight="bold">⑤</text>
+                                </g>
+                            </svg>
+                        </div>
+                    );
+
+                case 'parallel_bulb': // 112年第42題
+                    return (
+                        <div className="flex justify-center my-4 bg-white p-4 rounded-3xl border-4 border-dopamine-yellow">
+                            <svg width="380" height="180" viewBox="0 0 380 180">
+                                <g transform="translate(20,20)">
+                                    <text x="60" y="0" fontSize="16" fontWeight="bold">圖(一)</text>
+                                    <line x1="0" y1="40" x2="0" y2="120" stroke="black" strokeWidth="2" />
+                                    <line x1="-10" y1="60" x2="10" y2="60" stroke="black" strokeWidth="3" />
+                                    <line x1="-5" y1="100" x2="5" y2="100" stroke="black" strokeWidth="5" />
+                                    <line x1="0" y1="40" x2="140" y2="40" stroke="black" strokeWidth="4" />
+                                    <text x="20" y="30" fontSize="14">丙</text>
+                                    <line x1="0" y1="120" x2="140" y2="120" stroke="black" strokeWidth="4" />
+                                    <text x="20" y="145" fontSize="14">丁</text>
+                                    <line x1="60" y1="40" x2="60" y2="70" {...wireStyle} />
+                                    <circle cx="60" cy="80" r="15" {...bulbStyle} />
+                                    <text x="53" y="85" fontSize="14">甲</text>
+                                    <line x1="60" y1="95" x2="60" y2="120" {...wireStyle} />
+                                    <line x1="120" y1="40" x2="120" y2="70" {...wireStyle} />
+                                    <circle cx="120" cy="80" r="15" {...bulbStyle} />
+                                    <text x="113" y="85" fontSize="14">乙</text>
+                                    <line x1="120" y1="95" x2="120" y2="120" {...wireStyle} />
+                                </g>
+                                <line x1="190" y1="0" x2="190" y2="180" stroke="#bdbdbd" strokeDasharray="5,5" />
+                                <g transform="translate(210,20)">
+                                    <text x="60" y="0" fontSize="16" fontWeight="bold">圖(二)</text>
+                                    <line x1="0" y1="60" x2="0" y2="100" stroke="black" strokeWidth="2" />
+                                    <line x1="-10" y1="70" x2="10" y2="70" stroke="black" strokeWidth="3" />
+                                    <line x1="-5" y1="90" x2="5" y2="90" stroke="black" strokeWidth="5" />
+                                    <circle cx="20" cy="80" r="3" fill="black" />
+                                    <line x1="0" y1="80" x2="20" y2="80" {...wireStyle} />
+                                    <polyline points="20,80 20,40 60,40" {...wireStyle} />
+                                    <circle cx="80" cy="40" r="15" {...bulbStyle} />
+                                    <text x="73" y="45" fontSize="14">甲</text>
+                                    <polyline points="100,40 140,40 140,80" {...wireStyle} />
+                                    <polyline points="20,80 20,120 60,120" {...wireStyle} />
+                                    <circle cx="80" cy="120" r="15" {...bulbStyle} />
+                                    <text x="73" y="125" fontSize="14">乙</text>
+                                    <polyline points="100,120 140,120 140,80" {...wireStyle} />
+                                    <circle cx="140" cy="80" r="3" fill="black" />
+                                    <line x1="140" y1="80" x2="160" y2="80" {...wireStyle} />
+                                    <polyline points="160,80 160,150 0,150 0,100" {...wireStyle} />
+                                </g>
+                            </svg>
+                        </div>
+                    );
+
+                default:
+                    return null;
+            }
+        };
+
+        // --- 3. 題目資料庫 ---
+        const questionsData = [
+            {
+                id: 1,
+                text: "將一根帶正電的玻璃棒靠近一顆以絕緣細線懸掛的不帶電金屬球，但玻璃棒與金屬球不互相接觸。關於金屬球兩側所帶電性與受力達平衡狀態的示意圖，下列何者最合理？",
+                options: [
+                    { id: 'A', text: "(示意圖略：球偏右，遠端感應正電)" },
+                    { id: 'B', text: "如上方示意圖所示 (球偏左，近端感應負電，遠端感應正電)" },
+                    { id: 'C', text: "(示意圖略：球垂直，感應電荷分布均勻)" },
+                    { id: 'D', text: "(示意圖略：球偏左，近端感應正電)" }
+                ],
+                correct: 'B',
+                source: "【108會考第13題】",
+                explanation: "靜電感應時，近端產生異性電荷(負電)，遠端產生同性電荷(正電)。由於帶正電玻璃棒與近端負電的吸引力大於與遠端正電的排斥力，所以金屬球會往左(靠近玻璃棒)偏轉。",
+                type: 'static_induction'
+            },
+            {
+                id: 2,
+                text: "導體甲、乙、丙分別連接成三個電路裝置。三個導體均由相同的材質組成。導體甲(長L, 截面積A)；導體乙(長2L, 截面積A)；導體丙(長L, 截面積2A)。若電路中導線及安培計的電阻、電池內電阻忽略不計，流經三導體的電流值分別為 I甲、I乙、I丙，其大小關係為下列何者？",
+                options: [
+                    { id: 'A', text: "I甲 > I乙 > I丙" },
+                    { id: 'B', text: "I乙 > I甲 > I丙" },
+                    { id: 'C', text: "I丙 > I甲 > I乙" },
+                    { id: 'D', text: "I丙 > I乙 > I甲" }
+                ],
+                correct: 'C',
+                source: "【108會考第31題】",
+                explanation: "電阻 R 正比於 長度L / 截面積A。R甲 ∝ L/A (=1)；R乙 ∝ 2L/A (=2)；R丙 ∝ L/2A (=0.5)。因此電阻大小：R乙 > R甲 > R丙。電壓相同(1.5V)時，根據 V=IR，電流與電阻成反比，故電流大小：I丙 > I甲 > I乙。",
+                type: 'resistance_compare'
+            },
+            {
+                id: 3,
+                text: "圖(二十六)為兩個安培計、兩個電阻器、一個電池與數條導線。老師要求小玉將器材依據圖(二十七)組裝。已知甲安培計只測得經過丙的電流，乙安培計測得電流應為經過丙的電流和經過丁的電流之和。請問下列哪一個組裝方式符合電路圖？",
+                options: [
+                    { id: 'A', text: "甲串聯在丙支路，乙串聯在主路 (如上方示意圖)" },
+                    { id: 'B', text: "甲串聯在主路，乙串聯在丙支路" },
+                    { id: 'C', text: "甲、乙皆串聯在丙支路" },
+                    { id: 'D', text: "甲、乙皆串聯在丁支路" }
+                ],
+                correct: 'A',
+                source: "【111會考第47題】",
+                explanation: "根據題目描述，乙測得的是總電流(丙+丁)，表示乙在主幹道上；甲只測得丙的電流，表示甲在丙的支路上。上方示意圖即為正確的連接方式。",
+                type: 'ammeter_circuit'
+            },
+            {
+                id: 4,
+                text: "承上題，若小玉報告中記錄：甲(I甲) > 乙(I乙)，請問此紀錄是否合理？",
+                options: [
+                    { id: 'A', text: "合理，因為負極為電子流流出端" },
+                    { id: 'B', text: "合理，因為甲測得的電流值包含丙與丁" },
+                    { id: 'C', text: "不合理，因為正極為電流流出端" },
+                    { id: 'D', text: "不合理，因為乙測得的電流值應為流過丙與丁的電流值相加，所以 I乙 > I甲 才合理" }
+                ],
+                correct: 'D',
+                source: "【111會考第48題】",
+                explanation: "乙安培計在主路，測量的是總電流(I丙 + I丁)；甲安培計在支路，只測量 I丙。因此總電流 I乙 一定大於支路電流 I甲。小玉紀錄 I甲 > I乙 是不合理的。",
+                type: 'ammeter_circuit'
+            },
+            {
+                id: 5,
+                text: "有一電路裝置如圖(二十九)所示，其中燈泡甲、乙的規格相同且可正常發亮。若忽略導線電阻及電池內電阻，下列敘述何者正確？",
+                options: [
+                    { id: 'A', text: "接通開關 S1、S2 及 S3 後，兩燈泡均發亮" },
+                    { id: 'B', text: "接通開關 S2、S3 及 S4 後，兩燈泡均不亮" },
+                    { id: 'C', text: "接通開關 S1、S3 及 S4 後，燈泡甲發亮，燈泡乙不亮" },
+                    { id: 'D', text: "接通開關 S1、S2 及 S4 後，燈泡甲不亮，燈泡乙發亮" }
+                ],
+                correct: 'B',
+                source: "【109會考第40題】",
+                explanation: "圖中 S3 若接通，會形成短路迴路(電流不經過燈泡直接回負極或繞過燈泡)。(B)選項中，接通 S3 會造成電源短路或燈泡被短路，導致兩燈泡均不亮。 (D)選項若接通 S1, S2, S4 (且 S3 斷開)，則甲乙並聯且通路，應皆亮。",
+                type: 'switch_circuit'
+            },
+            {
+                id: 6,
+                text: "將甲、乙兩不帶電金屬塊進行圖中的實驗步驟：①取不帶電金屬塊甲 ②將帶負電金屬棒接觸甲 ③移走金屬棒 ④將甲與不帶電的乙接觸 ⑤分開兩金屬塊。關於步驟⑤中兩金屬塊的電性，應為下列何者？",
+                options: [
+                    { id: 'A', text: "甲：帶正電，乙：帶正電" },
+                    { id: 'B', text: "甲：帶正電，乙：帶負電" },
+                    { id: 'C', text: "甲：帶負電，乙：帶正電" },
+                    { id: 'D', text: "甲：帶負電，乙：帶負電" }
+                ],
+                correct: 'D',
+                source: "【110會考第29題】",
+                explanation: "步驟②接觸起電：帶負電金屬棒接觸甲，電子傳給甲，甲帶負電。步驟④電荷傳導：帶負電的甲接觸不帶電的乙，電子由甲傳向乙，使兩者皆帶負電。故最後兩者均帶負電。",
+                type: 'contact_steps'
+            },
+            {
+                id: 7,
+                text: "圖(一)、圖(二)兩種連接方式皆為甲、乙兩個燈泡並聯。小明認為圖(二)接法，若燈泡乙燒斷，甲仍會亮。阿華認為若導線丙、丁其中一條斷裂，圖(一)中甲不亮，圖(二)中甲仍會亮。關於兩人的解釋是否合理？",
+                options: [
+                    { id: 'A', text: "兩人皆合理" },
+                    { id: 'B', text: "兩人皆不合理" },
+                    { id: 'C', text: "只有小明合理" },
+                    { id: 'D', text: "只有阿華合理" }
+                ],
+                correct: 'D',
+                source: "【112會考第42題】",
+                explanation: "圖(一)中，丙、丁是共用的主幹線，任一條斷裂都會導致整個電路斷路，甲乙都不亮。圖(二)中，甲、乙燈泡有各自獨立的引線分支，若丙、丁(假設為圖中的獨立分支導線)其中一條斷裂，只會影響該分支的燈泡，另一個燈泡仍會亮。故阿華的解釋合理。",
+                type: 'parallel_bulb'
+            }
+        ];
+
+        // 3. 勵志格言 (多巴胺版)
+        const quote = "「點亮心中的燈泡，你的潛力比電壓更強大！」";
+
+        // 4. 主應用程式
+        const App = () => {
+            const [screen, setScreen] = useState('welcome');
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [userAnswers, setUserAnswers] = useState({});
+            const [userInfo, setUserInfo] = useState({ name: '', seat: '' });
+            const [score, setScore] = useState(0);
+            const [showConfirm, setShowConfirm] = useState(false);
+
+            const handleStart = () => {
+                if (userInfo.name && userInfo.seat) {
+                    setScreen('quiz');
+                } else {
+                    alert("請輸入座號和姓名才能開始挑戰喔！");
+                }
+            };
+
+            const handleAnswer = (optionId) => {
+                setUserAnswers({
+                    ...userAnswers,
+                    [questionsData[currentQuestion].id]: optionId
+                });
+            };
+
+            const nextQuestion = () => {
+                if (currentQuestion < questionsData.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                } else {
+                    setShowConfirm(true);
+                }
+            };
+
+            const prevQuestion = () => {
+                if (currentQuestion > 0) {
+                    setCurrentQuestion(currentQuestion - 1);
+                    setShowConfirm(false);
+                }
+            };
+
+            const submitQuiz = () => {
+                let rawScore = 0;
+                let correctCount = 0;
+
+                questionsData.forEach(q => {
+                    if (userAnswers[q.id] === q.correct) {
+                        rawScore += 14; 
+                        correctCount++;
+                    }
+                });
+
+                if (correctCount === questionsData.length) {
+                    rawScore = 100; // 滿分處理
+                } else if (rawScore > 100) {
+                    rawScore = 100;
+                }
+
+                setScore(rawScore);
+                setScreen('result');
+                setShowConfirm(false);
+            };
+
+            const downloadCSV = () => {
+                const bom = "\uFEFF"; 
+                const header = ["座號", "姓名", "總分", "題號", "題目內容", "你的作答", "正確答案", "結果", "解析與知識點", "出處"];
+                
+                const escapeCSV = (text) => {
+                    if (text === null || text === undefined) return "";
+                    const stringText = String(text);
+                    if (stringText.includes(",") || stringText.includes("\"") || stringText.includes("\n")) {
+                        return `"${stringText.replace(/"/g, '""')}"`;
+                    }
+                    return stringText;
+                };
+
+                const rows = questionsData.map(q => {
+                    const myAnswer = userAnswers[q.id] || "未作答";
+                    const isCorrect = myAnswer === q.correct;
+                    const result = isCorrect ? "正確" : "錯誤";
+                    
+                    return [
+                        escapeCSV(userInfo.seat),
+                        escapeCSV(userInfo.name),
+                        score,
+                        q.id,
+                        escapeCSV(q.text),
+                        myAnswer,
+                        q.correct,
+                        result,
+                        escapeCSV(q.explanation), 
+                        escapeCSV(q.source)
+                    ];
+                });
+                
+                let csvContent = "data:text/csv;charset=utf-8," + bom;
+                csvContent += header.join(",") + "\n";
+                rows.forEach(row => {
+                    csvContent += row.join(",") + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                const dateStr = new Date().toISOString().split('T')[0];
+                link.setAttribute("download", `${userInfo.seat}_${userInfo.name}_9-1-C4理化錯題訂正表_${dateStr}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const printResult = () => {
+                window.print();
+            };
+
+            return (
+                <div className="min-h-screen pb-10">
+                    
+                    {/* --- 歡迎頁面 --- */}
+                    {screen === 'welcome' && (
+                        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+                            <div className="bg-white p-8 rounded-3xl shadow-[8px_8px_0px_0px_#FFD93D] border-4 border-dopamine-yellow max-w-md w-full text-center float-anim">
+                                <div className="flex justify-center mb-4 text-dopamine-yellow">
+                                    <Zap width={64} height={64} />
+                                </div>
+                                <h1 className="text-3xl font-black text-gray-800 mb-2 tracking-wider">自然基會試煉</h1>
+                                <h2 className="text-xl font-bold text-dopamine-blue mb-6">9-1-C4 簡單電路</h2>
+                                
+                                <div className="space-y-4 mb-6 text-left">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">座號</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-dopamine-yellow focus:outline-none transition-colors bg-gray-50"
+                                            placeholder="請輸入座號 (例: 05)"
+                                            value={userInfo.seat}
+                                            onChange={(e) => setUserInfo({...userInfo, seat: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">姓名</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-dopamine-yellow focus:outline-none transition-colors bg-gray-50"
+                                            placeholder="請輸入姓名"
+                                            value={userInfo.name}
+                                            onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="bg-dopamine-cream p-4 rounded-xl mb-6 border border-dopamine-yellow">
+                                    <p className="text-gray-600 font-medium italic text-sm">
+                                        <Star className="inline w-4 h-4 mb-1 mr-1 text-dopamine-yellow" />
+                                        {quote}
+                                    </p>
+                                </div>
+
+                                <button 
+                                    onClick={handleStart}
+                                    className="w-full py-4 bg-dopamine-yellow hover:bg-yellow-400 text-gray-900 font-black text-xl rounded-2xl shadow-lg transition-transform active:scale-95 flex justify-center items-center gap-2"
+                                >
+                                    開始挑戰 <ChevronRight />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- 測驗頁面 --- */}
+                    {screen === 'quiz' && (
+                        <div className="max-w-2xl mx-auto p-4 pt-10 pop-in">
+                            {/* 進度條與資訊 */}
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="font-bold text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-200">
+                                    考生: {userInfo.seat} {userInfo.name}
+                                </span>
+                                <div className="px-4 py-1 bg-dopamine-cream text-dopamine-yellow rounded-full font-bold border border-dopamine-yellow text-gray-700">
+                                    第 {currentQuestion + 1} / {questionsData.length} 題
+                                </div>
+                            </div>
+
+                            <div className="w-full bg-white h-4 rounded-full mb-8 overflow-hidden border border-gray-200 p-1">
+                                <div 
+                                    className="bg-dopamine-yellow h-full rounded-full transition-all duration-500 ease-out"
+                                    style={{ width: `${((currentQuestion + 1) / questionsData.length) * 100}%` }}
+                                ></div>
+                            </div>
+
+                            {/* 題目卡片 */}
+                            <div className="bg-white p-6 rounded-3xl shadow-[8px_8px_0px_0px_#4D96FF] border-4 border-gray-100 mb-8 min-h-[350px] flex flex-col justify-between relative">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                         <span className="inline-block px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full font-bold">
+                                            {questionsData[currentQuestion].source}
+                                        </span>
+                                    </div>
+                                    
+                                    <h3 className="text-xl font-bold text-gray-800 leading-relaxed mb-6">
+                                        {questionsData[currentQuestion].text}
+                                    </h3>
+
+                                    {/* SVG 圖片顯示區 */}
+                                    <QuestionDiagram type={questionsData[currentQuestion].type} />
+
+                                    <div className="space-y-3 mt-6">
+                                        {questionsData[currentQuestion].options.map((opt) => (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => handleAnswer(opt.id)}
+                                                className={`w-full text-left p-4 rounded-xl border-2 font-medium transition-all duration-200 flex items-center
+                                                    ${userAnswers[questionsData[currentQuestion].id] === opt.id 
+                                                        ? 'border-dopamine-blue bg-blue-50 text-dopamine-blue shadow-md' 
+                                                        : 'border-gray-100 hover:border-dopamine-yellow hover:bg-yellow-50 text-gray-600'
+                                                    }`}
+                                            >
+                                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full mr-3 text-sm font-bold flex-shrink-0
+                                                    ${userAnswers[questionsData[currentQuestion].id] === opt.id 
+                                                        ? 'bg-dopamine-blue text-white' 
+                                                        : 'bg-gray-100 text-gray-500'
+                                                    }`}>
+                                                    {opt.id}
+                                                </span>
+                                                {opt.text}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 導航按鈕 */}
+                            <div className="flex justify-between items-center">
+                                <button 
+                                    onClick={prevQuestion}
+                                    disabled={currentQuestion === 0}
+                                    className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors
+                                        ${currentQuestion === 0 
+                                            ? 'text-gray-300 cursor-not-allowed' 
+                                            : 'text-gray-600 bg-white hover:bg-gray-100 shadow-sm border border-gray-200'}`}
+                                >
+                                    <ChevronLeft /> 上一題
+                                </button>
+
+                                {showConfirm ? (
+                                    <button 
+                                        onClick={submitQuiz}
+                                        className="px-8 py-3 bg-dopamine-green hover:bg-green-500 text-white font-bold rounded-xl shadow-[4px_4px_0px_0px_#10B981] flex items-center gap-2 animate-bounce"
+                                    >
+                                        確定繳交 <CheckCircle />
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={nextQuestion}
+                                        className="px-6 py-3 bg-dopamine-blue hover:bg-blue-600 text-white font-bold rounded-xl shadow-[4px_4px_0px_0px_#2563EB] active:translate-y-1 active:shadow-none flex items-center gap-2"
+                                    >
+                                        下一題 <ChevronRight />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- 結果頁面 --- */}
+                    {screen === 'result' && (
+                        <div className="max-w-4xl mx-auto p-4 pt-10 pop-in">
+                            {/* 不列印區域: 標題與賀詞 */}
+                            <div className="text-center mb-8 no-print">
+                                <div className="inline-block p-4 rounded-full bg-yellow-100 text-dopamine-yellow mb-4 float-anim border-4 border-white shadow-lg">
+                                    <Award width={64} height={64} />
+                                </div>
+                                <h2 className="text-4xl font-black text-gray-800 mb-2">測驗完成！</h2>
+                                <p className="text-gray-500">做得好，{userInfo.name}！電學大師就是你！</p>
+                            </div>
+
+                            {/* 成績卡 (列印區域) */}
+                            <div className="bg-white p-8 rounded-3xl border-4 border-dopamine-yellow text-center mb-8 shadow-xl relative overflow-hidden print:border-2 print:shadow-none">
+                                <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-dopamine-pink via-dopamine-yellow to-dopamine-blue"></div>
+                                
+                                <div className="flex justify-between items-end border-b border-gray-100 pb-4 mb-4">
+                                    <div className="text-left">
+                                        <div className="text-sm text-gray-400">考生姓名</div>
+                                        <div className="text-xl font-bold text-gray-800">{userInfo.seat} {userInfo.name}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm text-gray-400">測驗日期</div>
+                                        <div className="text-lg font-bold text-gray-800">{new Date().toLocaleDateString()}</div>
+                                    </div>
+                                </div>
+
+                                <div className="py-6">
+                                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Total Score</div>
+                                    <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-dopamine-yellow to-dopamine-pink inline-block">
+                                        {score}
+                                    </div>
+                                    {score > 50 && (
+                                        <div className="mt-2 text-dopamine-pink font-bold text-lg animate-pulse flex items-center justify-center gap-2">
+                                            <Zap className="w-5 h-5" /> 電力滿滿！完美通關！ <Zap className="w-5 h-5" />
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="mt-6 flex justify-center gap-4 no-print">
+                                    <button 
+                                        onClick={downloadCSV}
+                                        className="px-5 py-3 bg-dopamine-green text-white rounded-xl font-bold hover:bg-green-600 shadow-md flex items-center gap-2 transition-transform hover:scale-105"
+                                    >
+                                        <Download width={20} /> 下載錯題與詳解 (CSV)
+                                    </button>
+                                    <button 
+                                        onClick={printResult}
+                                        className="px-5 py-3 bg-dopamine-blue text-white rounded-xl font-bold hover:bg-blue-600 shadow-md flex items-center gap-2 transition-transform hover:scale-105"
+                                    >
+                                        <Printer width={20} /> 列印 / 存為 PDF
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 詳解列表 */}
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-bold text-gray-700 border-l-8 border-dopamine-yellow pl-4">詳細解析</h3>
+                                {questionsData.map((q, index) => {
+                                    const isCorrect = userAnswers[q.id] === q.correct;
+                                    return (
+                                        <div key={q.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm break-page">
+                                            <div className="flex gap-4">
+                                                <div className="flex-shrink-0 mt-1">
+                                                    {isCorrect ? (
+                                                        <CheckCircle className="w-8 h-8 text-dopamine-green" />
+                                                    ) : (
+                                                        <XCircle className="w-8 h-8 text-dopamine-pink" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h4 className="font-bold text-lg text-gray-800">第 {index + 1} 題</h4>
+                                                        <span className="text-xs font-bold px-2 py-1 bg-gray-100 text-gray-500 rounded">
+                                                            {q.source}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-gray-700 mb-4 font-medium">{q.text}</p>
+                                                    
+                                                    {/* SVG 圖片顯示區 */}
+                                                    <QuestionDiagram type={q.type} />
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <div className={`p-3 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                                            <span className="text-xs font-bold block mb-1 text-gray-500">你的答案</span>
+                                                            <span className={`font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                                                {userAnswers[q.id] || "未作答"} : {q.options.find(o => o.id === userAnswers[q.id])?.text || "-"}
+                                                            </span>
+                                                        </div>
+                                                        <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                                                            <span className="text-xs font-bold block mb-1 text-gray-500">正確答案</span>
+                                                            <span className="font-bold text-blue-700">{q.correct} : {q.options.find(o => o.id === q.correct)?.text}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-dopamine-cream p-4 rounded-xl text-sm text-gray-700 border border-dopamine-yellow">
+                                                        <span className="font-bold text-dopamine-yellow block mb-1 flex items-center gap-1">
+                                                            <Zap width={14} /> 解析：
+                                                        </span>
+                                                        {q.explanation}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="mt-10 text-center text-gray-400 text-sm print-only">
+                                自然基會試煉 9-1-C4 | 考生：{userInfo.seat} {userInfo.name}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Render Logic
+        const container = document.getElementById('root');
+        if (container) {
+            ReactDOM.render(<App />, container);
+        }
+    </script>
+<a id="ahao-back" href="../../index.html#ch-9-1-4" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

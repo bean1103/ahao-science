@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>熱傳導捕手</title>
+    <style>
+        :root {
+            --bg-color: #2c3e50;
+            --hole-color: #34495e;
+            --mole-color: #f1c40f;
+            --text-color: #2c3e50;
+            --accent: #e74c3c;
+        }
+
+        body {
+            font-family: '微軟正黑體', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        h1 { margin: 10px 0; font-size: 1.8rem; text-align: center; color: #f1c40f; }
+        
+        .info-panel {
+            display: flex;
+            gap: 20px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: 1; /* 保持正方形 */
+        }
+
+        .hole {
+            background-color: var(--hole-color);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+            cursor: pointer;
+            /* 讓手機點擊更靈敏 */
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        /* 地鼠 (卡片) */
+        .mole {
+            width: 100%;
+            height: 100%;
+            background-color: var(--mole-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 100%; /* 初始位置在洞底下 */
+            left: 0;
+            transition: top 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: var(--text-color);
+            padding: 10px;
+            box-sizing: border-box;
+            border: 5px solid #d35400;
+        }
+
+        .mole.up {
+            top: 0; /* 冒出來 */
+        }
+
+        /* 打擊特效 */
+        .mole.hit {
+            background-color: #2ecc71; /* 打對變綠 */
+            border-color: #27ae60;
+            color: white;
+        }
+
+        .mole.wrong {
+            background-color: #e74c3c; /* 打錯變紅 */
+            border-color: #c0392b;
+            color: white;
+            animation: shake 0.2s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #d35400;
+        }
+        .btn:active { transform: translateY(5px); box-shadow: none; }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .instruction {
+            color: #ddd;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>⚡ 熱傳導捕手</h1>
+    <div class="info-panel">
+        <span>分數: <span id="score">0</span></span>
+        <span>時間: <span id="time">30</span></span>
+    </div>
+
+    <div class="game-grid">
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+    </div>
+
+    <div class="overlay" id="start-screen">
+        <h1 style="font-size:3rem; margin-bottom:10px;">🎯</h1>
+        <h2 style="margin-bottom:10px;">任務目標</h2>
+        <p class="instruction">
+            請捕捉 <strong>「良導體 (易導熱)」</strong> 的物品！<br>
+            <span style="color:#e74c3c;">(打到絕緣體會扣分喔！)</span>
+        </p>
+        <button class="btn" onclick="startGame()">開始挑戰</button>
+    </div>
+
+    <div class="overlay" id="end-screen" style="display:none;">
+        <h1>時間到！</h1>
+        <h2 style="font-size: 2rem; margin: 20px;">最終得分: <span id="final-score">0</span></h2>
+        <p id="comment" style="font-size: 1.2rem; color: #f1c40f;"></p>
+        <button class="btn" onclick="startGame()">再來一次</button>
+    </div>
+
+<script>
+    // --- 資料庫設定 ---
+    // good = 良導體 (打對加分)
+    // bad  = 絕緣體 (打錯扣分)
+    const items = [
+        { text: "銀", type: "good" },
+        { text: "銅", type: "good" },
+        { text: "鋁", type: "good" },
+        { text: "鐵", type: "good" },
+        { text: "鐵鍋", type: "good" },
+        { text: "水銀", type: "good" },
+        { text: "金屬", type: "good" },
+        
+        { text: "木頭", type: "bad" },
+        { text: "空氣", type: "bad" },
+        { text: "塑膠", type: "bad" },
+        { text: "保麗龍", type: "bad" },
+        { text: "玻璃", type: "bad" },
+        { text: "棉被", type: "bad" },
+        { text: "羽絨衣", type: "bad" }
+    ];
+
+    const holes = document.querySelectorAll('.hole');
+    const scoreBoard = document.getElementById('score');
+    const timeBoard = document.getElementById('time');
+    const startScreen = document.getElementById('start-screen');
+    const endScreen = document.getElementById('end-screen');
+    
+    let lastHole;
+    let timeUp = false;
+    let score = 0;
+    let timeLeft = 30;
+    let timerId;
+    let gameLoopId;
+
+    // 隨機時間間隔
+    function randomTime(min, max) {
+        return Math.round(Math.random() * (max - min) + min);
+    }
+
+    // 隨機選洞
+    function randomHole(holes) {
+        const idx = Math.floor(Math.random() * holes.length);
+        const hole = holes[idx];
+        if (hole === lastHole) {
+            return randomHole(holes);
+        }
+        lastHole = hole;
+        return hole;
+    }
+
+    // 隨機選物品
+    function randomItem() {
+        const idx = Math.floor(Math.random() * items.length);
+        return items[idx];
+    }
+
+    // 地鼠冒出
+    function peep() {
+        const time = randomTime(800, 1500); // 停留時間
+        const hole = randomHole(holes);
+        const mole = hole.querySelector('.mole');
+        const item = randomItem();
+
+        // 設定地鼠內容
+        mole.innerText = item.text;
+        mole.dataset.type = item.type;
+        
+        // 重置樣式
+        mole.classList.remove('hit', 'wrong');
+        
+        // 冒出來
+        mole.classList.add('up');
+
+        // 時間到縮回去
+        setTimeout(() => {
+            mole.classList.remove('up');
+            if (!timeUp) {
+                // 隨機延遲後下一個冒出來
+                setTimeout(peep, randomTime(200, 800)); 
+            }
+        }, time);
+    }
+
+    function startGame() {
+        scoreBoard.textContent = 0;
+        timeBoard.textContent = 30;
+        timeUp = false;
+        score = 0;
+        timeLeft = 30;
+        
+        startScreen.style.display = 'none';
+        endScreen.style.display = 'none';
+
+        // 啟動倒數
+        timerId = setInterval(() => {
+            timeLeft--;
+            timeBoard.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+
+        // 開始冒地鼠
+        peep();
+    }
+
+    function endGame() {
+        clearInterval(timerId);
+        timeUp = true;
+        
+        // 顯示結算
+        setTimeout(() => {
+            endScreen.style.display = 'flex';
+            document.getElementById('final-score').innerText = score;
+            
+            const comment = document.getElementById('comment');
+            if(score >= 150) comment.innerText = "神一般的反應速度！⚡";
+            else if(score >= 100) comment.innerText = "非常厲害！觀念很熟！🔥";
+            else comment.innerText = "加油！分辨速度要再快一點！💪";
+            
+        }, 1000); // 等最後一隻縮回去
+    }
+
+    function bonk(e) {
+        if(!e.isTrusted) return; // 防止腳本點擊
+        const mole = this;
+        
+        // 已經打過就不能再打
+        if(mole.classList.contains('hit') || mole.classList.contains('wrong')) return;
+
+        if (mole.dataset.type === 'good') {
+            // 打對了！
+            score += 10;
+            mole.classList.add('hit');
+            mole.innerText = "⭕";
+        } else {
+            // 打錯了！
+            score -= 10;
+            mole.classList.add('wrong');
+            mole.innerText = "❌";
+        }
+        
+        scoreBoard.textContent = score;
+        
+        // 打到後立刻縮回去 (視覺上更爽快)
+        setTimeout(() => {
+            mole.classList.remove('up');
+        }, 200);
+    }
+
+    // 綁定點擊事件
+    holes.forEach(hole => {
+        const mole = hole.querySelector('.mole');
+        mole.addEventListener('click', bonk);
+        mole.addEventListener('touchstart', bonk); // 手機優化
+    });
+
+</script>
+
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

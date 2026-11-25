@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿豪自然115-G9-1模 | 詳解戰術系統</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Luckiest+Guy&family=Bungee+Inline&family=Slackey&family=Titan+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* 淺色背景 Slate 50 */
+            color: #0f172a; /* 加深為 Slate 900 */
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        .luckiest { font-family: 'Luckiest Guy', cursive; }
+        .bungee { font-family: 'Bungee Inline', cursive; }
+        .slackey { font-family: 'Slackey', cursive; }
+        .titan { font-family: 'Titan One', cursive; }
+
+        /* 粗黑體風格 - 淺色版 */
+        .bold-black-style {
+            font-weight: 900;
+            color: #0f172a;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.05), 8px 8px 20px rgba(0,0,0,0.05);
+            letter-spacing: -0.05em;
+        }
+
+        .pop-text-shadow {
+            text-shadow: 6px 6px 0px #be185d, 12px 12px 0px rgba(0,0,0,0.1);
+        }
+
+        .cyber-gradient-pop {
+            background: linear-gradient(to right, #047857, #0369a1, #be185d, #047857); /* 改為深綠、深藍、深粉紅 */
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1));
+            animation: shine 4s linear infinite;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85); /* 更不透明的白色 */
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(0, 0, 0, 0.05); /* 淺色邊框 */
+            border-radius: 3rem;
+        }
+
+        .grid-item-lively {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 1.5rem;
+            background: #ffffff; /* 純白背景 */
+            border: 2px solid rgba(0,0,0,0.05);
+        }
+        .grid-item-lively:hover {
+            transform: scale(1.25) rotate(5deg);
+            background: #00ff9f;
+            color: #000;
+            border-color: #00ff9f;
+            box-shadow: 0 15px 40px rgba(0, 255, 159, 0.4);
+            z-index: 10;
+        }
+        .grid-item-active {
+            background: #ff00ff !important;
+            color: #fff !important;
+            transform: scale(1.15);
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.5);
+            border: 2px solid #000 !important;
+        }
+
+        .floating-id {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0) rotate(-8deg); }
+            50% { transform: translateY(-20px) rotate(-4deg); }
+        }
+
+        @keyframes shine {
+            to { background-position: 300% center; }
+        }
+
+        .main-title-container {
+            perspective: 1000px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect, useRef } = React;
+
+        const App = () => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [displayId, setDisplayId] = useState(null);
+            const [subjectFilter, setSubjectFilter] = useState('ALL');
+            const resultRef = useRef(null);
+
+            // 115-G9-1模 1~50題完整配置
+            const examData = [
+                { id: 1, ans: "D", subject: "生", source: "生物：生命的層次與病毒特性", keyPoint: "生物層次與病毒結構辨析", quote: "從微觀的細胞出發，看透生命的完整層次！", detail: "(A)海芋是植物，沒有器官系統；(B)面天樹蛙是多細胞動物，具有組織、器官、器官系統；(C)草履蟲是單細胞生物，沒有組織、器官和器官系統；(D)狂犬病病毒沒有細胞構造，是介於生物和非生物之間的物體。" },
+                { id: 2, ans: "A", subject: "生", source: "生物：體溫恆定與代謝調節", keyPoint: "內溫動物與外溫動物的體溫調節機制", quote: "保持內在穩定的能量，任憑外界風雨變幻！", detail: "(A)(C)想尋找內溫動物應向左轉，其體溫主要來自體內的代謝；(B)(D)想尋找外溫動物應向右轉，其體溫易隨著環境溫度變化而有較大的改變。" },
+                { id: 3, ans: "B", subject: "生", source: "生物：人體呼吸運動", keyPoint: "吸氣時肋骨與橫膈的協同運動", quote: "深吸一口勇氣，胸腔擴張迎接全新挑戰！", detail: "(B)吸氣時，肋骨上升、橫膈下降、胸腔變大，使氣體進入肺。" },
+                { id: 4, ans: "C", subject: "生", source: "生物：細胞能量工廠", keyPoint: "細胞胞器構造與功能專一性", quote: "粒線體提供動能，正如自律為你提供源源不絕的實力！", detail: "細胞內產生能量的特定構造為粒線體。(A)細胞核；(B)液胞；(C)粒線體；(D)細胞膜。" },
+                { id: 5, ans: "C", subject: "理", source: "理化：溶液與濃度配製", keyPoint: "重量百分率濃度的天平與量筒配製器材", quote: "精確量取每一次付出，調配出屬於你的黃金比例！", detail: "依特定重量百分率濃度配製食鹽水，需用天平量取無碘鹽的質量，以及用量筒量取水的體積。" },
+                { id: 6, ans: "B", subject: "理", source: "理化：科學測量與估計值", keyPoint: "準確值、估計值與工具最小刻度關係", quote: "精細度決定高度，精準掌控每一分微小差距！", detail: "測量值是由一組準確值及一位估計值組成，準確值記錄到測量工具的最小刻度，磁鐵條的最小刻度是cm，較直尺的最小刻度mm大，故測量值也會不同。" },
+                { id: 7, ans: "D", subject: "理", source: "理化：空氣成分與氣體製備", keyPoint: "大氣氣體特性與酸沉澱反應產物", quote: "化學反應激盪靈感，掌握關鍵產物一擊必中！", detail: "甲是氮氣，常溫時不易發生反應；乙是氧氣，容易發生化學反應；丙是氬氣；丁為氮、氧、氬以外的其他氣體。碳酸鈣和稀鹽酸反應生成二氧化碳，包括在丁中。" },
+                { id: 8, ans: "B", subject: "理", source: "理化：熱的傳播方式", keyPoint: "液體熱傳播與對流機制", quote: "熱量驅動對流，逆流而上才能創造沸騰的高峰！", detail: "液體中的熱傳播以對流為主。水是熱的不良導體，但受熱後水的密度減小而上浮形成對流，使上方的甲處水溫較高。" },
+                { id: 9, ans: "D", subject: "生", source: "生物：物質進出細胞膜的途徑", keyPoint: "細胞膜蛋白質通道與磷脂質雙層穿透限制", quote: "認清前進的專屬通道，不要在錯誤的路徑上盲目碰壁！", detail: "礦物質走「專屬通道」，也就是圖中的蛋白質路徑(甲、丙、丁)。(A)葡萄糖相對於氧氣、二氧化碳來說屬於「大分子」，沒辦法直接鑽過磷脂質(乙)；(B)葡萄糖也可以通過蛋白質通道；(C)兩者都必須從甲、丙、丁通過。" },
+                { id: 10, ans: "A", subject: "生", source: "生物：內分泌與消化系統調節", keyPoint: "激素運送途徑與消化液輸送管道", quote: "讓正確的訊號流淌全身，找回屬於你的平衡節奏！", detail: "激素由血液運送。胰液經專屬管道注入小腸。人體無法分解纖維素。" },
+                { id: 11, ans: "B", subject: "生", source: "生物：人體免疫防禦機制", keyPoint: "專一性免疫與非專一性防禦差異", quote: "築起防禦的長城，記住每次挫折化為更強的抗體！", detail: "甲為專一性免疫(具記憶性、產生特定抗體)，乙為非專一性防禦(發炎反應)。" },
+                { id: 12, ans: "C", subject: "生", source: "生物：醣類檢驗與本氏液反應", keyPoint: "本氏液呈色階梯與隔水加熱操作", quote: "細細檢驗每個環節，微小細節都是勝負關鍵！", detail: "由本氏液檢測結果可推測，乙藍→藍(無糖)、丁藍→綠(微糖)、甲藍→黃(半糖)、丙藍→紅(全糖)。(A)甲為黃色，不是無糖；(B)乙為無糖(藍)，低於丁(綠)；(D)本氏液的檢測需隔水加熱。" },
+                { id: 13, ans: "A", subject: "理", source: "理化：三態變化與熱量轉移", keyPoint: "汽化與昇華吸熱現象及熱傳導", quote: "吸納外界淬鍊，轉化為向更高境界躍升的動能！", detail: "酒精減少是由液態變成氣態的汽化現象，和乾冰由固態變成氣態的昇華過程一樣需要吸熱。熱由金屬湯匙傳至酒精，金屬湯匙因而降溫，以致觸摸時感覺冰涼。" },
+                { id: 14, ans: "D", subject: "理", source: "理化：元素週期表與同族性質", keyPoint: "鹼土金屬族（第2直行）元素特性", quote: "找到志同道合的夥伴，發揮無可取代的專屬特質！", detail: "鹼土族位在週期表的第二直行，即乙元素所在，該行元素為同族，有相似的化學性質。" },
+                { id: 15, ans: "B", subject: "理", source: "理化：熱平衡與熱量散失計算", keyPoint: "質量相同水混合平衡溫度與散失估算", quote: "冷熱交融終成平穩，沉著應對考場任何波動！", detail: "兩杯水質量相同，若沒有熱量散失，混合後溫度應為50℃。若混合過程中有部分熱量散失，混合後溫度會低於50℃，但仍應高於原本冷水的20℃，因此最可能為40℃。" },
+                { id: 16, ans: "D", subject: "理", source: "理化：液態氮特性與相變現象", keyPoint: "凝結物理變化本質與氮氣化學惰性", quote: "撥開眼前迷霧，冷靜洞察事物背後的科學真理！", detail: "(A)(C)液態氮會吸熱，使周圍空氣中的水蒸氣凝結成小水滴而形成白煙，為物理變化；(B)滾沸是沸騰時的現象；(D)氮氣不易發生反應，常填充入食品包裝保鮮。" },
+                { id: 17, ans: "C", subject: "理", source: "理化：光學與不透明體呈色", keyPoint: "物體反射特定色光與吸收原理", quote: "在不同光源下綻放色彩，任何考題都難不倒你！", detail: "藍絲帶可反射藍光，若以紅光或綠光照射，絲帶會吸收色光而呈黑色，而紅光和綠光分別會使帽子紅色部分呈現紅色或黑色。" },
+                { id: 18, ans: "D", subject: "生", source: "生物：中樞神經系統構造分工", keyPoint: "大腦、小腦與腦幹的功能職責劃分", quote: "大腦思辨、小腦平衡、腦幹守護，全力衝刺考場！", detail: "(A)負責維持平衡是乙(小腦)；(B)調節呼吸心跳的中樞是丙(腦幹)；(C)產生意識判斷的是甲(大腦)。" },
+                { id: 19, ans: "A", subject: "生", source: "生物：內分泌異常與代謝失調", keyPoint: "甲狀腺素過量分泌症狀分析", quote: "調節好內在能量節奏，不急不躁踏實邁進！", detail: "甲狀腺亢進代表甲狀腺素分泌過多，神經容易興奮。因全身代謝快速，正常進食，體重卻減輕。" },
+                { id: 20, ans: "D", subject: "生", source: "生物模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 21, ans: "D", subject: "生", source: "生物模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 22, ans: "C", subject: "理", source: "理化模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 23, ans: "B", subject: "理", source: "理化模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 24, ans: "A", subject: "理", source: "理化模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 25, ans: "B", subject: "理", source: "理化模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 26, ans: "D", subject: "生", source: "生物模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 27, ans: "C", subject: "生", source: "生物模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 28, ans: "A", subject: "生", source: "生物模組", keyPoint: "待上傳詳解", quote: "堅持到底，每一道題目都是通往成功的階梯！", detail: "詳解文字等待阿豪老師更新中..." },
+                { id: 29, ans: "D", subject: "生", source: "生物：光合作用實驗", keyPoint: "澱粉檢測與變因控制的邏輯推導", quote: "抽絲剝繭地驗證假設，實驗的每一步都是通往真理的拼圖！", detail: "(A)證明光合作用需要光照；(B)呈現藍黑色表示含有澱粉；(C)甲葉片呈黃褐色，而乙葉片呈藍黑色；(D)植物先放置黑暗中，葉片中澱粉會消耗完，實驗後若葉片內有澱粉，是光照後葉片行光合作用所產生。" },
+                { id: 30, ans: "C", subject: "理", source: "理化：光學與反射定律", keyPoint: "光的反射與對稱圖形分析", quote: "掌握光的對稱反射軌跡，解開空間距離的幾何之謎！", detail: "因入射角＝反射角，入射線與反射線以法線為對稱線，畫圖如下可知天花板上兩光點間距離應大於10cm。" },
+                {
+                    id: 31,
+                    ans: "A",
+                    subject: "理", 
+                    source: "理化：溫度計原理與電阻", 
+                    keyPoint: "物質性質隨溫度改變與電阻溫度計的應用", 
+                    quote: "敏銳感知溫度的微小變化，這是物質精準測量的核心！", 
+                    detail: "物質的某一性質會隨溫度變化而改變，即可用以設計溫度計。由金屬片電阻值與溫度關係圖可知，不同的電阻值會有對應的溫度值，故可以測量金屬的電阻推論環境的溫度。"
+                },
+                {
+                    id: 32,
+                    ans: "C",
+                    subject: "理", 
+                    source: "理化：聲音傳播與回聲", 
+                    keyPoint: "聲速計算與回聲物理特性的變化", 
+                    quote: "聲音的折返是時光的測距儀，振幅減弱但本質不變！", 
+                    detail: "聲速340公尺/秒，聲波來回時間0.1秒，來回距離為340×0.1＝34，所以單趟距離34/2＝17公尺。回聲與原聲，頻率、週期、波長、波速皆相同，但振幅會減小，即響度會變小。" 
+                },
+                { 
+                    id: 33, 
+                    ans: "D", 
+                    subject: "理", 
+                    source: "理化：熱量公式與比熱", 
+                    keyPoint: "H=M×S×ΔT的邏輯推導與物質判定", 
+                    quote: "溫度的升降不只關乎熱量，更是質量與比熱的綜合較量！", 
+                    detail: "由H=(M×S)×ΔT可知，沒有說明甲、乙質量或比熱關係，甲升溫較快，只知是甲的質量與比熱乘積較小，故小文錯誤，但若甲、乙質量相同，則甲比熱應較小，表示二者為不同物質，阿揚正確。" 
+                },
+                { 
+                    id: 34, 
+                    ans: "B", 
+                    subject: "生", 
+                    source: "生物：人體血液循環路徑", 
+                    keyPoint: "心臟腔室、瓣膜與相連血管的立體對應", 
+                    quote: "心臟的每一次搏動，都是血液精準航向全身的動力樞紐！", 
+                    detail: "甲：右心房(接收全身回流的缺氧血)。乙：右心室(將缺氧血壓向肺動脈)。丙：左心房(接收肺部回流的充氧血)。丁：左心室(將充氧血壓向主動脈)。a：上大靜脈。b：肺動脈(流向肺部)。c：主動脈(流向全身)。d：肺靜脈(由肺部回心)。e：下大靜脈。肺動脈瓣位於右心室(乙)與肺動脈(b)之間。當右心室收縮時，血液必須推開肺動脈瓣進入肺部。如果瓣膜狹窄，血液從乙→b的過程就會受阻。" 
+                },
+                { 
+                    id: 35, 
+                    ans: "B", 
+                    subject: "生", 
+                    source: "生物：植物的感應", 
+                    keyPoint: "向光性與觸發運動的分辨及生長素機制", 
+                    quote: "順應光的指引，這是深植於細胞內的生長本能！", 
+                    detail: "(A)是向光性，非觸發運動；(C)(D)切除尖端後，單側光照也不會彎曲生長。" 
+                },
+                { 
+                    id: 36, 
+                    ans: "D", 
+                    subject: "生", 
+                    source: "生物：排泄系統與含氮廢物", 
+                    keyPoint: "動物界各類群含氮廢物的毒性與形式", 
+                    quote: "認清事物的毒性本質，轉化為無害的結晶排出體外！", 
+                    detail: "(A)含氮廢物的來源是蛋白質(含有氮元素)，而不是醣類(僅含碳、氫、氧)；(B)臺灣黑熊是哺乳類，代謝產物是尿素；(C)臺灣藍鵲(鳥類)排出的白色物質是尿酸，尿酸毒性最低，能以固體形式排出。" 
+                },
+                { 
+                    id: 37, 
+                    ans: "C", 
+                    subject: "理", 
+                    source: "理化：密度與沉浮", 
+                    keyPoint: "物體密度與水密度的比較", 
+                    quote: "密度決定沉浮，厚實的質量終會使你穩定沉澱！", 
+                    detail: "皆沉入水中，表示密度均比水大，水密度1g/cm³，表示1cm³水質量1g，若物體下沉，則該物體密度比水大(即質量數值較體積大)。(C)選項物體密度為20/27 ≒ 0.7g/cm³，在水中不會下沉。" 
+                },
+                { 
+                    id: 38, 
+                    ans: "B", 
+                    subject: "理", 
+                    source: "理化：波的傳播", 
+                    keyPoint: "週期與介質位置的關係", 
+                    quote: "把握週期的規律，在每一次循環中回到初心！", 
+                    detail: "週期T=2s，則每經過一週期的時間，介質上P點會回到原位置，4秒為2秒的整數倍數，故經過4秒後，P點會回原位。" 
+                },
+                { 
+                    id: 39, 
+                    ans: "D", 
+                    subject: "理", 
+                    source: "理化：溶解度與飽和溶液", 
+                    keyPoint: "同溫下飽和溶液的濃度與溶解量", 
+                    quote: "相同的溫度下，擁有越大的器量，就能包容越多的知識！", 
+                    detail: "同樣20℃飽和溶液，濃度相同，而大杯的乙，水量多，溶解量也多。" 
+                },
+                { 
+                    id: 40, 
+                    ans: "A", 
+                    subject: "生", 
+                    source: "生物：體溫恆定", 
+                    keyPoint: "環境溫度對排汗量及水分恆定的影響", 
+                    quote: "揮灑汗水是為了保持冷靜，適應環境才能穩定發揮！", 
+                    detail: "(A)炎熱戶外應為甲(排汗量高)；(B)冷氣房應為丙(排汗量低)；(C)常溫應為乙(排汗量中等)；(D)排汗量的變化主要是為了維持體溫恆定，而非維持水分恆定。" 
+                },
+                { 
+                    id: 41, 
+                    ans: "B", 
+                    subject: "生", 
+                    source: "生物：體溫調節機制", 
+                    keyPoint: "微血管收縮與排汗在體溫調節的作用", 
+                    quote: "調節自我的散熱機制，在壓力中依然保持恆溫！", 
+                    detail: "(A)三種情境時，體溫都需要調節；(C)丙：皮膚微血管收縮以減少散熱；(D)甲：增加排汗增加散熱。" 
+                },
+                { 
+                    id: 42, 
+                    ans: "A", 
+                    subject: "生", 
+                    source: "生物：水分恆定", 
+                    keyPoint: "排汗量與排尿量的拮抗關係", 
+                    quote: "有失必有得，在流失與保留之間找到完美的水分平衡！", 
+                    detail: "(A)排汗多時，排尿減少，以維持水分平衡；(B)無法確定乙情境排尿的絕對量；(C)丙情境排尿量可能較多；(D)會隨排汗改變。" 
+                },
+                { 
+                    id: 43, 
+                    ans: "B", 
+                    subject: "理", 
+                    source: "理化：鹼金屬族元素", 
+                    keyPoint: "鹼金屬的物理及化學性質", 
+                    quote: "如鹼金屬般活潑耀眼，在水深火熱中依然劇烈綻放！", 
+                    detail: "依敘述中X為銀白色固體，且放入水中會劇烈反應，顯示X應為鹼金族的金屬元素。金屬元素通常具有良好的導電性、導熱性及延展性，新切面有金屬光澤，鹼金族元素則可能有放入水中上浮的情形，因此(B)是X較不可能具有的性質。" 
+                },
+                { 
+                    id: 44, 
+                    ans: "C", 
+                    subject: "理", 
+                    source: "理化：化學式與純物質", 
+                    keyPoint: "原子數目比推導化學式及化合物判定", 
+                    quote: "看透原子的組合比例，化繁為簡寫出精準的化學密碼！", 
+                    detail: "Y是元素X與氧元素反應後形成的單一新物質，含有兩種不同元素，因此屬於純物質中的化合物。題幹指出Y中X原子與氧原子的數目比為2：1，所以化學式可表示為X₂O。" 
+                },
+                { 
+                    id: 45, 
+                    ans: "B", 
+                    subject: "生", 
+                    source: "生物：植物分類與構造", 
+                    keyPoint: "單子葉植物的葉脈與維管束特徵", 
+                    quote: "平行延伸的葉脈，指引你直線衝刺的單向目標！", 
+                    detail: "(B)鬱金香具有平行脈，為單子葉植物，莖內維管束散生，且木質部在內側，韌皮部在外側。" 
+                },
+                { 
+                    id: 46, 
+                    ans: "C", 
+                    subject: "生", 
+                    source: "生物：植物的水分運輸", 
+                    keyPoint: "木質部與蒸散作用的關係", 
+                    quote: "頂天立地，向上攀升的動力源於無聲的蒸散！", 
+                    detail: "(C)木質部運送水分，而蒸散作用是植物體內水分上升的動力。" 
+                },
+                { 
+                    id: 47, 
+                    ans: "B", 
+                    subject: "生", 
+                    source: "生物：植物的蒸散作用", 
+                    keyPoint: "影響蒸散作用快慢的變因", 
+                    quote: "迎向陽光與水分，讓生命力的運轉加速！", 
+                    detail: "(A)剪掉鬱金香的葉片會使氣孔數量減少，蒸散作用變慢；(B)充足的水分和光照會使氣孔打開，蒸散作用加快；(C)黑暗中，氣孔會關閉，蒸散作用變慢；(D)葡萄糖沒有促進蒸散作用的功能。" 
+                },
+                { 
+                    id: 48, 
+                    ans: "A", 
+                    subject: "理", 
+                    source: "理化：光的折射", 
+                    keyPoint: "光速改變導致折射現象", 
+                    quote: "改變環境就改變了速度，這就是折射的真理！", 
+                    detail: "陽光經凸透鏡折射後會聚，會發生折射是因光在空氣和玻璃中光速不同。" 
+                },
+                { 
+                    id: 49, 
+                    ans: "B", 
+                    subject: "理", 
+                    source: "理化：凸透鏡成像規律", 
+                    keyPoint: "物距大於兩倍焦距的成像性質", 
+                    quote: "站得夠遠，才能看清縮小卻真實的全貌！", 
+                    detail: "圖示為蠟燭放在凸透鏡前兩倍焦距外，會在鏡後F到2F間，成倒立縮小實像，故找到清晰成像時，紙屏位在圖中丁區。" 
+                },
+                { 
+                    id: 50, 
+                    ans: "D", 
+                    subject: "理", 
+                    source: "理化：光學儀器成像比較", 
+                    keyPoint: "凸透鏡、凹透鏡與針孔成像差異", 
+                    quote: "不同的透鏡看見不同的世界，掌握本質就能選對答案！", 
+                    detail: "蠟燭位在凸透鏡焦點內，燭焰光線經凸透鏡折射成正立放大虛像；而燭焰光線經針孔所成的像是實像，燭焰光線經凹透鏡折射成正立縮小虛像，故選(D)。" 
+                }
+            ];
+
+            const filteredExamData = useMemo(() => {
+                if (subjectFilter === 'ALL') return examData;
+                return examData.filter(d => d.subject === subjectFilter);
+            }, [subjectFilter]);
+
+            const handleSearch = (id) => {
+                const num = parseInt(id);
+                if (num >= 1 && num <= 50) {
+                    setDisplayId(num);
+                    setSearchTerm('');
+                }
+            };
+
+            useEffect(() => {
+                if (displayId && resultRef.current) {
+                    const y = resultRef.current.getBoundingClientRect().top - 40; // Desktop offset
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }, [displayId]);
+
+            const result = useMemo(() => examData.find(d => d.id === displayId), [displayId]);
+
+            return (
+                <div className="min-h-screen px-4 py-12 md:py-20">
+                    <div className="max-w-6xl mx-auto">
+                        
+                        {/* 活力粗黑標題 Header */}
+                        <div className="text-center mb-24 animate__animated animate__bounceIn main-title-container">
+                            <div className="inline-block slackey text-amber-700 text-lg md:text-xl tracking-[0.2em] mb-8 px-6 md:px-8 py-2 md:py-3 bg-amber-500/10 rounded-full border-2 border-amber-500/30 shadow-sm">
+                                🚀 115 國三第一次會考模擬考 // 戰略系統
+                            </div>
+                            
+                            <h1 className="text-[55px] sm:text-[90px] md:text-[130px] leading-[0.8] mb-10 transform -rotate-2">
+                                <span className="block bold-black-style">阿豪自然</span>
+                                <div className="mt-6 md:mt-8">
+                                    <span className="cyber-gradient-pop luckiest inline-block scale-110">115-G9-1</span>
+                                    <span className="bold-black-style inline-block ml-4 md:ml-6">模</span>
+                                </div>
+                            </h1>
+                            
+                            <div className="flex justify-center items-center gap-4 md:gap-8 mt-4">
+                                <div className="h-[4px] md:h-[6px] w-16 md:w-24 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]"></div>
+                                <p className="titan text-xl md:text-3xl text-sky-700 tracking-tight uppercase">
+                                    Strategic Analysis System
+                                </p>
+                                <div className="h-[4px] md:h-[6px] w-16 md:w-24 bg-fuchsia-500 rounded-full shadow-[0_0_10px_#d946ef]"></div>
+                            </div>
+                        </div>
+
+                        {/* 搜尋、科目篩選與網格 */}
+                        <div className="max-w-5xl mx-auto mb-24 space-y-10 animate__animated animate__fadeInUp animate__delay-1s">
+                            {/* 活潑搜尋框 */}
+                            <div className="glass-panel p-2 md:p-3 shadow-xl shadow-slate-200/50 relative group overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-fuchsia-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="flex items-center p-4 md:p-6 bg-white/90 shadow-inner rounded-[2.5rem] md:rounded-[2.8rem]">
+                                    <div className="luckiest text-4xl md:text-5xl text-emerald-700 ml-4 md:ml-6">?</div>
+                                    <input 
+                                        type="number" 
+                                        placeholder="輸入題號 (1-50)" 
+                                        className="w-full bg-transparent border-none py-4 md:py-6 px-6 md:px-10 text-3xl md:text-5xl font-black text-slate-900 focus:outline-none placeholder-slate-400 luckiest"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchTerm)}
+                                    />
+                                    <button 
+                                        onClick={() => handleSearch(searchTerm)} 
+                                        className="bg-emerald-500 text-white px-10 md:px-16 py-6 md:py-8 rounded-[1.8rem] md:rounded-[2rem] luckiest text-2xl md:text-3xl hover:scale-105 active:scale-95 transition-all shadow-md shadow-emerald-200"
+                                    >
+                                        SCAN
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 科目快速切換選單 */}
+                            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                                <button 
+                                    onClick={() => setSubjectFilter('ALL')}
+                                    className={`px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl text-lg md:text-xl font-black transition-all ${subjectFilter === 'ALL' ? 'bg-sky-600 text-white shadow-[0_4px_15px_rgba(2,132,199,0.4)]' : 'bg-white shadow text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-200'}`}
+                                >
+                                    全部 (50)
+                                </button>
+                                <button 
+                                    onClick={() => setSubjectFilter('生')}
+                                    className={`px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl text-lg md:text-xl font-black transition-all ${subjectFilter === '生' ? 'bg-emerald-600 text-white shadow-[0_4px_15px_rgba(5,150,105,0.4)]' : 'bg-white shadow text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-200'}`}
+                                >
+                                    🌿 生物科 (22)
+                                </button>
+                                <button 
+                                    onClick={() => setSubjectFilter('理')}
+                                    className={`px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl text-lg md:text-xl font-black transition-all ${subjectFilter === '理' ? 'bg-amber-500 text-white shadow-[0_4px_15px_rgba(245,158,11,0.4)]' : 'bg-white shadow text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-200'}`}
+                                >
+                                    ⚡ 理化科 (28)
+                                </button>
+                            </div>
+
+                            {/* 大方題號網格 */}
+                            <div className="glass-panel p-8 md:p-14 shadow-lg shadow-slate-200/50">
+                                <div className="flex items-center justify-center gap-4 md:gap-6 mb-8 md:mb-12">
+                                    <span className="slackey text-slate-500 text-sm md:text-base tracking-widest uppercase">Select Target Unit</span>
+                                </div>
+                                <div className="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-4 md:gap-6">
+                                    {filteredExamData.map((d) => (
+                                        <button
+                                            key={d.id}
+                                            onClick={() => handleSearch(d.id)}
+                                            className={`relative h-16 md:h-24 flex flex-col items-center justify-center text-3xl md:text-4xl luckiest grid-item-lively ${
+                                                displayId === d.id ? 'grid-item-active' : 'text-slate-600'
+                                            }`}
+                                        >
+                                            <span>{d.id}</span>
+                                            <span className={`text-[10px] md:text-xs font-sans font-bold px-2 py-0.5 rounded-full mt-0.5 md:mt-1 ${d.subject === '生' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                                                {d.subject}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 詳解顯示卡片 */}
+                        <div className="min-h-[800px]">
+                            {result ? (
+                                <div 
+                                    ref={resultRef}
+                                    className="glass-panel overflow-hidden animate__animated animate__zoomInDown animate__faster shadow-2xl shadow-slate-300/60"
+                                >
+                                    <div className="bg-gradient-to-br from-slate-100 to-white p-12 md:p-20 relative">
+                                        <div className="absolute top-0 left-0 w-full h-4 md:h-5 bg-gradient-to-r from-emerald-500 via-sky-500 to-fuchsia-500 shadow-sm"></div>
+                                        
+                                        <div className="flex flex-col xl:flex-row items-center gap-12 md:gap-20">
+                                            <div className="relative floating-id">
+                                                <div className="absolute inset-0 bg-[#00ff9f] blur-[60px] md:blur-[80px] opacity-20"></div>
+                                                <div className="relative bg-white border-[8px] border-emerald-500 w-48 h-48 md:w-64 md:h-64 rounded-[3.5rem] md:rounded-[4rem] flex flex-col items-center justify-center transform rotate-[-6deg] shadow-lg shadow-emerald-200/50">
+                                                    <span className="slackey text-emerald-700 text-sm md:text-base mb-2 md:mb-3 tracking-widest uppercase">ID CODE</span>
+                                                    <span className="luckiest text-8xl md:text-[140px] text-slate-900 leading-none">#{result.id}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col items-center">
+                                                <div className="bg-fuchsia-600 text-white luckiest text-xl md:text-2xl px-8 md:px-10 py-3 rounded-full transform rotate-3 mb-[-15px] md:mb-[-20px] z-10 relative shadow-md">CORRECT ANS</div>
+                                                <div className="bg-white/50 border-[6px] border-fuchsia-500 backdrop-blur-md w-40 h-40 md:w-56 md:h-56 rounded-[3rem] md:rounded-[3.5rem] flex items-center justify-center shadow-lg shadow-fuchsia-200/50">
+                                                    <span className="luckiest text-[100px] md:text-[160px] text-slate-900 leading-none">{result.ans}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-grow text-center xl:text-left space-y-6 md:space-y-8">
+                                                <div className="flex items-center justify-center xl:justify-start gap-3 md:gap-4">
+                                                    <span className={`px-4 py-1.5 rounded-full text-sm md:text-base font-black ${result.subject === '生' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                                                        {result.subject === '生' ? '🌿 生物科' : '⚡ 理化科'}
+                                                    </span>
+                                                    <span className="bungee text-sky-700 text-lg md:text-xl tracking-[0.2em]">115-G9-1模</span>
+                                                </div>
+                                                <h4 className="text-4xl md:text-6xl font-black text-slate-900 italic tracking-tighter leading-tight">
+                                                    {result.source}
+                                                </h4>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-12 md:p-20 space-y-16 md:space-y-20 bg-white/60">
+                                        {/* 戰術深度解析區塊 (先顯示) */}
+                                        <section className="animate__animated animate__fadeInLeft">
+                                            <div className="flex items-center gap-6 md:gap-8 mb-8 md:mb-10 text-slate-600">
+                                                <div className="w-14 h-14 md:w-16 md:h-16 border-4 border-slate-400 rounded-2xl md:rounded-3xl flex items-center justify-center text-lg md:text-xl bungee">INFO</div>
+                                                <h5 className="bungee tracking-[0.2em] md:tracking-[0.3em] text-xl md:text-2xl uppercase">戰術深度解析</h5>
+                                            </div>
+                                            <div className="text-2xl md:text-4xl font-bold text-slate-800 leading-[1.8] pl-12 md:pl-16 border-l-8 border-slate-300 italic whitespace-pre-wrap">
+                                                <div className="mb-6 md:mb-8 text-sky-700 font-black bungee">【 {result.keyPoint} 】</div>
+                                                {result.detail}
+                                            </div>
+                                        </section>
+
+                                        {/* 金句區塊 (後顯示) */}
+                                        <section className="animate__animated animate__fadeInLeft animate__delay-1s">
+                                            <div className="flex items-center gap-6 md:gap-8 mb-8 md:mb-10">
+                                                <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-100 border-2 border-emerald-500 rounded-2xl md:rounded-[2rem] flex items-center justify-center text-emerald-700 font-black text-4xl md:text-5xl slackey shadow-lg shadow-emerald-200/50">!</div>
+                                                <h5 className="bungee text-emerald-700 text-2xl md:text-3xl tracking-[0.2em]">金句</h5>
+                                            </div>
+                                            <div className="text-3xl md:text-5xl font-black cyber-gradient-pop leading-[1.4] italic p-10 md:p-14 bg-white/80 rounded-[3rem] md:rounded-[4rem] border-l-[20px] md:border-l-[25px] border-emerald-500 shadow-md">
+                                                "{result.quote}"
+                                            </div>
+                                        </section>
+
+                                        <button 
+                                            onClick={() => setDisplayId(null)}
+                                            className="w-full py-12 md:py-16 mt-16 md:mt-20 rounded-[3rem] md:rounded-[4rem] bg-white/80 bungee border border-slate-300 shadow-sm text-slate-600 hover:bg-slate-50 hover:text-emerald-700 text-2xl md:text-4xl tracking-[1em] md:tracking-[1.5em] transition-all active:scale-95"
+                                        >
+                                            RELOAD SYSTEM
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-48 md:py-64 border-8 border-dashed border-slate-300 rounded-[6rem] md:rounded-[8rem] animate-pulse">
+                                    <div className="relative mb-20 md:mb-24">
+                                        <div className="absolute inset-0 blur-[100px] md:blur-[120px] bg-[#00ff9f]/10"></div>
+                                        <div className="luckiest text-[150px] md:text-[200px] text-slate-200 select-none tracking-[0.1em] md:tracking-[0.2em]">READY</div>
+                                    </div>
+                                    <h2 className="bungee text-slate-500 text-4xl md:text-5xl tracking-[1.5em] md:tracking-[2em] text-center uppercase">Standby Mode</h2>
+                                    <p className="slackey text-slate-400 text-lg md:text-xl mt-8 md:mt-10">AH-HAO SCIENCE STRATEGIC COMMAND CENTER</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-48 md:mt-56 text-center pb-24 md:pb-32 opacity-60">
+                            <div className="flex justify-center gap-6 md:gap-8 mb-12 md:mb-14">
+                                <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-emerald-500 animate-bounce shadow-sm shadow-emerald-200"></div>
+                                <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-fuchsia-500 animate-bounce delay-100 shadow-sm shadow-fuchsia-200"></div>
+                                <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-sky-500 animate-bounce delay-200 shadow-sm shadow-sky-200"></div>
+                            </div>
+                            <p className="bungee text-[18px] md:text-[20px] font-black tracking-[0.8em] md:tracking-[1em] text-slate-500">
+                                AH-HAO SCIENCE // 115-G9-1模 // STRATEGIC SYSTEM
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-1 宇宙與太陽系互動教學</title>
+    
+    <!-- 引入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 引入 Babel 用於解析 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 引入 Tailwind CSS 用於樣式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* 自定義動畫樣式 */
+        .animate-spin-slow {
+            animation: spin 20s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .stars-bg {
+            background-image: radial-gradient(white 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        /* 隱藏捲軸但保留功能 */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white m-0 p-0">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 圖示組件 (SVG) ---
+        const Rocket = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.1 2.74-2 9-2 2.07-.38 4.71-1.25 5.5-2.09C20 4.14 20.35 4.67 21 5c-.77.71-1.63 1.26-2 5.5-.38 4.74-1.25 5.9-2.09 9-.84 2.87-4 2-4 2v-5z"/></svg>
+        );
+        const Globe = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        );
+        const Zap = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        );
+        const Star = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        );
+        const ChevronRight = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>
+        );
+        const CheckCircle = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        );
+        const XCircle = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        );
+        const Trophy = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        );
+
+        // --- 資料庫 ---
+        const hierarchyData = [
+            { 
+                title: "地球 (Earth)", 
+                desc: "我們的家，行星之一。", 
+                size: "12,742 km (直徑)",
+                icon: <Globe className="w-12 h-12 text-blue-400" />
+            },
+            { 
+                title: "太陽系 (Solar System)", 
+                desc: "包含太陽、八大行星、矮行星等。", 
+                size: "直徑約 100 AU (天文單位)",
+                icon: <div className="w-12 h-12 rounded-full bg-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.6)]" />
+            },
+            { 
+                title: "銀河系 (Milky Way)", 
+                desc: "包含數千億顆恆星，太陽系位於獵戶臂。", 
+                size: "直徑約 10 萬光年 (ly)",
+                icon: <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 via-blue-500 to-white opacity-80 animate-spin-slow" />
+            },
+            { 
+                title: "宇宙 (Universe)", 
+                desc: "包含無數個星系，廣大無邊。", 
+                size: "目前可觀測範圍約 930 億光年",
+                icon: <div className="w-12 h-12 bg-black rounded-full border border-gray-700 flex items-center justify-center"><Star className="text-white w-4 h-4" /></div>
+            }
+        ];
+
+        const planetsData = [
+            { name: "水星", type: "類地", density: "大", volume: "小", component: "岩石、金屬", color: "bg-gray-400", size: 4 },
+            { name: "金星", type: "類地", density: "大", volume: "小", component: "岩石、金屬", color: "bg-yellow-600", size: 9 },
+            { name: "地球", type: "類地", density: "大", volume: "小", component: "岩石、金屬", color: "bg-blue-500", size: 10 },
+            { name: "火星", type: "類地", density: "大", volume: "小", component: "岩石、金屬", color: "bg-red-500", size: 5 },
+            { name: "木星", type: "類木", density: "小", volume: "超大", component: "氣體、冰", color: "bg-orange-300", size: 40 },
+            { name: "土星", type: "類木", density: "小", volume: "大", component: "氣體、冰", color: "bg-yellow-200", size: 35 },
+            { name: "天王星", type: "類木", density: "小", volume: "中", component: "氣體、冰", color: "bg-cyan-300", size: 25 },
+            { name: "海王星", type: "類木", density: "小", volume: "中", component: "氣體、冰", color: "bg-blue-700", size: 24 },
+        ];
+
+        // --- 子組件 ---
+        function NavButton({ active, onClick, children }) {
+            return (
+                <button
+                onClick={onClick}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    active 
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' 
+                    : 'text-slate-300 hover:text-white hover:bg-slate-600'
+                }`}
+                >
+                {children}
+                </button>
+            );
+        }
+
+        function HierarchyView() {
+            const [step, setStep] = useState(0);
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[60vh] relative overflow-hidden rounded-3xl bg-slate-800 border border-slate-700 p-8">
+                <div className="absolute inset-0 stars-bg pointer-events-none"></div>
+                
+                <div className="text-center mb-10 z-10">
+                    <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-300 to-purple-300 text-transparent bg-clip-text">
+                    我們在宇宙中的地址
+                    </h2>
+                    <p className="text-slate-400">請依序點擊下方卡片，探索從小到大的結構</p>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center gap-4 z-10 w-full justify-center">
+                    {hierarchyData.map((item, index) => (
+                    <React.Fragment key={index}>
+                        <div 
+                        onClick={() => setStep(index)}
+                        className={`
+                            relative w-full md:w-56 p-6 rounded-2xl border transition-all duration-500 cursor-pointer flex flex-col items-center text-center gap-4
+                            ${index <= step ? 'opacity-100 translate-y-0' : 'opacity-30 translate-y-4 grayscale'}
+                            ${index === step ? 'bg-indigo-900/50 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)] scale-105' : 'bg-slate-800 border-slate-600 hover:bg-slate-750'}
+                        `}
+                        >
+                        {item.icon}
+                        <div>
+                            <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                            <p className="text-xs text-indigo-300 mt-1 font-mono">{item.size}</p>
+                        </div>
+                        
+                        {index === step && (
+                            <div className="text-sm text-slate-300 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            {item.desc}
+                            </div>
+                        )}
+                        </div>
+                        
+                        {index < hierarchyData.length - 1 && (
+                        <div className={`transform transition-all duration-500 ${index < step ? 'text-indigo-500 scale-100' : 'text-slate-700 scale-75'}`}>
+                            <ChevronRight className="w-8 h-8 rotate-90 md:rotate-0" />
+                        </div>
+                        )}
+                    </React.Fragment>
+                    ))}
+                </div>
+
+                <div className="mt-12 p-4 bg-slate-900/80 rounded-lg text-sm text-slate-400 max-w-2xl text-center border border-slate-700 z-10">
+                    <span className="font-bold text-yellow-500">💡 知識點：</span>
+                    太陽系只是銀河系數千億顆恆星系統中的一個。天文單位 (AU) 用於測量太陽系內距離，光年 (ly) 用於測量恆星與星系間的距離。
+                </div>
+                </div>
+            );
+        }
+
+        function ComparisonView() {
+            const [filter, setFilter] = useState('all'); 
+            
+            const filteredPlanets = planetsData.filter(p => {
+                if (filter === 'inner') return p.type === '類地';
+                if (filter === 'outer') return p.type === '類木';
+                return true;
+            });
+
+            return (
+                <div className="space-y-8">
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold mb-2">太陽系家族點點名</h2>
+                    <p className="text-slate-400">比較八大行星的性質：類地行星 vs 類木行星</p>
+                </div>
+
+                {/* 控制器 */}
+                <div className="flex justify-center gap-4">
+                    <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-full border ${filter === 'all' ? 'bg-indigo-600 border-indigo-600' : 'border-slate-600 hover:bg-slate-800'}`}>全部顯示</button>
+                    <button onClick={() => setFilter('inner')} className={`px-4 py-2 rounded-full border ${filter === 'inner' ? 'bg-blue-600 border-blue-600' : 'border-slate-600 hover:bg-slate-800'}`}>類地行星 (內)</button>
+                    <button onClick={() => setFilter('outer')} className={`px-4 py-2 rounded-full border ${filter === 'outer' ? 'bg-orange-600 border-orange-600' : 'border-slate-600 hover:bg-slate-800'}`}>類木行星 (外)</button>
+                </div>
+
+                {/* 行星展示軌道 */}
+                <div className="relative h-[300px] bg-slate-800 rounded-3xl border border-slate-700 overflow-x-auto overflow-y-hidden flex items-center px-12 custom-scrollbar">
+                    {/* Sun (partial) */}
+                    <div className="absolute left-[-150px] top-1/2 transform -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-yellow-500 blur-sm opacity-20"></div>
+                    <div className="absolute left-[-160px] top-1/2 transform -translate-y-1/2 w-[320px] h-[320px] rounded-full bg-orange-500 opacity-80 shadow-[0_0_50px_rgba(255,165,0,0.5)] flex items-center justify-center">
+                        <span className="text-white font-bold text-4xl translate-x-[100px]">太陽</span>
+                    </div>
+
+                    <div className="flex items-end gap-8 ml-20 h-full pb-10 pt-20">
+                        {filteredPlanets.map((planet, idx) => (
+                        <div key={idx} className="flex flex-col items-center gap-3 group relative cursor-pointer min-w-[80px]">
+                            {/* 氣泡提示 */}
+                            <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 border border-slate-600 p-2 rounded text-xs w-32 z-10 pointer-events-none">
+                            <p><span className="text-slate-400">密度:</span> {planet.density}</p>
+                            <p><span className="text-slate-400">成分:</span> {planet.component}</p>
+                            </div>
+                            
+                            {/* 行星本體 */}
+                            <div 
+                            className={`${planet.color} rounded-full shadow-inner transition-transform duration-300 group-hover:scale-110 relative`}
+                            style={{ width: planet.size * 2 + 'px', height: planet.size * 2 + 'px' }}
+                            >
+                                {planet.name === '土星' && (
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] h-[40%] border-2 border-yellow-200/50 rounded-[50%] skew-x-12"></div>
+                                )}
+                            </div>
+                            
+                            {/* 名稱與分類 */}
+                            <div className="text-center">
+                            <div className="font-bold">{planet.name}</div>
+                            <div className={`text-xs px-2 py-0.5 rounded-full mt-1 ${planet.type === '類地' ? 'bg-blue-900/50 text-blue-200' : 'bg-orange-900/50 text-orange-200'}`}>
+                                {planet.type}
+                            </div>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 比較表格 */}
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-blue-900/50">
+                    <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                        <Globe className="w-5 h-5" /> 類地行星 (Terrestrial)
+                    </h3>
+                    <ul className="space-y-3 text-sm text-slate-300">
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>成員</span>
+                        <span className="font-bold text-white">水、金、地、火</span>
+                        </li>
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>主要成分</span>
+                        <span className="font-bold text-white">岩石、金屬</span>
+                        </li>
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>體積/質量</span>
+                        <span className="font-bold text-white">小</span>
+                        </li>
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>密度</span>
+                        <span className="font-bold text-white text-green-400">大 (重)</span>
+                        </li>
+                        <li className="flex justify-between">
+                        <span>位置</span>
+                        <span className="font-bold text-white">內太陽系</span>
+                        </li>
+                    </ul>
+                    </div>
+
+                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-orange-900/50">
+                    <h3 className="text-xl font-bold text-orange-400 mb-4 flex items-center gap-2">
+                        <Zap className="w-5 h-5" /> 類木行星 (Jovian)
+                    </h3>
+                    <ul className="space-y-3 text-sm text-slate-300">
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>成員</span>
+                        <span className="font-bold text-white">木、土、天、海</span>
+                        </li>
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>主要成分</span>
+                        <span className="font-bold text-white">氣體、冰</span>
+                        </li>
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>體積/質量</span>
+                        <span className="font-bold text-white">大</span>
+                        </li>
+                        <li className="flex justify-between border-b border-slate-700 pb-2">
+                        <span>密度</span>
+                        <span className="font-bold text-white text-green-400">小 (輕)</span>
+                        </li>
+                        <li className="flex justify-between">
+                        <span>位置</span>
+                        <span className="font-bold text-white">外太陽系</span>
+                        </li>
+                    </ul>
+                    </div>
+                </div>
+                </div>
+            );
+        }
+
+        function ClassificationGame() {
+            const [score, setScore] = useState(0);
+            const [currentPlanetIndex, setCurrentPlanetIndex] = useState(0);
+            const [feedback, setFeedback] = useState(null); // 'correct', 'wrong', null
+            const [isFinished, setIsFinished] = useState(false);
+            
+            const [gamePlanets, setGamePlanets] = useState([]);
+
+            useEffect(() => {
+                resetGame();
+            }, []);
+
+            const resetGame = () => {
+                setGamePlanets([...planetsData].sort(() => Math.random() - 0.5));
+                setScore(0);
+                setCurrentPlanetIndex(0);
+                setFeedback(null);
+                setIsFinished(false);
+            };
+
+            const handleGuess = (guessType) => {
+                const currentPlanet = gamePlanets[currentPlanetIndex];
+                const isCorrect = currentPlanet.type === guessType;
+
+                if (isCorrect) {
+                setScore(s => s + 10);
+                setFeedback('correct');
+                } else {
+                setFeedback('wrong');
+                }
+
+                setTimeout(() => {
+                setFeedback(null);
+                if (currentPlanetIndex < gamePlanets.length - 1) {
+                    setCurrentPlanetIndex(prev => prev + 1);
+                } else {
+                    setIsFinished(true);
+                }
+                }, 800);
+            };
+
+            if (gamePlanets.length === 0) return <div>Loading...</div>;
+
+            return (
+                <div className="flex flex-col items-center justify-center py-10">
+                
+                {!isFinished ? (
+                    <>
+                    <div className="flex justify-between w-full max-w-md mb-8 items-end">
+                        <div>
+                        <h2 className="text-2xl font-bold">行星分類挑戰</h2>
+                        <p className="text-slate-400 text-sm">請判斷這是類地還是類木行星？</p>
+                        </div>
+                        <div className="text-3xl font-mono font-bold text-yellow-400">
+                        {score} <span className="text-sm text-slate-500">分</span>
+                        </div>
+                    </div>
+
+                    <div className="relative w-full max-w-md h-64 bg-slate-800 rounded-3xl border-4 border-slate-700 flex flex-col items-center justify-center mb-8 overflow-hidden shadow-2xl">
+                        {/* 題目卡片 */}
+                        <div className={`transition-all duration-300 transform ${feedback === 'correct' ? 'scale-110 opacity-0' : feedback === 'wrong' ? 'shake bg-red-900/50' : ''}`}>
+                        <div 
+                            className={`${gamePlanets[currentPlanetIndex].color} rounded-full shadow-[inset_-10px_-10px_20px_rgba(0,0,0,0.5)] mb-4 mx-auto`}
+                            style={{ width: '100px', height: '100px' }}
+                            />
+                            <h3 className="text-3xl font-bold text-center">{gamePlanets[currentPlanetIndex].name}</h3>
+                        </div>
+
+                        {/* 反饋圖示 */}
+                        {feedback === 'correct' && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-green-500/20 backdrop-blur-sm animate-in fade-in zoom-in">
+                            <CheckCircle className="w-24 h-24 text-green-400 drop-shadow-lg" />
+                        </div>
+                        )}
+                        {feedback === 'wrong' && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-red-500/20 backdrop-blur-sm animate-in fade-in zoom-in">
+                            <div className="text-center">
+                                <XCircle className="w-24 h-24 text-red-400 drop-shadow-lg mx-auto" />
+                                <p className="font-bold text-red-200 mt-2">是 {gamePlanets[currentPlanetIndex].type}行星！</p>
+                            </div>
+                        </div>
+                        )}
+                        
+                        {/* 進度條 */}
+                        <div className="absolute bottom-0 left-0 h-1 bg-indigo-500 transition-all duration-300" style={{ width: `${((currentPlanetIndex) / 8) * 100}%` }}></div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+                        <button 
+                        onClick={() => handleGuess('類地')}
+                        disabled={feedback !== null}
+                        className="p-4 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition-colors font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                        <Globe className="w-5 h-5" /> 類地行星
+                        </button>
+                        <button 
+                        onClick={() => handleGuess('類木')}
+                        disabled={feedback !== null}
+                        className="p-4 rounded-xl bg-orange-600 hover:bg-orange-500 active:bg-orange-700 transition-colors font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                        <Zap className="w-5 h-5" /> 類木行星
+                        </button>
+                    </div>
+                    </>
+                ) : (
+                    <div className="text-center animate-in zoom-in duration-500">
+                    <Trophy className="w-24 h-24 text-yellow-400 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
+                    <h2 className="text-4xl font-bold mb-2">挑戰完成！</h2>
+                    <p className="text-xl text-slate-300 mb-8">
+                        你的得分：<span className="text-yellow-400 font-bold text-3xl">{score}</span> / 80
+                    </p>
+                    <button 
+                        onClick={resetGame}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-full font-bold shadow-lg shadow-indigo-500/50 transition-all"
+                    >
+                        再玩一次
+                    </button>
+                    </div>
+                )}
+                </div>
+            );
+        }
+
+        // --- 主組件 ---
+        function SolarSystemInteractive() {
+            const [activeTab, setActiveTab] = useState('hierarchy');
+
+            return (
+                <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-indigo-500 selection:text-white pb-10">
+                {/* 導航列 */}
+                <nav className="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 sticky top-0 z-50">
+                    <div className="max-w-5xl mx-auto px-4">
+                    <div className="flex items-center justify-between h-16">
+                        <div className="flex items-center gap-2">
+                        <Rocket className="text-indigo-400" />
+                        <span className="font-bold text-xl tracking-wide">7-1 宇宙與太陽系</span>
+                        </div>
+                        <div className="flex space-x-1 bg-slate-700/50 p-1 rounded-lg">
+                        <NavButton active={activeTab === 'hierarchy'} onClick={() => setActiveTab('hierarchy')}>宇宙地址</NavButton>
+                        <NavButton active={activeTab === 'comparison'} onClick={() => setActiveTab('comparison')}>類地 vs 類木</NavButton>
+                        <NavButton active={activeTab === 'game'} onClick={() => setActiveTab('game')}>分類挑戰</NavButton>
+                        </div>
+                    </div>
+                    </div>
+                </nav>
+
+                {/* 主要內容區 */}
+                <main className="max-w-5xl mx-auto p-4 md:p-8">
+                    {activeTab === 'hierarchy' && <HierarchyView />}
+                    {activeTab === 'comparison' && <ComparisonView />}
+                    {activeTab === 'game' && <ClassificationGame />}
+                </main>
+                
+                {/* 頁尾 */}
+                <footer className="text-center text-slate-500 text-sm py-8 border-t border-slate-800 mt-8">
+                    113學年度 國三地科 | 配合 C7.pdf 講義內容
+                </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SolarSystemInteractive />);
+    </script>
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

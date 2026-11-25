@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>熱學填空拼圖</title>
+    <style>
+        :root {
+            --primary: #e55039; /* 熱學紅 */
+            --secondary: #f6b93b;
+            --bg-color: #fdf0ef;
+            --text: #2d3436;
+        }
+
+        body {
+            font-family: '微軟正黑體', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            touch-action: pan-y; /* 允許垂直捲動 */
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 10px 0;
+            font-size: 1.6rem;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #555;
+            box-sizing: border-box;
+        }
+
+        /* 題目卡片區域 */
+        .question-card {
+            background: white;
+            width: 100%;
+            min-height: 180px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(229, 80, 57, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 4px solid var(--primary);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        /* 放置區 (空格) */
+        .drop-zone {
+            display: inline-block;
+            width: 140px;
+            height: 50px;
+            border-bottom: 4px dashed var(--primary);
+            background-color: #fff0eb;
+            vertical-align: middle;
+            margin: 0 5px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .drop-zone.highlight {
+            background-color: #ffeaa7;
+            transform: scale(1.05);
+            border-bottom-style: solid;
+        }
+
+        /* 答案庫區域 */
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding-bottom: 50px; /* 預留底部空間 */
+        }
+
+        /* 可拖曳的答案積木 */
+        .draggable-word {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: grab;
+            box-shadow: 0 4px 0 #c0392b;
+            touch-action: none; /* 禁止瀏覽器預設觸控 */
+            transition: transform 0.1s;
+            z-index: 100;
+        }
+
+        .draggable-word:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        .draggable-word.used {
+            opacity: 0.3;
+            pointer-events: none;
+            box-shadow: none;
+            transform: scale(0.9);
+            background-color: #95a5a6;
+        }
+
+        /* 正確答案填入後的樣式 */
+        .filled-word {
+            background-color: #27ae60;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            animation: popIn 0.3s;
+            box-shadow: 0 4px 0 #219150;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* 錯誤震動 */
+        .shake { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* 結算畫面 */
+        .result-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🧩 熱學填空拼圖</h1>
+    
+    <div class="status-bar">
+        <span>進度: <span id="progress">1 / 8</span></span>
+        <span>得分: <span id="score">0</span></span>
+    </div>
+
+    <div class="question-card" id="question-card">
+        <div class="question-text" id="question-text">
+            題目載入中...
+        </div>
+    </div>
+
+    <div class="word-bank" id="word-bank">
+        </div>
+</div>
+
+<div class="result-screen" id="result-screen">
+    <h1 style="font-size: 4rem; margin: 0;">🎉</h1>
+    <h2 style="color: #333;">挑戰完成！</h2>
+    <p style="font-size: 1.2rem; color: #666;" id="final-msg"></p>
+    <button class="btn" onclick="initGame()">再玩一次</button>
+</div>
+
+<script>
+    // --- 題目與答案對照表 (根據您提供的答案設計題目) ---
+    const quizData = [
+        { 
+            q: "用手觸摸來判斷溫度高低，結果通常是____的。", 
+            a: "主觀" 
+        },
+        { 
+            q: "常見的液體溫度計，是利用物質____的性質製成的。", 
+            a: "熱脹冷縮" 
+        },
+        { 
+            q: "物體受熱後，粒子的運動會變得更加____。", 
+            a: "劇烈" 
+        },
+        { 
+            q: "溫度計的玻璃管越細，代表測量的____越高。", 
+            a: "靈敏度" 
+        },
+        { 
+            q: "在攝氏溫標中，一大氣壓下水的冰點定義為____度。", 
+            a: "0" 
+        },
+        { 
+            q: "在華氏溫標中，一大氣壓下水的沸點定義為____度。", 
+            a: "212" 
+        },
+        { 
+            q: "利用兩種膨脹程度不同的金屬片製成的是____溫度計。", 
+            a: "雙金屬" 
+        },
+        { 
+            q: "耳溫槍是利用感測人體發出的____來測量體溫。", 
+            a: "紅外線" 
+        }
+    ];
+
+    let currentQIndex = 0;
+    let score = 0;
+    
+    const questionTextEl = document.getElementById('question-text');
+    const wordBankEl = document.getElementById('word-bank');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const questionCard = document.getElementById('question-card');
+    const resultScreen = document.getElementById('result-screen');
+    const finalMsg = document.getElementById('final-msg');
+
+    // 初始化遊戲
+    function initGame() {
+        currentQIndex = 0;
+        score = 0;
+        scoreEl.innerText = 0;
+        resultScreen.style.display = 'none';
+        
+        // 建立所有答案積木 (一次性建立，讓學生從中挑選)
+        setupWordBank();
+        loadQuestion();
+    }
+
+    // 建立答案庫 (包含所有答案，並打亂順序)
+    function setupWordBank() {
+        wordBankEl.innerHTML = '';
+        // 取得所有答案
+        let allAnswers = quizData.map(item => item.a);
+        
+        // 洗牌
+        allAnswers.sort(() => Math.random() - 0.5);
+
+        allAnswers.forEach(ans => {
+            const div = document.createElement('div');
+            div.className = 'draggable-word';
+            div.innerText = ans;
+            div.dataset.val = ans; // 儲存值
+            
+            // 綁定拖曳事件 (使用最新的 Pointer Events)
+            setupDraggable(div);
+            
+            wordBankEl.appendChild(div);
+        });
+    }
+
+    // 載入當前題目
+    function loadQuestion() {
+        if (currentQIndex >= quizData.length) {
+            endGame();
+            return;
+        }
+
+        const data = quizData[currentQIndex];
+        progressEl.innerText = `${currentQIndex + 1} / ${quizData.length}`;
+
+        // 將題目中的 "____" 替換成 HTML 的放置區
+        // 這裡我們直接產生含有 drop-zone 的 HTML
+        const parts = data.q.split('____');
+        questionTextEl.innerHTML = parts[0] + 
+            `<div class="drop-zone" id="target-zone"></div>` + 
+            (parts[1] || '');
+            
+        // 重置所有積木狀態 (如果之前有用過，要恢復嗎？這是不重複使用的玩法，所以不用恢復)
+        // 但為了視覺清楚，我們保持積木在下方，直到答對才標記為 used
+    }
+
+    // --- 拖曳核心邏輯 (Pointer Events) ---
+    function setupDraggable(el) {
+        let isDragging = false;
+        let startX, startY;
+        let initialLeft, initialTop;
+        let originalParent = el.parentElement;
+
+        el.addEventListener('pointerdown', (e) => {
+            if (el.classList.contains('used')) return; // 用過的不能再拖
+
+            e.preventDefault();
+            isDragging = true;
+            el.setPointerCapture(e.pointerId);
+
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            // 計算目前位置相對於 viewport
+            const rect = el.getBoundingClientRect();
+            
+            // 設定為 fixed 以便自由移動，不受父容器限制
+            el.style.position = 'fixed';
+            el.style.left = rect.left + 'px';
+            el.style.top = rect.top + 'px';
+            el.style.zIndex = 1000;
+            el.style.width = rect.width + 'px'; // 鎖定寬度
+            el.style.margin = 0;
+            
+            el.style.transition = 'none';
+        });
+
+        el.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+
+            el.style.transform = `translate(${dx}px, ${dy}px)`;
+            
+            // 碰撞檢測高亮
+            checkHover(el, e.clientX, e.clientY);
+        });
+
+        el.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            el.releasePointerCapture(e.pointerId);
+
+            // 檢查是否放置正確
+            const targetZone = document.getElementById('target-zone');
+            const isCorrect = checkDrop(el, e.clientX, e.clientY);
+
+            if (isCorrect) {
+                // 答對邏輯
+                handleCorrect(el, targetZone);
+            } else {
+                // 答錯或是沒放進去：彈回原位
+                resetDraggable(el);
+            }
+            
+            if (targetZone) targetZone.classList.remove('highlight');
+        });
+    }
+
+    function checkHover(el, x, y) {
+        const targetZone = document.getElementById('target-zone');
+        if (!targetZone) return;
+
+        const rect = targetZone.getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+            targetZone.classList.add('highlight');
+        } else {
+            targetZone.classList.remove('highlight');
+        }
+    }
+
+    function checkDrop(el, x, y) {
+        const targetZone = document.getElementById('target-zone');
+        if (!targetZone) return false;
+
+        const rect = targetZone.getBoundingClientRect();
+        // 檢查游標是否在目標區內
+        const isInside = (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
+        
+        if (isInside) {
+            // 檢查答案是否正確
+            const currentAns = quizData[currentQIndex].a;
+            if (el.dataset.val === currentAns) {
+                return true;
+            } else {
+                // 放進去了但答案錯 -> 震動提示
+                questionCard.classList.add('shake');
+                setTimeout(() => questionCard.classList.remove('shake'), 400);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    function handleCorrect(el, targetZone) {
+        // 視覺效果：填入格子
+        targetZone.innerHTML = `<div class="filled-word">${el.innerText}</div>`;
+        targetZone.style.border = 'none';
+        targetZone.style.background = 'transparent';
+
+        // 移除手上的積木 (視覺上消失或變灰)
+        el.style.display = 'none'; // 直接隱藏原本的積木
+        // 標記該詞彙已被使用 (雖然這裡是隱藏，但為了邏輯嚴謹)
+        el.classList.add('used');
+
+        score += 10;
+        scoreEl.innerText = score;
+        
+        // 播放音效或延遲進入下一題
+        setTimeout(() => {
+            currentQIndex++;
+            loadQuestion();
+        }, 800);
+    }
+
+    function resetDraggable(el) {
+        // 恢復原狀
+        el.style.transition = 'all 0.3s';
+        el.style.transform = 'translate(0, 0)';
+        
+        // 稍微延遲後取消 fixed，放回 flex 排版中
+        // 這樣才有「彈回列表」的感覺
+        el.style.position = 'relative';
+        el.style.left = 'auto';
+        el.style.top = 'auto';
+        el.style.width = 'auto';
+        el.style.zIndex = 100;
+    }
+
+    function endGame() {
+        resultScreen.style.display = 'flex';
+        if(score >= 80) finalMsg.innerText = "太強了！熱學觀念全對！💯";
+        else finalMsg.innerText = "不錯喔！再挑戰一次吧！💪";
+    }
+
+    // 啟動
+    initGame();
+
+</script>
+
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

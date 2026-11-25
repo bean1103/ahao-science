@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>114九年級第二次複習考詳解</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Microsoft JhengHei', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .explanation-text { text-align: justify; line-height: 1.8; }
+        
+        /* 隱藏滾動條但保留功能 (美觀用) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex justify-center items-start p-0 md:p-6">
+
+    <div class="w-full max-w-2xl bg-white md:rounded-3xl shadow-2xl min-h-screen md:min-h-[800px] md:h-auto relative overflow-hidden flex flex-col">
+        
+        <!-- ================= 首頁 (輸入與選題) ================= -->
+        <div id="home-screen" class="flex flex-col h-full fade-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-br from-indigo-800 to-blue-900 p-8 text-white rounded-b-[2.5rem] shadow-lg shrink-0 relative overflow-hidden">
+                <div class="absolute top-0 right-0 opacity-10 transform translate-x-6 -translate-y-6">
+                    <i class="fa-solid fa-graduation-cap text-9xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <h1 class="text-2xl font-bold tracking-wide mb-2">
+                        114九年級第二次複習考詳解
+                    </h1>
+                    <p class="text-indigo-200 text-sm font-light flex items-center">
+                        <i class="fa-solid fa-flask mr-2"></i> 自然科試題解析系統
+                    </p>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="px-6 py-6 shrink-0">
+                <label class="block text-slate-700 font-bold mb-3 text-lg ml-1">
+                    輸入題號查詢
+                </label>
+                <div class="relative shadow-md rounded-2xl">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="number" id="q-input" placeholder="例如：25" 
+                           class="w-full py-4 pl-12 pr-20 text-slate-700 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-xl transition-all"
+                           onkeypress="handleEnter(event)">
+                    <button onclick="searchQuestion()" 
+                            class="absolute right-2 top-2 bottom-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 rounded-xl transition shadow-sm active:scale-95">
+                        查詢
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Links Grid -->
+            <div class="flex-1 overflow-y-auto px-6 pb-6 no-scrollbar">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                        快速選題 (1-50)
+                    </span>
+                    <span class="text-xs text-slate-300">
+                        <i class="fa-solid fa-arrow-down"></i> 捲動更多
+                    </span>
+                </div>
+                <div class="grid grid-cols-5 gap-3" id="quick-links">
+                    <!-- JS will populate buttons -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 結果頁 (詳解顯示) ================= -->
+        <div id="result-screen" class="hidden flex-col h-full bg-slate-50 absolute inset-0 z-20">
+            
+            <!-- Result Content (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar" id="result-content">
+                
+                <!-- Top Status Bar -->
+                <div class="flex justify-between items-center mb-6">
+                    <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">
+                        第 <span id="q-num-display"></span> 題
+                    </span>
+                    <button onclick="goBack()" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Answer Card -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-4 text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-indigo-500"></div>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">正確答案</p>
+                    <p id="ans-display" class="text-7xl font-black text-indigo-600 font-mono leading-none"></p>
+                </div>
+
+                <!-- Info Cards -->
+                <div class="grid grid-cols-1 gap-3 mb-4">
+                    <!-- Topic -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 border-l-4 border-l-emerald-400">
+                        <span class="text-xs text-emerald-500 font-bold uppercase tracking-wider block mb-1">
+                            <i class="fa-solid fa-lightbulb mr-1"></i>核心知識點
+                        </span>
+                        <span id="topic-display" class="text-lg font-bold text-slate-800"></span>
+                    </div>
+                    <!-- Source -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 border-l-4 border-l-blue-400">
+                        <span class="text-xs text-blue-500 font-bold uppercase tracking-wider block mb-1">
+                            <i class="fa-solid fa-book-bookmark mr-1"></i>出處
+                        </span>
+                        <span id="source-display" class="text-sm font-medium text-slate-600"></span>
+                    </div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center border-b border-slate-100 pb-3">
+                        <span class="bg-yellow-100 text-yellow-600 w-8 h-8 flex items-center justify-center rounded-lg mr-3 text-sm">
+                            <i class="fa-solid fa-pen-nib"></i>
+                        </span>
+                        詳解說明
+                    </h3>
+                    <p id="explanation-display" class="explanation-text text-slate-600 text-lg"></p>
+                </div>
+
+                <!-- Bottom Spacer for Button -->
+                <div class="h-24"></div>
+            </div>
+
+            <!-- Floating Bottom Button -->
+            <div class="absolute bottom-0 left-0 w-full p-4 bg-white/80 backdrop-blur-md border-t border-slate-200">
+                <button onclick="goBack()" 
+                        class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl shadow-lg transform active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> 返回選題
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- 題目資料庫 (1-50題) ---
+        const examData = {
+            1: { ans: "C", source: "翰林 B1 第 6 章 協調作用", topic: "內分泌系統（甲狀腺素）", exp: "服用甲狀腺素會出現代謝變快、精神亢奮、體態消瘦等症狀。故選(C)。" },
+            2: { ans: "A", source: "翰林 B1 第 4 章 營養", topic: "消化系統（膽汁的功能）", exp: "膽汁由肝臟分泌，由導管運輸到膽囊儲存，再由導管運送到小腸作用，乳化脂質。故選(A)。" },
+            3: { ans: "C", source: "翰林 B4 第 2 章 氧化與還原", topic: "氧化反應", exp: "因高溫加速金屬箔與氧氣反應，屬於氧化反應。金屬氧化後會產生與元素本身不同的色澤。故選(C)。" },
+            4: { ans: "D", source: "翰林 B3 第 4 章 光", topic: "凸透鏡成像（眼睛的構造）", exp: "視網膜如同屏幕，凸透鏡（水晶體）在屏幕上的成像為倒立實像。故選(D)。" },
+            5: { ans: "A", source: "翰林 B1 第 2 章 生物體的組成", topic: "細胞構造與功能（粒線體）", exp: "人體細胞所需的能量由粒線體提供，而邦克列酸這個毒素會抑制粒線體的功能，造成身體細胞失去能量。故選(A)。" },
+            6: { ans: "D", source: "翰林 B3 第 4 章 光 / 第 5 章 熱", topic: "光的反射與吸收", exp: "因銀白色容易反射光線，所以傘外側的顏色若為銀白色，則可以反射太陽強光。因黑色容易吸收光線，所以傘內側的顏色若為黑色，則可以吸收太陽強光，避免光線反射而照射人體。故選(D)。" },
+            7: { ans: "D", source: "翰林 B4 第 1 章 化學反應", topic: "分解反應（小蘇打受熱）", exp: "步驟四為小蘇打粉受熱分解為碳酸鈉、二氧化碳及水的化學反應。故選(D)。" },
+            8: { ans: "A", source: "翰林 B2 第 1 章 生殖", topic: "減數分裂與配子形成", exp: "葉片細胞屬於體細胞，染色體為雙套。花粉中的雄配子因已經過減數分裂，染色體數量是減半且不成對的，因此形成 10 條、不成對、單套的染色體。故選(A)。" },
+            9: { ans: "D", source: "翰林 B1 第 5 章 體內物質的運輸與恆定", topic: "呼吸運動（胸腔變化）", exp: "「哈」為吸氣，胸腔變化為橫膈下降、肋骨上升；「啾」為呼氣，胸腔變化為橫膈上升、肋骨下降。故選(D)。" },
+            10: { ans: "D", source: "翰林 B2 第 3 章 生物的分類", topic: "原核生物界 vs 真菌界", exp: "兩者均無葉綠體；金黃色葡萄球菌無菌絲、無細胞核，但青黴菌有菌絲、有細胞核。故選(D)。" },
+            11: { ans: "D", source: "翰林 B3 第 2 章 物質的世界", topic: "密度與浮力", exp: "由圖判斷，同體積中，質量的大小排序為：丙＞乙＞甲，推論密度大小為：丙＞乙＞甲，且乙為酒精，所以密度大的丙為沉體，密度小的甲為浮體。故選(D)。" },
+            12: { ans: "C", source: "翰林 B2 第 3 章 生物的分類", topic: "分類階層", exp: "三者都屬於熊科，但分別屬於 2 個屬，故三者在界、門、綱、目、科的分類階層相同。故選(C)。" },
+            13: { ans: "B", source: "翰林 B1 第 1 章 顯微鏡的使用", topic: "顯微鏡倍率計算與視野變化", exp: "放大倍率的計算方式為目鏡 × 物鏡，原以 15 × 10＝150 倍，後為 10 × 40＝400 倍。調高倍率後，視野中細胞數量會變少，視野會變暗。故選(B)。" },
+            14: { ans: "C", source: "翰林 B2 第 1 章 生殖", topic: "開花植物的有性生殖", exp: "甲是雄蕊，乙是雌蕊的柱頭，丙是子房，丁是胚珠。授粉後會發育成果實（莢果），即為子房。故選(C)。" },
+            15: { ans: "D", source: "翰林 B3 第 3 章 波動與聲音", topic: "頻率與波形", exp: "頻率是指振源或介質在一秒內振動的次數。由圖可知，頻率大小為甲＜乙＜丙，又由表格可知，音叉 x＝400 Hz，音叉 y＝200 Hz，音叉 z＝100 Hz，所以丙為 x，乙為 y，甲為 z。故選(D)。" },
+            16: { ans: "C", source: "翰林 B4 第 5 章 物質的構造", topic: "原子結構", exp: "(A)由題目可知，此為帶正電的粒子，故質子數＞電子數＝5，可推論●為質子；(B)此粒子的原子序為 6；(D)圖中符號△代表電子，且質量最小。" },
+            17: { ans: "B", source: "翰林 B1 第 3 章 運輸", topic: "植物維管束構造", exp: "甲是木質部，乙是韌皮部，丙是表皮。韌皮部位於維管束外側，負責運輸有機養分。故選(B)。" },
+            18: { ans: "D", source: "翰林 B3 第 2 章 物質的世界", topic: "溶解度", exp: "40 °C 時溶液為飽和溶液；60 °C 時溶液的狀態可能為恰好飽和或者為未飽和溶液。故選(D)。" },
+            19: { ans: "B", source: "翰林 B4 第 4 章 有機化合物", topic: "有機化合物的性質", exp: "(A)麵粉反應後仍有黑色碳粒產生，可判斷其為有機化合物；(B)灰石粉加熱無法得到黑色的碳，所以灰石粉不是有機化合物；(C)(D)由表格數據可知，應使用碎冰糖取代糖粉可以得到最長的碳蛇。故選(B)。" },
+            20: { ans: "B", source: "翰林 B1 第 4 章 營養", topic: "食物中養分的測定", exp: "豆漿加碘液後呈藍黑色，代表含有澱粉，鮮奶加碘液後呈黃褐色，則代表不含澱粉；糖濃度由低至高可讓本氏液呈綠色→黃色→橙色→紅色，愈接近紅色代表含糖量愈多。故選(B)。" },
+            21: { ans: "A", source: "翰林 B4 第 3 章 反應速率與平衡", topic: "影響反應速率的因素（接觸面積）", exp: "碳酸鈣粉末的顆粒較小，與鹽酸的接觸面積較大，反應速率較快，所以能夠用(甲)、(乙)的圖示看出其差異。故選(A)。" },
+            22: { ans: "D", source: "翰林 B1 第 5 章 體內物質的運輸與恆定", topic: "排泄系統（含氮廢物）", exp: "甲為肝臟，可將氨轉換為尿素；乙為腎臟，可將尿素過濾形成尿液。故選(D)。" },
+            23: { ans: "C", source: "翰林 B1 第 6 章 協調作用", topic: "神經傳導路徑（受器與動器）", exp: "(A)二氧化碳對蚊子而言是刺激；(B)動器為腺體或肌肉，仁華呼氣的動器應為胸腔肌肉及橫膈；肺臟無肌肉，不屬於動器；(D)蚊子觸角為受器。" },
+            24: { ans: "C", source: "翰林 B4 第 2 章 氧化與還原", topic: "金屬活性大小", exp: "(A)鎂的活性比銅大，故鎂會與氧化銅反應，所以甲應為○；(B)鎂與未知金屬氧化物會反應，而鈉的活性比鎂大，則鈉也會與此氧化物反應，所以乙應為○；(C)(D)鎂的活性大於銅和未知金屬，但無法得知銅與未知金屬間的活性大小，所以丙有可能為╳或○。故選(C)。" },
+            25: { ans: "B", source: "翰林 B2 第 5 章 生態系", topic: "能量金字塔", exp: "(A)甲階層的生物體內所含毒素濃度最高；(C)丙階層約有 1/10 的能量向上傳遞到乙階層；(D)傳遞到甲階層的能量不可循環利用回到丙階層。" },
+            26: { ans: "A", source: "翰林 B3 第 5 章 熱", topic: "熱平衡", exp: "(A)達熱平衡時，兩者溫度相等，皆為 50 °C；(B)因熱水的溫度變化較小，所以質量較冷水大；(C)因沒有熱量散失，所以熱水放出的熱量等於冷水吸收的熱量；(D)熱水降溫 10 °C，冷水升溫 30 °C，所以冷水的溫度變化較大。故選(A)。" },
+            27: { ans: "D", source: "翰林 B2 第 3 章 生物的分類", topic: "植物界（被子植物）", exp: "(A)具有果實，故屬於被子植物；(B)果實為生殖器官；(C)一個胚珠能發育出一顆種子。" },
+            28: { ans: "A", source: "翰林 B3 第 4 章 光", topic: "光的折射", exp: "在水中，人體反射光線後，光線從水中進入空氣中時，光速變快，折射光偏離法線，因此眼中所看見人體在水中的位置，非真實位置，因此產生頭與身體分離的視覺效果。故選(A)。" },
+            29: { ans: "C", source: "翰林 B2 第 5 章 生態系", topic: "生物放大作用", exp: "由食物來源可知食物鏈為：稻→蟲→麻雀→蛇，而根據生物放大作用，麻雀的重金屬含量濃度為次多。故選(C)。" },
+            30: { ans: "A", source: "翰林 B4 第 4 章 有機化合物", topic: "聚合物（熱塑性）", exp: "因聚丙烯酸鈉的分子量極大，其化學式中含 C 原子，且為鏈狀結構，所以屬於熱塑性有機聚合物。故選(A)。" },
+            31: { ans: "C", source: "翰林 B4 第 5 章 物質的構造", topic: "元素週期表", exp: "(C)從週期表中無法得知元素在自然界中的含量。" },
+            32: { ans: "A", source: "翰林 B3 第 5 章 熱", topic: "加熱曲線與物質三態", exp: "(A)固液共存時的溫度為 80 °C，所以熔點為 80 °C；(B)由圖形中看不出沸點溫度；(C)液態時比熱＞固態時比熱；(D)由圖形中看不出氣態時比熱。故選(A)。" },
+            33: { ans: "B", source: "翰林 B3 第 3 章 波動與聲音", topic: "波速公式", exp: "傳播速率＝頻率 × 波長，同一介質傳播速率固定，頻率與波長成反比，若擺動頻率由 f 改為 2f，波長會變為原來的 0.5 倍，原波長＝200÷2＝100 公分，新波長 λ＝100 × 0.5＝50 公分。故選(B)。" },
+            34: { ans: "D", source: "翰林 B2 第 2 章 遺傳", topic: "人類遺傳與染色體", exp: "(A)人類體細胞所含的染色體數目為 46 條；(B)體細胞所含的染色體均為雙套；(C)男生及女生體細胞的性染色體數目均為 2 條；(D)龍鳳胎為異卵雙生，異卵雙生由不同的卵與不同的精子結合，故遺傳因子組合不同。故選(D)。" },
+            35: { ans: "B", source: "翰林 B2 第 2 章 遺傳", topic: "性狀表現（環境影響）", exp: "(A)(D)根據題意，韭菜花是韭菜的花，而韭黃的產生是由韭菜經過避光的培植手法而種植出來，過程中並沒有進行有性生殖的遺傳重組或突變；(C)三者同種，都是韭菜，只是培植手法及食用部位不同。" },
+            36: { ans: "C", source: "翰林 B2 第 2 章 遺傳", topic: "孟德爾遺傳法則", exp: "(A)兩隻黑身果蠅交配後產下的後代都是黑身，可能是顯性與顯性交配（GG × GG）或隱性與隱性交配（gg × gg），無法確認黑身是顯性或隱性；(B)兩隻灰身果蠅交配若產下灰身後代，可能是顯性與顯性交配或隱性與隱性交配，無法確認灰身是顯性或隱性；(C)若灰身為隱性，則隱性雙親不會產下顯性（黑身）後代，除非發生突變；(D)黑身和灰身果蠅交配產下的後代是黑身與灰身比例約為 1：1，應該是 Gg（顯性）與 gg（隱性）交配，但無法確認黑身就是顯性。故選(C)。" },
+            37: { ans: "B", source: "翰林 B4 第 6 章 力與壓力", topic: "靜摩擦力", exp: "因為物體靜止不動，所以無論 F＝3 kgw 或 F＝4 kgw，摩擦力的大小皆等於物體重量 2 kgw，方向向上。故選(B)。" },
+            38: { ans: "A", source: "翰林 B4 第 4 章 反應速率與平衡", topic: "影響反應速率的因素（酸鹼性）", exp: "碳酸鈣與酸性水溶液作用會產生二氧化碳氣體，餐後胃液分泌增加，酸性更強，反應速率更快。因胃液是酸性的，[H⁺]＞[OH⁻] 且 pH＜7，所以小萍與小智的看法皆正確。故選(A)。" },
+            39: { ans: "D", source: "翰林 B4 第 4 章 反應速率與平衡", topic: "化學平衡（勒沙特列原理）", exp: "(A) [OH⁻] 增加，[H⁺] 減少，使平衡向右移動，C₂₇H₂₇Br₂O₅S⁻ 增加，水溶液的顏色偏藍色；(B)達平衡時，水溶液的顏色由各物質含量決定，仍含 C₂₇H₂₇Br₂O₅S⁻；(C)達平衡時，各物質的濃度維持定值，不一定相等；(D) [H⁺] 增加，使平衡向左移動，C₂₇H₂₈Br₂O₅S 增加，水溶液的顏色偏黃色。故選(D)。" },
+            40: { ans: "C", source: "翰林 B1 第 4 章 營養", topic: "酵素（溫度影響）", exp: "低溫處理並不會使酵素完全喪失活性；高溫會使酵素喪失活性，且不可恢復。故選(C)。" },
+            41: { ans: "A", source: "翰林 B2 第 3 章 生物的分類", topic: "脊椎動物分類", exp: "(A)由入口到達出口的最短路徑中，需經過用肺呼吸和內溫動物兩種生物特性，由此判斷為白頭翁；(B)紅火蟻為外溫動物，具有外骨骼；(C)彈塗魚為外溫動物，用鰓呼吸；(D)臺北樹蛙為外溫動物，用皮膚及肺呼吸。故選(A)。" },
+            42: { ans: "B", source: "翰林 B3 第 2 章 物質的世界", topic: "濃度計算（ppm）", exp: "鎂離子的最佳濃度為 20 ppm，所以最佳含量為 2000 g × (20/1000000) ＝0.04 g＝40 mg。故選(B)。" },
+            43: { ans: "C", source: "翰林 B4 第 1 章 化學反應", topic: "化學計量", exp: "從題幹中反應描述可寫出反應式，10 個三氯蔗糖分子會需要 10 個蔗糖分子和 6 個五氯化磷分子。故選(C)。" },
+            44: { ans: "B", source: "翰林 B1 第 3 章 運輸", topic: "滲透作用（質離現象）", exp: "由甲圖變成乙圖，是植物細胞因滲透作用導致細胞脫水（放入高張溶液中）。故選(B)。" },
+            45: { ans: "D", source: "翰林 B2 第 4 章 生態系", topic: "族群數量的估算（捉放法）", exp: "第一年估計值算法：20/X ＝ 18/50，X ≒ 55.5 隻，依同法計算第二年 62.5 隻、第三年 83 隻、第四年 100 隻、第五年 125 隻，族群數量逐年增加，推測環境相對有利。故選(D)。" },
+            46: { ans: "A", source: "翰林 B4 第 6 章 力與壓力", topic: "浮力", exp: "由圖可知，A、B 兩物體等重，B 物體的密度小於 A 物體的密度，所以 B 物體的體積大於 A 物體的體積。在水中，A 物體的浮力小於 A 物體的重量，B 物體的浮力等於 B 物體的重量，所以 B 物體的浮力大於 A 物體的浮力；在酒精中，A、B 兩物體皆為沉體，浮力＝物體在液體中的體積 × 液體的密度，因 B 物體的體積較大，所以 B 物體的浮力大於 A 物體的浮力。故選(A)。" },
+            47: { ans: "B", source: "翰林 B1 第 3 章 運輸", topic: "淋巴循環", exp: "淋巴會由大靜脈回收至血液循環中。故選(B)。" },
+            48: { ans: "C", source: "翰林 B1 第 1 章（科學方法與尺度）", topic: "微觀尺度", exp: "(A)(B)(C)題幹提及奈米脂球大約是原核細胞的五分之一大，因此奈米脂球比大腸桿菌小。題幹又提到奈米脂球包覆著聚合物（核糖核酸），所以比氫原子、水分子大；(D) 0.1 微米＝100 奈米。故選(C)。" },
+            49: { ans: "A", source: "翰林 B3/B4 實驗器材", topic: "實驗操作（薊頭漏斗）", exp: "使用滴管吸取適量鹽酸加入薊頭漏斗中較合適（避免直接傾倒噴濺，且可控制量）。故選(A)。" },
+            50: { ans: "B", source: "翰林 B4 第 3 章 電解質與酸鹼鹽", topic: "電解質的導電性", exp: "乙濾液中含有 CaCl₂ 電解質，可導電，所以燈泡會發亮。故選(B)。" }
+        };
+
+        // --- 初始化快速連結按鈕 (1-50) ---
+        function initQuickLinks() {
+            const container = document.getElementById('quick-links');
+            const keys = Array.from({length: 50}, (_, i) => i + 1);
+            
+            container.innerHTML = keys.map(num => 
+                `<button onclick="searchQuestion(${num})" 
+                         class="w-full aspect-square flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl text-lg font-medium text-slate-600 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition shadow-sm">
+                    ${num}
+                 </button>`
+            ).join('');
+        }
+
+        // --- 搜尋邏輯 (切換畫面) ---
+        function searchQuestion(num) {
+            let qNum = num;
+            if (!qNum) {
+                const input = document.getElementById('q-input');
+                qNum = parseInt(input.value.trim());
+            }
+
+            if (!qNum) return;
+
+            const data = examData[qNum];
+
+            if (data) {
+                // 填入資料
+                document.getElementById('q-num-display').innerText = qNum;
+                document.getElementById('ans-display').innerText = data.ans;
+                document.getElementById('topic-display').innerText = data.topic;
+                document.getElementById('source-display').innerText = data.source;
+                document.getElementById('explanation-display').innerText = data.exp;
+
+                // 切換畫面
+                document.getElementById('home-screen').classList.add('hidden');
+                document.getElementById('result-screen').classList.remove('hidden');
+                document.getElementById('result-screen').classList.add('flex');
+                
+                // 捲動到頂部
+                document.getElementById('result-content').scrollTop = 0;
+            } else {
+                alert(`查無第 ${qNum} 題的資料。\n(目前已收錄 1-50 題)`);
+            }
+        }
+
+        // --- 返回首頁 ---
+        function goBack() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('flex');
+            document.getElementById('home-screen').classList.remove('hidden');
+            
+            // 清空輸入框並聚焦
+            const input = document.getElementById('q-input');
+            input.value = '';
+            input.focus();
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                searchQuestion();
+            }
+        }
+
+        // 啟動
+        initQuickLinks();
+
+    </script>
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

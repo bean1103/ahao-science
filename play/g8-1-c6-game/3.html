@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>理化分類工廠</title>
+    <style>
+        :root {
+            --phy-color: #3498db; /* 物理-藍色 */
+            --chem-color: #e74c3c; /* 化學-紅色 */
+            --bg-color: #f7f9fc;
+        }
+
+        body {
+            font-family: '微軟正黑體', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* 防止拖曳時捲動 */
+            box-sizing: border-box;
+            touch-action: none; /* 禁止瀏覽器預設觸控行為 */
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin: 5px 0;
+            font-size: 1.5rem;
+        }
+
+        .score-bar {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* 題目區 (等待被拖曳的卡片) */
+        .source-area {
+            flex: 1;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 20px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .draggable-item {
+            padding: 15px 30px;
+            background: white;
+            border: 2px solid #2c3e50;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: grab;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            user-select: none;
+            position: absolute; /* 絕對定位以便自由拖曳 */
+            touch-action: none;
+            transition: transform 0.1s;
+            z-index: 100;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* 籃子區域 */
+        .baskets-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            height: 220px;
+        }
+
+        .basket {
+            flex: 1;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 20px;
+            transition: all 0.3s;
+            position: relative;
+            border-width: 4px;
+            border-style: solid;
+            background: rgba(255,255,255,0.8);
+        }
+
+        .basket-phy {
+            border-color: var(--phy-color);
+            color: var(--phy-color);
+        }
+
+        .basket-chem {
+            border-color: var(--chem-color);
+            color: var(--chem-color);
+        }
+        
+        /* 籃子標題 */
+        .basket-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            pointer-events: none; /* 讓字不會擋住拖曳偵測 */
+        }
+        
+        .basket-icon {
+            font-size: 4rem;
+            margin-top: 10px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* 拖曳時籃子的高亮效果 */
+        .basket.highlight {
+            background-color: rgba(255,255,255,1);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .basket-phy.highlight { background-color: #ebf5fb; }
+        .basket-chem.highlight { background-color: #fdedec; }
+
+        /* 錯誤震動動畫 */
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        /* 結算畫面 */
+        .result-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>🧪 理化分類工廠</h1>
+    
+    <div class="score-bar">
+        <span>剩餘題目: <span id="remaining">10</span></span>
+        <span>得分: <span id="score">0</span></span>
+    </div>
+
+    <div class="source-area" id="source-zone">
+        <div style="color:#aaa; font-style:italic;">準備發牌...</div>
+    </div>
+
+    <div class="baskets-container">
+        <div class="basket basket-phy" id="basket-phy">
+            <div class="basket-title">物理變化</div>
+            <div class="basket-icon">❄️</div>
+        </div>
+        <div class="basket basket-chem" id="basket-chem">
+            <div class="basket-title">化學變化</div>
+            <div class="basket-icon">🔥</div>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h1 style="font-size:3rem; margin-bottom:10px;">🎉 分類完成！</h1>
+        <p style="font-size:1.5rem;" id="final-msg">你的觀念非常清晰！</p>
+        <button class="btn" onclick="initGame()">再玩一次</button>
+    </div>
+
+<script>
+    // --- 題目資料庫 ---
+    // type: 'phy' (物理) 或 'chem' (化學)
+    const allItems = [
+        { text: "水結成冰", type: "phy" },
+        { text: "糖溶於水", type: "phy" },
+        { text: "酒精揮發", type: "phy" },
+        { text: "切割金屬", type: "phy" },
+        { text: "粉筆折斷", type: "phy" },
+        { text: "熱漲冷縮", type: "phy" },
+        { text: "燈泡發光", type: "phy" }, // 鎢絲受熱發光，物理
+        { text: "鐵生鏽", type: "chem" },
+        { text: "紙張燃燒", type: "chem" },
+        { text: "光合作用", type: "chem" },
+        { text: "牛奶變酸", type: "chem" },
+        { text: "呼吸作用", type: "chem" },
+        { text: "煙火爆炸", type: "chem" },
+        { text: "煎蛋", type: "chem" } // 蛋白質變性
+    ];
+
+    let gameItems = [];
+    let currentItemIndex = 0;
+    let score = 0;
+    let currentDraggable = null; // 當前正在拖曳的 DOM 元素
+
+    // DOM 元素
+    const sourceZone = document.getElementById('source-zone');
+    const basketPhy = document.getElementById('basket-phy');
+    const basketChem = document.getElementById('basket-chem');
+    const scoreEl = document.getElementById('score');
+    const remainingEl = document.getElementById('remaining');
+    const resultScreen = document.getElementById('result-screen');
+
+    function initGame() {
+        // 洗牌並取出前 10 題 (避免每次都一樣)
+        gameItems = [...allItems].sort(() => Math.random() - 0.5).slice(0, 10);
+        currentItemIndex = 0;
+        score = 0;
+        
+        scoreEl.innerText = score;
+        resultScreen.style.display = 'none';
+        
+        spawnNextItem();
+    }
+
+    function spawnNextItem() {
+        // 清空並檢查是否結束
+        sourceZone.innerHTML = '';
+        remainingEl.innerText = gameItems.length - currentItemIndex;
+
+        if (currentItemIndex >= gameItems.length) {
+            endGame();
+            return;
+        }
+
+        const itemData = gameItems[currentItemIndex];
+        
+        // 建立卡片
+        const el = document.createElement('div');
+        el.className = 'draggable-item';
+        el.innerText = itemData.text;
+        el.dataset.type = itemData.type; // 綁定答案
+        
+        // 設定初始位置 (居中)
+        el.style.left = '50%';
+        el.style.top = '50%';
+        el.style.transform = 'translate(-50%, -50%)';
+
+        // 綁定拖曳事件 (滑鼠 + 觸控)
+        setupDragEvents(el);
+
+        sourceZone.appendChild(el);
+        currentDraggable = el;
+    }
+
+    // --- 核心拖曳邏輯 (相容 Mobile/PC) ---
+    function setupDragEvents(el) {
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        // 共用的開始拖曳函式
+        const startDrag = (e) => {
+            isDragging = true;
+            // 取得游標/手指座標
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            startX = clientX;
+            startY = clientY;
+            
+            // 取得目前 CSS left/top 值
+            const rect = el.getBoundingClientRect();
+            // 我們需要相對於 sourceZone 的偏移量，或是直接用 transform 移動
+            // 這裡採用 transform translate 的方式移動，比較順暢
+            el.style.transition = 'none'; // 拖曳時移除過渡動畫
+        };
+
+        // 共用的移動函式
+        const moveDrag = (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // 防止滾動螢幕
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+
+            // 移動卡片
+            el.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+
+            // 碰撞檢測 (Highlight 籃子)
+            checkHover(el);
+        };
+
+        // 共用的結束拖曳函式
+        const endDrag = (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            el.style.transition = 'transform 0.3s'; // 恢復彈回動畫
+
+            // 檢查是否投進籃子
+            const result = checkDrop(el);
+            
+            if (result === 'correct') {
+                // 答對動畫 (縮小並消失)
+                el.style.transform = 'scale(0)';
+                el.style.opacity = '0';
+                score += 10;
+                scoreEl.innerText = score;
+                setTimeout(() => {
+                    currentItemIndex++;
+                    spawnNextItem();
+                }, 300);
+            } else if (result === 'wrong') {
+                // 答錯：籃子震動，卡片彈回
+                const targetBasket = el.dataset.type === 'phy' ? basketChem : basketPhy; // 這是他投錯的那個籃子
+                targetBasket.classList.add('shake');
+                setTimeout(() => targetBasket.classList.remove('shake'), 500);
+                
+                // 彈回原位
+                el.style.transform = 'translate(-50%, -50%)';
+            } else {
+                // 沒投進任何籃子：彈回原位
+                el.style.transform = 'translate(-50%, -50%)';
+            }
+
+            // 清除高亮
+            basketPhy.classList.remove('highlight');
+            basketChem.classList.remove('highlight');
+        };
+
+        // 滑鼠事件
+        el.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', moveDrag);
+        document.addEventListener('mouseup', endDrag);
+
+        // 觸控事件
+        el.addEventListener('touchstart', startDrag, {passive: false});
+        document.addEventListener('touchmove', moveDrag, {passive: false});
+        document.addEventListener('touchend', endDrag);
+    }
+
+    // 檢查卡片目前是否懸停在某個籃子上
+    function checkHover(el) {
+        const itemRect = el.getBoundingClientRect();
+        const phyRect = basketPhy.getBoundingClientRect();
+        const chemRect = basketChem.getBoundingClientRect();
+
+        // 簡單的碰撞檢測：看卡片中心點是否在籃子內
+        const itemCenterX = itemRect.left + itemRect.width / 2;
+        const itemCenterY = itemRect.top + itemRect.height / 2;
+
+        const inPhy = isInside(itemCenterX, itemCenterY, phyRect);
+        const inChem = isInside(itemCenterX, itemCenterY, chemRect);
+
+        if (inPhy) {
+            basketPhy.classList.add('highlight');
+            basketChem.classList.remove('highlight');
+        } else if (inChem) {
+            basketChem.classList.add('highlight');
+            basketPhy.classList.remove('highlight');
+        } else {
+            basketPhy.classList.remove('highlight');
+            basketChem.classList.remove('highlight');
+        }
+    }
+
+    // 檢查放置結果
+    function checkDrop(el) {
+        const itemRect = el.getBoundingClientRect();
+        const phyRect = basketPhy.getBoundingClientRect();
+        const chemRect = basketChem.getBoundingClientRect();
+        const itemCenterX = itemRect.left + itemRect.width / 2;
+        const itemCenterY = itemRect.top + itemRect.height / 2;
+        const correctType = el.dataset.type;
+
+        if (isInside(itemCenterX, itemCenterY, phyRect)) {
+            return correctType === 'phy' ? 'correct' : 'wrong';
+        } else if (isInside(itemCenterX, itemCenterY, chemRect)) {
+            return correctType === 'chem' ? 'correct' : 'wrong';
+        }
+        return 'none';
+    }
+
+    function isInside(x, y, rect) {
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    }
+
+    function endGame() {
+        resultScreen.style.display = 'flex';
+        const finalMsg = document.getElementById('final-msg');
+        if (score === 100) finalMsg.innerText = "太神了！你是分類大師！🏆";
+        else if (score >= 80) finalMsg.innerText = "非常棒！觀念很清楚！✨";
+        else finalMsg.innerText = "不錯喔！再玩一次挑戰滿分！💪";
+    }
+
+    // 啟動
+    initGame();
+
+</script>
+
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

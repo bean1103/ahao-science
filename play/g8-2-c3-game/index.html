@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化學反應：電解質與酸鹼鹽挑戰</title>
+    <style>
+        :root {
+            /* 酸鹼風格：石蕊紫配試紙黃 */
+            --primary-color: #6c5ce7; 
+            --secondary-color: #a29bfe;
+            --accent-color: #fdcb6e;
+            --bg-color: #f3e5f5; /* 淡淡的淺紫背景 */
+            --card-bg: #ffffff;
+            --text-color: #2d3436;
+        }
+
+        body {
+            font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#e056fd 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 嵌入高度優化 */
+            min-height: 90vh; 
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-color);
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(108, 92, 231, 0.15);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: 6px solid var(--primary-color);
+        }
+
+        /* 進度條 */
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #dfe6e9;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.05);
+        }
+
+        .score-board {
+            font-size: 1.2rem;
+            color: #636e72;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            background: #f1f2f6;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 50px;
+        }
+
+        .question-box {
+            font-size: 1.3rem;
+            font-weight: 600;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            padding: 20px;
+            background: #f8f8ff;
+            border-radius: 15px;
+            border: 2px dashed #a29bfe;
+            color: #2d3436;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .btn {
+            border: none;
+            padding: 15px 0;
+            font-size: 1.8rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 130px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-true {
+            background-color: #fff;
+            border: 3px solid #00b894;
+            color: #00b894;
+        }
+
+        .btn-false {
+            background-color: #fff;
+            border: 3px solid #d63031;
+            color: #d63031;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-true:hover { background-color: #e3fdf5; }
+        .btn-false:hover { background-color: #fff0f0; }
+
+        /* 回饋區塊 */
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.4s;
+            text-align: left;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .feedback.correct {
+            background-color: #dff9fb;
+            color: #00cec9;
+            border-left: 5px solid #00cec9;
+        }
+        .feedback.wrong {
+            background-color: #ffeaa7;
+            color: #d35400;
+            border-left: 5px solid #d35400;
+        }
+
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background-color: #4834d4;
+        }
+
+        .result-screen {
+            display: none;
+        }
+        
+        /* 燒杯氣泡動畫 */
+        .lab-anim {
+            font-size: 5rem;
+            margin: 20px 0;
+            display: inline-block;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- 遊戲進行畫面 -->
+    <div id="quiz-screen">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <h1>⚗️ 酸鹼電解質大挑戰</h1>
+        <div class="score-board">目前得分: <span id="score">0</span></div>
+        
+        <div class="question-box">
+             <span id="question-text">題目載入中...</span>
+        </div>
+
+        <div class="btn-container" id="options">
+            <button class="btn btn-true" onclick="checkAnswer(true)">
+                <span>⭕</span> 對
+            </button>
+            <button class="btn btn-false" onclick="checkAnswer(false)">
+                <span>❌</span> 錯
+            </button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">下一題 ➜</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="result-screen" class="result-screen">
+        <h1>挑戰完成！</h1>
+        <div class="lab-anim">⚗️</div>
+        <h2 id="final-score" style="font-size: 2.5rem; color: var(--text-color);"></h2>
+        <p id="comment" style="font-size: 1.2rem; color: #666;"></p>
+        <button class="btn" style="background:var(--primary-color); color:white; border:none; margin-top:20px; width: auto; padding: 12px 30px;" onclick="restartGame()">再試一次</button>
+    </div>
+</div>
+
+<script>
+    // --- 題目資料 ---
+    let questions = [
+        {
+            q: "銅線可以導電，所以銅線是電解質；食鹽晶體（固體）不能導電，所以食鹽不是電解質。",
+            a: false,
+            explain: "【錯誤】電解質是指「化合物」溶於水或熔融狀態能導電者。銅是元素（金屬），不是電解質；食鹽（氯化鈉）雖固體不導電，但溶於水可導電，故「是」電解質。"
+        },
+        {
+            q: "電解質溶於水解離時，溶液中「陽離子的總個數」必定等於「陰離子的總個數」，才能保持溶液呈電中性。",
+            a: false,
+            explain: "【錯誤】溶液呈電中性是因為「陽離子的總電荷量」等於「陰離子的總電荷量」，而非個數相等（例如 CaCl₂ 解離，Cl⁻ 個數是 Ca²⁺ 的兩倍）。"
+        },
+        {
+            q: "稀釋濃硫酸時，為了避免發生危險，應將水緩緩沿著玻璃棒倒入濃硫酸中，並加以攪拌。",
+            a: false,
+            explain: "【錯誤】稀釋濃硫酸會產生大量的熱，正確操作應為「將濃硫酸緩緩加入水中」，若將水加入酸中，水會瞬間沸騰噴濺傷人。"
+        },
+        {
+            q: "將鎂帶放入稀鹽酸中，會產生氣泡，此氣體具有可燃性，點火會發出爆鳴聲。",
+            a: true,
+            explain: "【正確】活性大的金屬（如鎂、鋅）與酸反應，會產生氫氣（H₂），氫氣具可燃性。"
+        },
+        {
+            q: "氨氣（NH₃）雖然分子式中不含氫氧根（OH⁻），但溶於水後會解離出氫氧根離子，使溶液呈鹼性，可讓紅色石蕊試紙變藍。",
+            a: true,
+            explain: "【正確】氨氣溶於水形成氨水（NH₄OH），會解離出 NH₄⁺ 和 OH⁻，故呈弱鹼性。"
+        },
+        {
+            q: "pH 值是用來表示溶液酸鹼程度的數值，pH = 1 的鹽酸溶液，其氫離子濃度是 pH = 3 的鹽酸溶液的 3 倍。",
+            a: false,
+            explain: "【錯誤】pH 值每差 1，氫離子濃度相差 10 倍。pH=1 與 pH=3 相差 2，故濃度相差 10² = 100 倍。"
+        },
+        {
+            q: "燒鹼（氫氧化鈉）與小蘇打（碳酸氫鈉）的水溶液皆呈鹼性，兩者加入酚酞指示劑後，溶液都會呈現紅色。",
+            a: true,
+            explain: "【正確】氫氧化鈉（強鹼）與碳酸氫鈉（弱鹼）水溶液皆呈鹼性，酚酞在鹼性溶液中呈紅色。"
+        },
+        {
+            q: "酸鹼中和反應（例如鹽酸加氫氧化鈉）通常會放出熱量，使溶液的溫度上升。",
+            a: true,
+            explain: "【正確】酸鹼中和屬於放熱反應，反應過程中水溶液溫度會升高。"
+        },
+        {
+            q: "雞蛋殼的主要成分是碳酸鈣，若將醋酸滴在蛋殼上，會產生二氧化碳氣泡。",
+            a: true,
+            explain: "【正確】碳酸鹽類（如碳酸鈣）遇到酸，會反應產生二氧化碳氣體。"
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const totalQuestions = questions.length;
+    const scorePerQuestion = Math.round(100 / totalQuestions);
+
+    const questionText = document.getElementById('question-text');
+    const scoreDisplay = document.getElementById('score');
+    const progressBar = document.getElementById('progressBar');
+    const feedbackDiv = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    const optionsDiv = document.getElementById('options');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+
+    // ★★★ 隨機洗牌函式 ★★★
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function loadQuestion() {
+        feedbackDiv.style.display = 'none';
+        nextBtn.style.display = 'none';
+        optionsDiv.style.pointerEvents = 'auto'; 
+        optionsDiv.style.opacity = '1';
+        
+        // 更新進度條
+        const progress = (currentQuestionIndex / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // 顯示題目 (自動加上題號 Q1, Q2)
+        questionText.innerText = `Q${currentQuestionIndex + 1}. ${questions[currentQuestionIndex].q}`;
+    }
+
+    function checkAnswer(userAnswer) {
+        const currentQ = questions[currentQuestionIndex];
+        const isCorrect = (userAnswer === currentQ.a);
+
+        optionsDiv.style.pointerEvents = 'none';
+        optionsDiv.style.opacity = '0.6';
+
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            score += scorePerQuestion;
+            // 滿分修正
+            if (currentQuestionIndex === totalQuestions - 1 && score >= 98) score = 100;
+
+            scoreDisplay.innerText = score;
+            feedbackDiv.className = 'feedback correct';
+            feedbackDiv.innerHTML = `<strong>🎉 觀念正確！</strong><br>${currentQ.explain}`;
+        } else {
+            feedbackDiv.className = 'feedback wrong';
+            feedbackDiv.innerHTML = `<strong>💥 觀念修正：</strong><br>${currentQ.explain}`;
+        }
+
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+            loadQuestion();
+        } else {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        progressBar.style.width = '100%';
+        document.getElementById('final-score').innerText = `${score} 分`;
+        
+        let comment = "";
+        if(score === 100) comment = "太強了！酸鹼化學大師就是你！⚗️✨";
+        else if(score >= 80) comment = "優秀！觀念非常清楚！🧪";
+        else if(score >= 60) comment = "及格囉！但小心陷阱題喔！🔥";
+        else comment = "別灰心！看懂詳解最重要，再試一次！💪";
+        
+        document.getElementById('comment').innerText = comment;
+    }
+
+    function restartGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreDisplay.innerText = "0";
+        quizScreen.style.display = 'block';
+        resultScreen.style.display = 'none';
+        
+        // ★★★ 重新開始時，再次洗牌 ★★★
+        shuffleArray(questions);
+        
+        loadQuestion();
+    }
+
+    // 啟動遊戲 (先洗牌)
+    shuffleArray(questions);
+    loadQuestion();
+
+</script>
+
+<a id="ahao-back" href="../../index.html#ch-8-2-3" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

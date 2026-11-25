@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原子結構與元素週期表挑戰 (隨機出題版)</title>
+    <style>
+        :root {
+            /* 科學風格配色：深藍與科技紫 */
+            --primary-color: #4a69bd; 
+            --secondary-color: #6a89cc;
+            --accent-color: #f6b93b; 
+            --bg-color: #f1f2f6;
+            --card-bg: #ffffff;
+            --text-color: #2f3542;
+        }
+
+        body {
+            font-family: '微軟正黑體', 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#dfe4ea 1px, transparent 1px);
+            background-size: 20px 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 650px;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: 6px solid var(--primary-color);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #dfe4ea;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .score-board {
+            font-size: 1.1rem;
+            color: #747d8c;
+            margin-bottom: 2rem;
+            font-weight: bold;
+        }
+
+        .question-box {
+            font-size: 1.3rem;
+            font-weight: 600;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px dashed #ced6e0;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .btn {
+            border: none;
+            padding: 15px 0;
+            font-size: 1.8rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 140px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-true {
+            background-color: #fff;
+            border: 3px solid #2ed573;
+            color: #2ed573;
+        }
+
+        .btn-false {
+            background-color: #fff;
+            border: 3px solid #ff4757;
+            color: #ff4757;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .btn-true:hover { background-color: #eaffe9; }
+        .btn-false:hover { background-color: #ffeaea; }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.4s;
+            text-align: left;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        .feedback.correct {
+            background-color: #dff9fb;
+            color: #22a6b3;
+            border-left: 5px solid #22a6b3;
+        }
+        .feedback.wrong {
+            background-color: #ffdde1;
+            color: #eb4d4b;
+            border-left: 5px solid #eb4d4b;
+        }
+
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 4px 10px rgba(74, 105, 189, 0.3);
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background-color: #3c56a0;
+        }
+
+        .result-screen {
+            display: none;
+        }
+        
+        .atom-animation {
+            font-size: 5rem;
+            margin: 20px 0;
+            animation: spin 3s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div id="quiz-screen">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <h1>⚛️ 原子結構大挑戰</h1>
+        <div class="score-board">目前得分: <span id="score">0</span></div>
+        
+        <div class="question-box">
+            <span id="question-text">題目載入中...</span>
+        </div>
+
+        <div class="btn-container" id="options">
+            <button class="btn btn-true" onclick="checkAnswer(true)">
+                <span>⭕</span> 對
+            </button>
+            <button class="btn btn-false" onclick="checkAnswer(false)">
+                <span>❌</span> 錯
+            </button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">下一題 ➜</button>
+    </div>
+
+    <div id="result-screen" class="result-screen">
+        <h1>測驗完成！</h1>
+        <div class="atom-animation">⚛️</div>
+        <h2 id="final-score" style="font-size: 2.5rem; color: var(--text-color);"></h2>
+        <p id="comment" style="font-size: 1.2rem; color: #666;"></p>
+        <button class="btn" style="background:var(--primary-color); color:white; border:none; margin-top:20px;" onclick="restartGame()">再挑戰一次</button>
+    </div>
+</div>
+
+<script>
+    // --- 題目資料庫 ---
+    // 這裡使用 let 而不是 const，因為我們需要對它進行洗牌
+    let questions = [
+        {
+            q: "「水」是由氫原子和氧原子組成的，它保留了氫氣可燃和氧氣助燃的特性，所以水是一種混合物。",
+            a: false,
+            explain: "【錯誤】水是「化合物」，其性質與組成元素（氫、氧）完全不同（例如水可滅火，但氫可燃、氧助燃）；混合物才會保有原有物質的特性。"
+        },
+        {
+            q: "原子的質量主要集中在原子核，原子核內由帶正電的質子和不帶電的中子所組成，所以原子核帶正電。",
+            a: true,
+            explain: "【正確】原子的質量集中在原子核，且原子核帶正電（質子帶正電、中子不帶電）。"
+        },
+        {
+            q: "某原子的原子序為 8，質量數為 16，這代表該原子的原子核內含有 8 個質子和 16 個中子。",
+            a: false,
+            explain: "【錯誤】質量數＝質子數＋中子數。因此中子數應為 16－8＝8 個，而非 16 個。"
+        },
+        {
+            q: "在常溫常壓下，所有的金屬元素都是以「固態」存在，且大部分都具有銀白色的金屬光澤。",
+            a: false,
+            explain: "【錯誤】唯一的例外是「汞」（水銀），在常溫常壓下為液態金屬。"
+        },
+        {
+            q: "週期表是依據元素的性質規律排列而成，位於同一「族」（縱行）的元素，通常具有相似的化學性質。",
+            a: true,
+            explain: "【正確】週期表的縱行稱為「族」，同族元素通常具有相似的化學性質。"
+        },
+        {
+            q: "自然界中存在多種氧原子（如 O-16、O-18），它們的質子數相同但中子數不同，我們稱這些原子互為「同位素」。",
+            a: true,
+            explain: "【正確】質子數相同、中子數不同的原子，互稱為同位素。"
+        },
+        {
+            q: "根據現代科學的發現，道耳頓提出的「原子說」中關於「原子是組成物質的最小粒子，不可再分割」的敘述，至今仍是完全正確的。",
+            a: false,
+            explain: "【錯誤】隨著電子、質子與中子的發現，證實原子內部有更小的粒子結構，因此道耳頓「原子不可再分割」的說法已被修正。"
+        },
+        {
+            q: "氦、氖、氬等氣體被稱為「鈍氣」，它們在常溫下活性很小，不易與其他物質發生反應，且以單原子分子的形式存在。",
+            a: true,
+            explain: "【正確】第18族元素稱為鈍氣（或稀有氣體），化學性質安定，常以單原子分子存在。"
+        },
+        {
+            q: "當一個中性的鎂原子失去兩個電子變成鎂離子（Mg2+）時，其原子核內的質子數也會跟著減少兩個。",
+            a: false,
+            explain: "【錯誤】原子變成離子是「核外電子」的得失，原子核內的質子數不會改變。"
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const totalQuestions = questions.length;
+    const scorePerQuestion = Math.round(100 / totalQuestions);
+
+    const questionText = document.getElementById('question-text');
+    const scoreDisplay = document.getElementById('score');
+    const progressBar = document.getElementById('progressBar');
+    const feedbackDiv = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    const optionsDiv = document.getElementById('options');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+
+    // ★★★ 新增：洗牌演算法 (Fisher-Yates Shuffle) ★★★
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            // 交換元素
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function loadQuestion() {
+        feedbackDiv.style.display = 'none';
+        nextBtn.style.display = 'none';
+        optionsDiv.style.pointerEvents = 'auto';
+        optionsDiv.style.opacity = '1';
+        
+        const progress = (currentQuestionIndex / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // 顯示題目 (會自動加上 Q1, Q2，即使順序變了，題號還是會照順序顯示)
+        questionText.innerText = `Q${currentQuestionIndex + 1}. ${questions[currentQuestionIndex].q}`;
+    }
+
+    function checkAnswer(userAnswer) {
+        const currentQ = questions[currentQuestionIndex];
+        const isCorrect = (userAnswer === currentQ.a);
+
+        optionsDiv.style.pointerEvents = 'none';
+        optionsDiv.style.opacity = '0.6';
+
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            score += scorePerQuestion;
+            if (currentQuestionIndex === totalQuestions - 1 && score >= 98) score = 100;
+            
+            scoreDisplay.innerText = score;
+            feedbackDiv.className = 'feedback correct';
+            feedbackDiv.innerHTML = `<strong>🎉 觀念正確！</strong><br>${currentQ.explain}`;
+        } else {
+            feedbackDiv.className = 'feedback wrong';
+            feedbackDiv.innerHTML = `<strong>💥 觀念修正：</strong><br>${currentQ.explain}`;
+        }
+
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+            loadQuestion();
+        } else {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        progressBar.style.width = '100%';
+
+        document.getElementById('final-score').innerText = `${score} 分`;
+        
+        let comment = "";
+        if(score === 100) comment = "太神了！你的原子觀念無懈可擊！⚛️✨";
+        else if(score >= 80) comment = "優秀！只差一點點就完美了！🔥";
+        else if(score >= 60) comment = "及格囉！但還有進步空間，加油！💡";
+        else comment = "別灰心！把詳解再看一次，下次一定會更好！💪";
+        
+        document.getElementById('comment').innerText = comment;
+    }
+
+    function restartGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreDisplay.innerText = "0";
+        quizScreen.style.display = 'block';
+        resultScreen.style.display = 'none';
+        
+        // ★★★ 重新開始時，再次洗牌 ★★★
+        shuffleArray(questions);
+        
+        loadQuestion();
+    }
+
+    // 遊戲初始化：先洗牌，再載入題目
+    shuffleArray(questions);
+    loadQuestion();
+
+</script>
+
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>豪強No.1考試時程 - Dark Dopamine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 引入高清晰度且現代的思源黑體：Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 全域設定 */
+        ::selection { background-color: #ff00ff; color: white; }
+        
+        /* 隱藏數字輸入框的箭頭 */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        
+        /* 自定義字體與全螢幕佈局 */
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+            overflow: hidden; /* 防止滾動 */
+            background-color: #050505; /* 極深黑 */
+            color: #ffffff;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        /* --- 霓虹顏色與陰影類別 --- */
+        .text-neon-pink { color: #ff00ff; }
+        .text-neon-green { color: #39ff14; }
+        .text-neon-cyan { color: #00ffff; }
+        .text-neon-yellow { color: #ffff00; }
+        .text-neon-gray { color: #888888; }
+        .text-neon-dark-gray { color: #aaaaaa; }
+        
+        .bg-neon-dark { background-color: #0a0a0a; }
+        .bg-neon-dark-gray { background-color: #111111; }
+        .bg-neon-darker-gray { background-color: #222222; }
+        .bg-neon-hover:hover { background-color: #333333; }
+        .bg-neon-green { background-color: #39ff14; }
+        .bg-neon-red { background-color: #ff0055; }
+        .bg-neon-cyan { background-color: #00ffff; }
+        .bg-neon-cyan-hover:hover { background-color: #00cccc; }
+        .bg-active-row { background-color: #1a1a1a; }
+        
+        .border-neon-cyan { border-color: #00ffff; }
+        .border-neon-green { border-color: #39ff14; }
+        .border-neon-yellow { border-color: #ffff00; }
+        .border-neon-dark { border-color: #333333; }
+        .border-neon-hover:hover { border-color: #666666; }
+
+        .stroke-neon-green { stroke: #39ff14; }
+        .stroke-neon-yellow { stroke: #ffff00; }
+        .stroke-neon-pink { stroke: #ff00ff; }
+        .stroke-neon-cyan { stroke: #00ffff; }
+        .stroke-dark-gray { stroke: #222222; }
+
+        /* 文字大小 (VW) */
+        .text-vw-1-2 { font-size: 1.2vw; }
+        .text-vw-1-5 { font-size: 1.5vw; }
+        .text-vw-2 { font-size: 2vw; }
+        .text-vw-2-2 { font-size: 2.2vw; }
+        .text-vw-2-5 { font-size: 2.5vw; }
+        .text-vw-3 { font-size: 3vw; }
+        .text-vw-3-5 { font-size: 3.5vw; }
+        .text-vw-4 { font-size: 4vw; }
+        .text-vw-5 { font-size: 5vw; }
+        .text-vw-6 { font-size: 6vw; }
+        .text-vw-7 { font-size: 7vw; }
+
+        /* 陰影效果 */
+        .neon-text-pink { text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff; }
+        .neon-text-green { text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14; }
+        .neon-text-cyan { text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff; }
+        .neon-text-yellow { text-shadow: 0 0 5px #ffff00, 0 0 10px #ffff00; }
+        
+        .text-shadow-double { text-shadow: 2px 2px 0 #ff00ff, -1px -1px 0 #00ffff; }
+        
+        .shadow-neon-green-glow { box-shadow: 0 0 20px rgba(57, 255, 20, 0.3); }
+        .shadow-neon-yellow { box-shadow: 0 0 15px #ffff00; }
+        .shadow-inset-black { box-shadow: inset -10px 0 20px rgba(0, 0, 0, 0.8); }
+        .shadow-btn { box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
+        .dopamine-shadow { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+        
+        .drop-shadow-white-glow { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); }
+        .drop-shadow-white-weak { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2)); }
+        .drop-shadow-cyan { filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5)); }
+        .drop-shadow-green { filter: drop-shadow(0 0 5px rgba(57, 255, 20, 0.5)); }
+
+        .neon-border-left { box-shadow: -5px 0 15px rgba(255, 255, 0, 0.3); }
+
+        /* 背景圖樣 */
+        .bg-radial-dopamine {
+            background: radial-gradient(circle at center, #ff00ff, #000000, #000000);
+            opacity: 0.2;
+        }
+
+        .bg-dopamine-stripes {
+            background: repeating-linear-gradient(
+                45deg,
+                #ff00ff,
+                #ff00ff 20px,
+                #39ff14 20px,
+                #39ff14 40px,
+                #00ffff 40px,
+                #00ffff 60px,
+                #ffff00 60px,
+                #ffff00 80px
+            );
+        }
+        
+        .hidden-input { display: none; }
+        .btn-active:active { transform: scale(0.95); }
+        .track-transition { transition: stroke-dashoffset 1s linear, stroke 0.5s ease; }
+
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em 1.5em;
+        }
+
+        /* 動畫 */
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-modal { animation: fadeInModal 0.2s ease-out forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); filter: blur(4px); }
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        const SCHEDULE = [
+            { type: 'break', start: '07:50', end: '08:00', label: '準備' },
+            { type: 'exam',  start: '08:00', end: '08:50', label: '第一節' },
+            { type: 'break', start: '08:50', end: '09:00', label: '下課' },
+            { type: 'exam',  start: '09:00', end: '09:50', label: '第二節' },
+            { type: 'break', start: '09:50', end: '10:00', label: '下課' },
+            { type: 'exam',  start: '10:00', end: '10:50', label: '第三節' }, 
+            { type: 'break', start: '10:50', end: '11:00', label: '下課' },
+            { type: 'exam',  start: '11:00', end: '11:50', label: '第四節' },
+            { type: 'break', start: '11:50', end: '12:00', label: '收卷' }
+        ];
+
+        const EXAM_SLOTS = SCHEDULE.filter(s => s.type === 'exam');
+        const SUBJECT_OPTIONS = ["國文", "英語", "英聽", "數學", "社會", "自然", "健體", "作文", "任科教師運用"];
+
+        const EXAM_MESSAGES = [
+            "✨ 考卷記得寫上班級姓名座號 ✨",
+            "👀 有問題舉手問老師",
+            "💪 不會寫的題目跳過寫會的",
+            "🧘 耐心、細心、小心",
+            "🤐 不要轉頭玩東西，寫完多檢查",
+            "⚡ 檢查完再檢查或趴下休息",
+            "🔥 考試即將結束，最後確認！"
+        ];
+
+        const BREAK_MESSAGES = [
+            "🥤 提早上廁所喝水",
+            "📚 準備下個科目",
+            "🧹 桌面淨空",
+            "🧘 準備考試、收拾位置",
+            "🤫 在座位上坐好"
+        ];
+
+        const formatTime = (date) => {
+            const h = String(date.getHours()).padStart(2, '0');
+            const m = String(date.getMinutes()).padStart(2, '0');
+            const s = String(date.getSeconds()).padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        };
+
+        // 設定面板元件
+        const SettingsModal = ({ isOpen, onClose, title, onTitleChange, cleanMode, onCleanModeChange, onReset }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+                    <div className="bg-neon-darker-gray border-2 border-neon-cyan p-6 rounded-lg w-[400px] max-w-[90%] shadow-neon-green-glow animate-modal">
+                        <h2 className="text-xl font-bold text-neon-cyan mb-4 border-b border-gray-700 pb-2">⚙️ 系統設定</h2>
+                        
+                        <div className="mb-4">
+                            <label className="block text-neon-gray text-sm mb-2">主標題文字</label>
+                            <input 
+                                type="text" 
+                                value={title} 
+                                onChange={(e) => onTitleChange(e.target.value)}
+                                className="w-full bg-black border border-neon-dark text-white p-2 rounded focus:border-neon-yellow outline-none"
+                            />
+                        </div>
+
+                        <div className="mb-6 flex items-center justify-between">
+                            <label className="text-white font-bold">專注模式 (隱藏按鈕)</label>
+                            <button 
+                                onClick={() => onCleanModeChange(!cleanMode)}
+                                className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${cleanMode ? 'bg-neon-green' : 'bg-gray-600'}`}
+                            >
+                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${cleanMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                            </button>
+                        </div>
+
+                        <div className="flex justify-between items-center mt-8">
+                            <button 
+                                onClick={onReset}
+                                className="text-xs text-red-400 hover:text-red-300 underline"
+                            >
+                                重置所有資料
+                            </button>
+                            <button 
+                                onClick={onClose}
+                                className="bg-neon-cyan text-black font-bold py-2 px-6 rounded hover:bg-white transition-colors"
+                            >
+                                完成
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            // Firebase 狀態
+            const [fbUser, setFbUser] = useState(null);
+            const [fbDb, setFbDb] = useState(null);
+            const [fbAppId, setFbAppId] = useState(null);
+            const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+
+            // 系統時間與偏移
+            const [now, setNow] = useState(new Date());
+            const [offset, setOffset] = useState(() => {
+                return parseInt(localStorage.getItem('exam_clock_offset_v2') || '0', 10);
+            });
+
+            // 設定狀態
+            const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+            const [cleanMode, setCleanMode] = useState(() => {
+                return localStorage.getItem('exam_clean_mode') === 'true';
+            });
+            const [appTitle, setAppTitle] = useState(() => {
+                return localStorage.getItem('exam_app_title') || "豪強No.1考試時程";
+            });
+
+            // 注意事項圖片 (固定載入本機或雲端的圖片)
+            const [noticeImage, setNoticeImage] = useState(() => {
+                return localStorage.getItem('exam_notice_image') || null;
+            });
+            const noticeImageInputRef = useRef(null);
+
+            // 考試資料
+            const [examData, setExamData] = useState(() => {
+                const saved = localStorage.getItem('exam_data_v2');
+                let initialData = {
+                    subjects: ["國文", "英語", "數學", "社會"],
+                    shouldArrive: "",
+                    actualArrive: "",
+                    absentList: "",
+                    specialRoomList: "" 
+                };
+
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        initialData = { ...initialData, ...parsed };
+                        if (!initialData.subjects || initialData.subjects.length !== 4) {
+                            initialData.subjects = ["國文", "英語", "數學", "社會"];
+                        }
+                    } catch (e) {}
+                }
+                return initialData;
+            });
+
+            // 音訊
+            const [audioTracks, setAudioTracks] = useState([
+                { src: null, fileName: "", isPlaying: false, progress: 0 },
+                { src: null, fileName: "", isPlaying: false, progress: 0 },
+                { src: null, fileName: "", isPlaying: false, progress: 0 },
+                { src: null, fileName: "", isPlaying: false, progress: 0 }
+            ]);
+            const audioRefs = useRef([]);
+            const fileInputRefs = useRef([]);
+
+            // ================= 雲端同步 Firebase 邏輯 =================
+            useEffect(() => {
+                const initFirebase = async () => {
+                    // 如果是在本地端直接打開 html，則不啟動 firebase
+                    if (true) return;
+                    
+                    try {
+                        // 使用 Function 繞過 Babel 對 import() 的編譯，避免 require is not defined 錯誤
+                        const dynamicImport = new Function('url', 'return import(url)');
+                        
+                        const { initializeApp } = await dynamicImport('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js');
+                        const { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = await dynamicImport('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+                        const { getFirestore, doc, setDoc, onSnapshot } = await dynamicImport('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
+
+                        window.fb = { doc, setDoc, onSnapshot }; // 快取函式
+
+                        const firebaseConfig = JSON.parse(__firebase_config);
+                        const app = initializeApp(firebaseConfig);
+                        const auth = getAuth(app);
+                        const db = getFirestore(app);
+                        const appId = typeof __app_id !== 'undefined' ? __app_id : 'exam-board-sync';
+
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+
+                        onAuthStateChanged(auth, (user) => {
+                            if (user) {
+                                setFbUser(user);
+                                setFbDb(db);
+                                setFbAppId(appId);
+                                setIsCloudSyncing(true);
+                            }
+                        });
+                    } catch (e) {
+                        console.error("Firebase init error:", e);
+                    }
+                };
+                initFirebase();
+            }, []);
+
+            // 監聽雲端資料變更
+            useEffect(() => {
+                if (!fbUser || !fbDb || !window.fb) return;
+                
+                const docRef = window.fb.doc(fbDb, 'artifacts', fbAppId, 'public', 'data', 'examBoardSync', 'sharedState');
+                const unsubscribe = window.fb.onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.examData) setExamData(data.examData);
+                        if (data.appTitle) setAppTitle(data.appTitle);
+                        if (data.offset !== undefined) setOffset(data.offset);
+                        if (data.cleanMode !== undefined) setCleanMode(data.cleanMode);
+                        if (data.noticeImage !== undefined) setNoticeImage(data.noticeImage);
+                    }
+                }, (err) => console.error("Sync read error:", err));
+
+                return () => unsubscribe();
+            }, [fbUser, fbDb, fbAppId]);
+
+            // 上傳變更到雲端
+            const saveToCloud = async (updates) => {
+                if (!fbUser || !fbDb || !window.fb) return;
+                try {
+                    const docRef = window.fb.doc(fbDb, 'artifacts', fbAppId, 'public', 'data', 'examBoardSync', 'sharedState');
+                    await window.fb.setDoc(docRef, updates, { merge: true });
+                } catch (e) {
+                    console.error("Sync write error:", e);
+                }
+            };
+            // =========================================================
+
+            // 時鐘計時器
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    setNow(new Date());
+                }, 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            // 備份存入 localStorage (雙重保險)
+            useEffect(() => { localStorage.setItem('exam_clock_offset_v2', offset); }, [offset]);
+            useEffect(() => { localStorage.setItem('exam_data_v2', JSON.stringify(examData)); }, [examData]);
+            useEffect(() => { localStorage.setItem('exam_clean_mode', cleanMode); }, [cleanMode]);
+            useEffect(() => { localStorage.setItem('exam_app_title', appTitle); }, [appTitle]);
+            useEffect(() => { 
+                if (noticeImage) {
+                    localStorage.setItem('exam_notice_image', noticeImage); 
+                } else {
+                    localStorage.removeItem('exam_notice_image');
+                }
+            }, [noticeImage]);
+
+            const handleReset = () => {
+                if (confirm("確定要清除所有資料（包含圖片、科目、人數、時間設定）嗎？")) {
+                    localStorage.removeItem('exam_data_v2');
+                    localStorage.removeItem('exam_clock_offset_v2');
+                    localStorage.removeItem('exam_clean_mode');
+                    localStorage.removeItem('exam_app_title');
+                    localStorage.removeItem('exam_notice_image');
+                    
+                    const resetData = {
+                        appTitle: "豪強No.1考試時程",
+                        cleanMode: false,
+                        offset: 0,
+                        noticeImage: null,
+                        examData: {
+                            subjects: ["國文", "英語", "數學", "社會"],
+                            shouldArrive: "",
+                            actualArrive: "",
+                            absentList: "",
+                            specialRoomList: "" 
+                        }
+                    };
+                    saveToCloud(resetData);
+                    window.location.reload();
+                }
+            };
+
+            const adjustedNow = useMemo(() => {
+                return new Date(now.getTime() + offset);
+            }, [now, offset]);
+
+            const currentSlot = useMemo(() => {
+                const currentMs = adjustedNow.getHours() * 3600000 + adjustedNow.getMinutes() * 60000 + adjustedNow.getSeconds() * 1000;
+                
+                for (let slot of SCHEDULE) {
+                    const [sh, sm] = slot.start.split(':').map(Number);
+                    const startMs = sh * 3600000 + sm * 60000;
+                    const [eh, em] = slot.end.split(':').map(Number);
+                    const endMs = eh * 3600000 + em * 60000;
+
+                    if (currentMs >= startMs && currentMs < endMs) {
+                        return { ...slot, startMs, endMs, durationMs: endMs - startMs };
+                    }
+                }
+                return null;
+            }, [adjustedNow]);
+
+            const reminderMessage = useMemo(() => {
+                if (!currentSlot) return "✨ 準備考試中 ✨";
+
+                const currentMs = adjustedNow.getHours() * 3600000 + adjustedNow.getMinutes() * 60000 + adjustedNow.getSeconds() * 1000;
+                const elapsedMinutes = Math.floor((currentMs - currentSlot.startMs) / 60000);
+
+                let messages = [];
+                let interval = 5;
+
+                if (currentSlot.type === 'exam') {
+                    messages = EXAM_MESSAGES;
+                    interval = 5;
+                } else {
+                    messages = BREAK_MESSAGES;
+                    const durationMins = currentSlot.durationMs / 60000;
+                    interval = durationMins >= 20 ? 4 : 2;
+                }
+                const index = Math.floor(elapsedMinutes / interval) % messages.length;
+                return messages[index];
+            }, [adjustedNow, currentSlot]);
+
+            const progressInfo = useMemo(() => {
+                if (!currentSlot) {
+                    return { remainingPercent: 0, color: 'stroke-gray-800', text: '等待中' };
+                }
+
+                const currentMs = adjustedNow.getHours() * 3600000 + adjustedNow.getMinutes() * 60000 + adjustedNow.getSeconds() * 1000;
+                const progressMs = currentMs - currentSlot.startMs;
+                const totalMs = currentSlot.durationMs;
+                const remainingMs = totalMs - progressMs;
+                
+                const elapsedPercent = Math.min(100, Math.max(0, (progressMs / totalMs) * 100));
+                const remainingPercent = 100 - elapsedPercent;
+
+                let colorClass = 'stroke-neon-green';
+                let statusText = "";
+
+                if (currentSlot.type === 'exam') {
+                    statusText = "考試開始";
+                    if (remainingMs <= totalMs / 2) {
+                        colorClass = 'stroke-neon-yellow'; 
+                        statusText = "時間剩下一半";
+                    }
+                    if (remainingMs <= 10 * 60000) {
+                        colorClass = 'stroke-neon-pink'; 
+                        statusText = "最後10分鐘";
+                    }
+                } else {
+                    if (remainingMs > 5 * 60000) {
+                        colorClass = 'stroke-neon-cyan'; 
+                        statusText = "休息時間";
+                    } else if (remainingMs > 3 * 60000) {
+                        colorClass = 'stroke-neon-yellow'; 
+                        statusText = "快去喝水";
+                    } else {
+                        colorClass = 'stroke-neon-pink';
+                        statusText = "回座位坐好";
+                    }
+                }
+
+                return { remainingPercent, color: colorClass, text: statusText };
+            }, [adjustedNow, currentSlot]);
+
+            // 資料綁定與同步觸發
+            const handleInputChange = (field, value) => {
+                const newData = { ...examData, [field]: value };
+                setExamData(newData);
+            };
+            const handleInputBlur = () => {
+                saveToCloud({ examData });
+            };
+
+            const handleSubjectChange = (index, value) => {
+                const newSubjects = [...examData.subjects];
+                newSubjects[index] = value;
+                const newData = { ...examData, subjects: newSubjects };
+                setExamData(newData);
+                saveToCloud({ examData: newData });
+            };
+
+            const adjustTime = (seconds) => {
+                const newOffset = offset + (seconds * 1000);
+                setOffset(newOffset);
+                saveToCloud({ offset: newOffset });
+            };
+
+            const handleTitleChange = (newTitle) => {
+                setAppTitle(newTitle);
+                saveToCloud({ appTitle: newTitle });
+            };
+
+            const handleCleanModeChange = (newMode) => {
+                setCleanMode(newMode);
+                saveToCloud({ cleanMode: newMode });
+            };
+
+            // 音訊處理 (維持本機不雲端化)
+            const handleFileSelect = (index, e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const url = URL.createObjectURL(file);
+                    setAudioTracks(prev => {
+                        const newTracks = [...prev];
+                        if (newTracks[index].src) URL.revokeObjectURL(newTracks[index].src);
+                        newTracks[index] = { src: url, fileName: file.name, isPlaying: false, progress: 0 };
+                        return newTracks;
+                    });
+                }
+            };
+
+            const togglePlay = (index) => {
+                const audioEl = audioRefs.current[index];
+                if (!audioEl) return;
+                
+                setAudioTracks(prev => {
+                    const newTracks = [...prev];
+                    const isNowPlaying = !newTracks[index].isPlaying;
+                    
+                    if (isNowPlaying) {
+                        newTracks.forEach((track, i) => {
+                            if (i !== index && track.isPlaying) {
+                                if (audioRefs.current[i]) audioRefs.current[i].pause();
+                                track.isPlaying = false;
+                            }
+                        });
+                        audioEl.play();
+                    } else {
+                        audioEl.pause();
+                    }
+                    
+                    newTracks[index].isPlaying = isNowPlaying;
+                    return newTracks;
+                });
+            };
+
+            const replayAudio = (index) => {
+                const audioEl = audioRefs.current[index];
+                if (!audioEl) return;
+                audioEl.currentTime = 0;
+                audioEl.play();
+                setAudioTracks(prev => {
+                    const newTracks = [...prev];
+                    newTracks.forEach((track, i) => {
+                        if (i !== index && track.isPlaying) {
+                            if (audioRefs.current[i]) audioRefs.current[i].pause();
+                            track.isPlaying = false;
+                        }
+                    });
+                    newTracks[index].isPlaying = true;
+                    return newTracks;
+                });
+            };
+
+            const handleAudioEnded = (index) => {
+                setAudioTracks(prev => {
+                    const newTracks = [...prev];
+                    newTracks[index].isPlaying = false;
+                    newTracks[index].progress = 0;
+                    return newTracks;
+                });
+            };
+
+            const handleTimeUpdate = (index, e) => {
+                const current = e.target.currentTime;
+                const duration = e.target.duration;
+                const percent = (duration > 0) ? (current / duration) * 100 : 0;
+                setAudioTracks(prev => {
+                    const newTracks = [...prev];
+                    newTracks[index] = { ...newTracks[index], progress: percent };
+                    return newTracks;
+                });
+            };
+
+            // 處理圖片上傳並壓縮，讓它能存進 localStorage / 雲端中固定住
+            const handleNoticeImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            // 設定壓縮上限大小
+                            const MAX_WIDTH = 1200;
+                            const MAX_HEIGHT = 1200;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            // 壓縮成 JPEG 並轉換為 Base64
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                            
+                            setNoticeImage(dataUrl);
+                            saveToCloud({ noticeImage: dataUrl });
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const clearNoticeImage = () => {
+                setNoticeImage(null);
+                saveToCloud({ noticeImage: null });
+                if (noticeImageInputRef.current) {
+                    noticeImageInputRef.current.value = '';
+                }
+            };
+
+            const toggleFullscreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => console.error(err));
+                } else {
+                    document.exitFullscreen();
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-screen w-screen overflow-hidden bg-black text-white selection:bg-[#ff00ff] selection:text-white">
+                    
+                    {/* 設定模態框 */}
+                    <SettingsModal 
+                        isOpen={isSettingsOpen}
+                        onClose={() => setIsSettingsOpen(false)}
+                        title={appTitle}
+                        onTitleChange={handleTitleChange}
+                        cleanMode={cleanMode}
+                        onCleanModeChange={handleCleanModeChange}
+                        onReset={handleReset}
+                    />
+
+                    {/* === C區 (上方 22%) === */}
+                    <div className="h-[22vh] w-full bg-neon-dark-gray border-b-[3px] border-neon-green flex flex-row relative shadow-neon-green-glow z-10">
+                        {/* 左側: 標題與狀態 (調整為 40% 讓標題有更多空間單行顯示) */}
+                        <div className="w-[40%] flex flex-col items-center justify-center border-r border-neon-dark bg-neon-dark relative group px-2">
+                            
+                            {/* 工具列 (左上) */}
+                            <div className="absolute top-0 left-0 w-full flex justify-between p-2 z-20">
+                                <div className="flex items-center gap-2">
+                                    {/* 全螢幕按鈕 */}
+                                    <button 
+                                        onClick={toggleFullscreen}
+                                        className="text-neon-gray hover:text-white transition-colors p-2 bg-black bg-opacity-30 rounded-full"
+                                        title="切換全螢幕"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                                    </button>
+                                    
+                                    {/* 雲端同步狀態標示 */}
+                                    {isCloudSyncing ? (
+                                        <span className="text-[0.7vw] font-bold bg-[#004400] text-[#39ff14] border border-[#39ff14] px-2 py-1 rounded-full shadow-[0_0_5px_#39ff14]"></span>
+                                    ) : (
+                                        <span className="text-[0.7vw] font-bold bg-gray-800 text-gray-400 px-2 py-1 rounded-full">💻 本機模式</span>
+                                    )}
+                                </div>
+
+                                {/* 設定按鈕 */}
+                                <button 
+                                    onClick={() => setIsSettingsOpen(true)}
+                                    className="text-neon-cyan hover:text-white transition-colors p-2 bg-black bg-opacity-30 rounded-full animate-pulse hover:animate-none"
+                                    title="系統設定"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                </button>
+                            </div>
+
+                            {/* 標題與狀態區塊 (並排) */}
+                            <div className="flex items-end justify-center gap-3 z-10 w-full px-4 pt-4">
+                                {/* 標題 (加入 whitespace-nowrap 強制單行不換行) */}
+                                <h1 className="text-vw-3 font-black text-neon-yellow neon-text-yellow tracking-wider leading-none whitespace-nowrap">
+                                    {appTitle}
+                                </h1>
+                                {/* 狀態文字 (移到右側) */}
+                                <span className={`text-vw-2 font-bold select-none whitespace-nowrap drop-shadow-md leading-none pb-1 ${currentSlot && currentSlot.type === 'exam' ? 'text-white' : 'text-neon-gray'}`}>
+                                    {progressInfo.text}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* 右側: 時間與進度條 (改為 60%) */}
+                        <div className="w-[60%] flex flex-col bg-black items-center justify-center p-4 overflow-hidden relative">
+                            
+                            {/* 時間顯示 (放大並置中) */}
+                            <div className="flex flex-col items-center justify-center z-10 -mb-2">
+                                <div className="text-vw-1-2 text-neon-cyan font-bold tracking-widest uppercase mb-0">現在時間</div>
+                                <div className="text-vw-7 font-black leading-none text-white tabular-nums tracking-tighter drop-shadow-white-glow">
+                                    {formatTime(adjustedNow)}
+                                </div>
+                            </div>
+
+                            {/* 進度條 (無文字) */}
+                            <div className="relative w-full flex-1 flex items-center justify-center min-h-0">
+                                <svg className="w-full h-full filter drop-shadow-white-weak" viewBox="0 0 300 50" preserveAspectRatio="xMidYMid meet">
+                                    <rect 
+                                        x="5" y="5" width="290" height="40" rx="20" ry="20" 
+                                        fill="none" 
+                                        stroke="#222" 
+                                        strokeWidth="8" 
+                                    />
+                                    <rect 
+                                        x="5" y="5" width="290" height="40" rx="20" ry="20" 
+                                        fill="none" 
+                                        className={`track-transition ${progressInfo.color}`}
+                                        strokeWidth="8"
+                                        pathLength="100"
+                                        strokeDasharray="100"
+                                        strokeDashoffset={100 - progressInfo.remainingPercent}
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                            </div>
+
+                            {/* 微調按鈕 (專注模式時隱藏) - 移至右下角 */}
+                            {!cleanMode && (
+                                <div className="absolute bottom-2 right-2 flex gap-2 opacity-30 hover:opacity-100 transition-opacity">
+                                    <button onClick={() => adjustTime(-60)} className="btn-active px-2 py-1 bg-neon-darker-gray border border-neon-dark rounded text-xs text-neon-dark-gray hover:text-neon-cyan">-1分</button>
+                                    <button onClick={() => adjustTime(60)} className="btn-active px-2 py-1 bg-neon-darker-gray border border-neon-dark rounded text-xs text-neon-dark-gray hover:text-neon-cyan">+1分</button>
+                                    <button onClick={() => adjustTime(-1)} className="btn-active px-2 py-1 bg-neon-darker-gray border border-neon-dark rounded text-xs text-neon-dark-gray hover:text-neon-cyan">-1秒</button>
+                                    <button onClick={() => adjustTime(1)} className="btn-active px-2 py-1 bg-neon-darker-gray border border-neon-dark rounded text-xs text-neon-dark-gray hover:text-neon-cyan">+1秒</button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* === 下方區塊 (A + B) === */}
+                    <div className="flex-1 flex flex-row h-[78vh]">
+                        
+                        {/* === A區: 考程表 (佔55% 增加右側圖片空間) === */}
+                        <div className="w-[55%] flex flex-col border-r-[3px] border-neon-cyan bg-neon-dark overflow-hidden relative">
+                            <div className="absolute inset-0 pointer-events-none shadow-inset-black z-20"></div>
+
+                            {/* A區上方: 科目列表 */}
+                            <div className="h-2/3 flex flex-col">
+                                {EXAM_SLOTS.map((slot, index) => {
+                                    const isActive = currentSlot && currentSlot.start === slot.start;
+                                    const activeClass = isActive 
+                                        ? 'bg-active-row border-l-8 border-neon-yellow neon-border-left' 
+                                        : 'border-l-8 border-transparent hover:bg-neon-hover';
+                                    
+                                    return (
+                                        <div key={index} className={`flex-1 flex items-center gap-4 border-b border-neon-darker-gray px-6 transition-all duration-300 ${activeClass}`}>
+                                            
+                                            {/* 時間顯示 */}
+                                            <div className="w-[50%] text-vw-4 font-black whitespace-nowrap text-neon-cyan font-sans tracking-tight border-r-2 border-neon-dark pr-4 flex items-center justify-end">
+                                                {slot.start}<span className="mx-1 text-neon-gray text-vw-3">~</span>{slot.end}
+                                            </div>
+
+                                            {/* 科目選擇 (下拉選單) */}
+                                            <div className="flex-1 relative pl-2">
+                                                <select
+                                                    value={examData.subjects[index] || ""}
+                                                    onChange={(e) => handleSubjectChange(index, e.target.value)}
+                                                    className={`w-full text-vw-3-5 font-bold bg-transparent border-b-2 outline-none appearance-none cursor-pointer transition-colors
+                                                        ${isActive ? 'text-neon-yellow border-neon-yellow' : 'text-white border-neon-dark hover:border-neon-hover'}`}
+                                                >
+                                                    <option value="" disabled className="bg-black text-gray-500">選擇科目</option>
+                                                    {SUBJECT_OPTIONS.map(opt => (
+                                                        <option key={opt} value={opt} className="bg-neon-dark-gray text-white py-2">{opt}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* 聽力控制區 */}
+                                            <div className="flex flex-col items-end justify-center w-[15%] relative z-30">
+                                                <input 
+                                                    type="file" 
+                                                    accept="audio/*" 
+                                                    ref={el => fileInputRefs.current[index] = el} 
+                                                    onChange={(e) => handleFileSelect(index, e)} 
+                                                    className="hidden-input"
+                                                />
+                                                
+                                                <div className="flex gap-2 w-full justify-end items-center">
+                                                    {/* 上傳 (專注模式時隱藏) */}
+                                                    {!cleanMode && (
+                                                        <button 
+                                                            onClick={() => fileInputRefs.current[index].click()}
+                                                            className="btn-active p-1.5 bg-neon-darker-gray text-neon-gray rounded hover:text-white hover:bg-neon-hover transition-colors"
+                                                            title="上傳聽力"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                                        </button>
+                                                    )}
+
+                                                    {/* 播放/重播 */}
+                                                    {audioTracks[index].src && (
+                                                        <>
+                                                            <button 
+                                                                onClick={() => togglePlay(index)}
+                                                                className={`btn-active p-1.5 rounded transition-colors shadow-btn
+                                                                    ${audioTracks[index].isPlaying ? 'bg-neon-red text-white' : 'bg-neon-green text-black'}`}
+                                                            >
+                                                                {audioTracks[index].isPlaying ? 
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> : 
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                                                }
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => replayAudio(index)}
+                                                                className="btn-active p-1.5 bg-neon-cyan text-black rounded hover:bg-neon-cyan-hover transition-colors"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+
+                                                {/* 音檔進度 */}
+                                                {audioTracks[index].src && (
+                                                    <div className="w-full h-1 bg-neon-hover rounded-full mt-2 overflow-hidden">
+                                                        <div 
+                                                            className="h-full bg-neon-cyan shadow-[0_0_5px_#00ffff]"
+                                                            style={{ width: `${audioTracks[index].progress}%` }}
+                                                        ></div>
+                                                    </div>
+                                                )}
+                                                
+                                                <audio 
+                                                    ref={el => audioRefs.current[index] = el}
+                                                    src={audioTracks[index].src || undefined} 
+                                                    onEnded={() => handleAudioEnded(index)}
+                                                    onTimeUpdate={(e) => handleTimeUpdate(index, e)}
+                                                    hidden
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* A區下方: 出席人數 (新增多元教室欄位) */}
+                            <div className="h-1/3 flex flex-row bg-neon-dark border-t border-neon-darker-gray">
+                                {/* 應到 */}
+                                <div className="flex-[0.8] flex flex-col items-center justify-center border-r border-neon-darker-gray p-2 relative overflow-hidden">
+                                    <span className="text-vw-1-5 font-bold text-neon-cyan mb-1 z-10 neon-text-cyan">應到</span>
+                                    <input 
+                                        type="number" 
+                                        value={examData.shouldArrive}
+                                        onChange={(e) => handleInputChange('shouldArrive', e.target.value)}
+                                        onBlur={handleInputBlur}
+                                        className="w-full text-center bg-transparent text-vw-5 font-black text-white outline-none z-10 drop-shadow-cyan"
+                                        placeholder="0"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#00ffff10]"></div>
+                                </div>
+                                {/* 實到 */}
+                                <div className="flex-[0.8] flex flex-col items-center justify-center border-r border-neon-darker-gray p-2 relative overflow-hidden">
+                                    <span className="text-vw-1-5 font-bold text-neon-green mb-1 z-10 neon-text-green">實到</span>
+                                    <input 
+                                        type="number" 
+                                        value={examData.actualArrive}
+                                        onChange={(e) => handleInputChange('actualArrive', e.target.value)}
+                                        onBlur={handleInputBlur}
+                                        className="w-full text-center bg-transparent text-vw-5 font-black text-white outline-none z-10 drop-shadow-green"
+                                        placeholder="0"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#39ff1410]"></div>
+                                </div>
+                                {/* 未到 */}
+                                <div className="flex-[1.2] flex flex-col items-center justify-center border-r border-neon-darker-gray p-2 relative overflow-hidden">
+                                    <span className="text-vw-1-5 font-bold text-neon-pink mb-1 z-10 neon-text-pink">未到座號/姓名</span>
+                                    <textarea 
+                                        value={examData.absentList}
+                                        onChange={(e) => handleInputChange('absentList', e.target.value)}
+                                        onBlur={handleInputBlur}
+                                        className="w-full h-full text-center bg-transparent text-vw-2-5 font-bold text-neon-pink outline-none resize-none pt-2 leading-tight z-10 placeholder-[#ff00ff50]"
+                                        placeholder="點擊輸入"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#ff00ff10]"></div>
+                                </div>
+                                {/* 多元教室 */}
+                                <div className="flex-[1.2] flex flex-col items-center justify-center p-2 relative overflow-hidden">
+                                    <span className="text-vw-1-2 font-bold text-neon-yellow mb-1 z-10 neon-text-yellow text-center leading-tight">到多元教室<br/>考試/號碼</span>
+                                    <textarea 
+                                        value={examData.specialRoomList || ""}
+                                        onChange={(e) => handleInputChange('specialRoomList', e.target.value)}
+                                        onBlur={handleInputBlur}
+                                        className="w-full h-full text-center bg-transparent text-vw-2-5 font-bold text-neon-yellow outline-none resize-none pt-2 leading-tight z-10 placeholder-[#ffff0050]"
+                                        placeholder="點擊輸入"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#ffff0010]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* === B區: 提醒事項 (佔45% 給圖片更大空間) === */}
+                        <div className="w-[45%] bg-black flex flex-col relative overflow-hidden">
+                            <div className="absolute top-0 left-0 bg-neon-yellow text-black px-6 py-2 text-xl font-black rounded-br-2xl z-20 shadow-neon-yellow transform rotate-1 flex justify-between items-center w-full pr-4">
+                                <span>NOTICE</span>
+                                
+                                {/* 圖片上傳按鈕 (只在非專注模式且無圖片時顯示) */}
+                                {!cleanMode && !noticeImage && (
+                                    <button 
+                                        onClick={() => noticeImageInputRef.current.click()}
+                                        className="ml-4 bg-black text-neon-yellow px-2 py-1 rounded text-sm hover:bg-gray-800 transition-colors"
+                                        title="上傳圖片"
+                                    >
+                                        📷 上傳圖片
+                                    </button>
+                                )}
+                                
+                                {/* 清除圖片按鈕 (只在有圖片時顯示) */}
+                                {noticeImage && !cleanMode && (
+                                    <button 
+                                        onClick={clearNoticeImage}
+                                        className="ml-4 bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                                        title="清除圖片"
+                                    >
+                                        🗑️ 清除圖片
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* 隱藏的檔案輸入框 */}
+                            <input 
+                                type="file" 
+                                ref={noticeImageInputRef} 
+                                onChange={handleNoticeImageUpload} 
+                                accept="image/*" 
+                                className="hidden" 
+                            />
+                            
+                            {/* 裝飾背景 */}
+                            <div className="absolute inset-0 opacity-20 bg-radial-dopamine pointer-events-none"></div>
+
+                            {/* 內部內容區塊 (動態排列) */}
+                            <div className="flex-1 flex flex-col items-center justify-center p-4 pt-12 pb-6 relative z-10 overflow-hidden gap-4">
+                                {noticeImage ? (
+                                    <>
+                                        {/* 顯示上傳的圖片，佔據大部分剩餘空間 */}
+                                        <div className="flex-1 w-full flex items-center justify-center min-h-0">
+                                            <img src={noticeImage} alt="Notice" className="max-w-full max-h-full object-contain rounded-md shadow-[0_0_15px_rgba(0,255,255,0.2)]" />
+                                        </div>
+                                        {/* 有圖片時：下方保留一排較小的輪播提醒文字，強制不換行 */}
+                                        <div className="text-vw-2-5 font-black text-center text-white animate-fade-in text-shadow-double whitespace-nowrap flex-shrink-0" key={reminderMessage}>
+                                            {reminderMessage}
+                                        </div>
+                                    </>
+                                ) : (
+                                    // 無圖片時：顯示原本超大的輪播文字
+                                    <div className="text-vw-5 font-black text-center leading-snug text-white animate-fade-in text-shadow-double" key={reminderMessage}>
+                                        {reminderMessage}
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* 底部多巴胺條紋 */}
+                            <div className="h-6 w-full bg-dopamine-stripes dopamine-shadow"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+<a id="ahao-back" href="../../index.html#tools" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

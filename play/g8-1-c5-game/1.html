@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>熱學觀念是非大挑戰</title>
+    <style>
+        :root {
+            --primary-color: #FF6B6B; /* 熱情的紅色 */
+            --secondary-color: #4ECDC4;
+            --bg-color: #fff0f0;
+            --card-bg: #ffffff;
+            --text-color: #2d3436;
+        }
+
+        body {
+            font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 修正嵌入高度問題，改用 padding 避免貼在網頁上時被切頭去尾 */
+            min-height: 90vh; 
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-color);
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        /* 進度條 */
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .score-board {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+        }
+
+        .question-box {
+            font-size: 1.4rem;
+            font-weight: bold;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            padding: 15px;
+            background-color: #fff5f5;
+            border-radius: 10px;
+            border: 1px dashed #ffa5a5;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 0;
+            font-size: 1.8rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-true {
+            background-color: #fff;
+            border: 3px solid #4CAF50;
+            color: #4CAF50;
+        }
+
+        .btn-false {
+            background-color: #fff;
+            border: 3px solid #FF5252;
+            color: #FF5252;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-true:hover { background-color: #eaffea; }
+        .btn-false:hover { background-color: #ffeaea; }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* 回饋區塊 (詳解) */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+        .feedback.correct {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border-left: 5px solid #2E7D32;
+        }
+        .feedback.wrong {
+            background-color: #FFEBEE;
+            color: #C62828;
+            border-left: 5px solid #C62828;
+        }
+
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none; /* 初始隱藏 */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* 結算畫面 */
+        .result-screen {
+            display: none;
+        }
+        
+        .fire-anim {
+            font-size: 5rem;
+            margin: 20px 0;
+            display: inline-block;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div id="quiz-screen">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <h1>🔥 熱學是非大挑戰</h1>
+        <div class="score-board">目前得分: <span id="score">0</span></div>
+        
+        <div class="question-box">
+             <span id="question-text">題目載入中...</span>
+        </div>
+
+        <div class="btn-container" id="options">
+            <button class="btn btn-true" onclick="checkAnswer(true)">⭕</button>
+            <button class="btn btn-false" onclick="checkAnswer(false)">❌</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">下一題 ➜</button>
+    </div>
+
+    <div id="result-screen" class="result-screen">
+        <h1>挑戰完成！</h1>
+        <div class="fire-anim">🔥</div>
+        <h2 id="final-score" style="font-size: 2rem;"></h2>
+        <p id="comment" style="font-size: 1.2rem; color: #555;"></p>
+        <button class="btn" style="background:var(--primary-color); color:white; font-size:1.2rem; width: auto; padding: 10px 30px;" onclick="restartGame()">再玩一次</button>
+    </div>
+</div>
+
+<script>
+    // --- 題目資料 ---
+    // 使用 let 才能進行洗牌
+    let questions = [
+        {
+            q: "熱量會由「熱含量」高的物體傳向「熱含量」低的物體。",
+            a: false,
+            explain: "【錯誤】熱量是由「溫度高」傳向「溫度低」，與熱含量無關。"
+        },
+        {
+            q: "水的比熱很大，這也是沿海地區日夜溫差通常比內陸地區小的原因。",
+            a: true,
+            explain: "【正確】比熱大代表溫度難升難降，所以溫差變化較小。"
+        },
+        {
+            q: "如果不考慮熱量散失，不同溫度的水混合時，高溫水放出的熱量會等於低溫水吸收的熱量。",
+            a: true,
+            explain: "【正確】這就是「熱平衡」原理：放熱＝吸熱。"
+        },
+        {
+            q: "冬天摸金屬門把覺得冰冷，是因為金屬的溫度比木頭門把低很多。",
+            a: false,
+            explain: "【錯誤】是因為金屬是「良導體」，導熱快，把你手上的熱迅速帶走，所以才覺得冷。"
+        },
+        {
+            q: "深色或粗糙的物體，比較容易吸收輻射熱，但也比較容易放出輻射熱。",
+            a: true,
+            explain: "【正確】容易吸熱的物體，通常也容易放熱。"
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const totalQuestions = questions.length;
+    // 自動計算配分
+    const scorePerQuestion = Math.round(100 / totalQuestions);
+
+    const questionText = document.getElementById('question-text');
+    const scoreDisplay = document.getElementById('score');
+    const progressBar = document.getElementById('progressBar');
+    const feedbackDiv = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    const optionsDiv = document.getElementById('options');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+
+    // ★★★ 隨機洗牌函式 ★★★
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function loadQuestion() {
+        // 重置介面狀態
+        feedbackDiv.style.display = 'none';
+        nextBtn.style.display = 'none';
+        optionsDiv.style.pointerEvents = 'auto'; 
+        optionsDiv.style.opacity = '1';
+        
+        // 更新進度條
+        const progress = (currentQuestionIndex / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // 顯示題目 (自動加上題號 Q1, Q2)
+        questionText.innerText = `Q${currentQuestionIndex + 1}. ${questions[currentQuestionIndex].q}`;
+    }
+
+    function checkAnswer(userAnswer) {
+        const currentQ = questions[currentQuestionIndex];
+        const isCorrect = (userAnswer === currentQ.a);
+
+        // 鎖定按鈕避免連點
+        optionsDiv.style.pointerEvents = 'none';
+        optionsDiv.style.opacity = '0.6';
+
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            score += scorePerQuestion;
+            // 滿分修正：如果是最後一題且接近 100 分，直接補滿
+            if (currentQuestionIndex === totalQuestions - 1 && score >= 98) score = 100;
+
+            scoreDisplay.innerText = score;
+            feedbackDiv.className = 'feedback correct';
+            feedbackDiv.innerHTML = `<strong>🎉 答對了！</strong><br>${currentQ.explain}`;
+        } else {
+            feedbackDiv.className = 'feedback wrong';
+            feedbackDiv.innerHTML = `<strong>💥 答錯了！</strong><br>${currentQ.explain}`;
+        }
+
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+            loadQuestion();
+        } else {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        progressBar.style.width = '100%'; // 進度條補滿
+        document.getElementById('final-score').innerText = `最終得分：${score} / 100`;
+        
+        let comment = "";
+        if(score === 100) comment = "太強了！你是熱學大師！🔥";
+        else if(score >= 80) comment = "很棒喔！觀念很清楚！✨";
+        else if(score >= 60) comment = "不錯喔！觀念很清楚！👍";
+        else comment = "別氣餒，再複習一下會更強！💪";
+        
+        document.getElementById('comment').innerText = comment;
+    }
+
+    function restartGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreDisplay.innerText = "0";
+        quizScreen.style.display = 'block';
+        resultScreen.style.display = 'none';
+        
+        // ★★★ 重新開始時，再次洗牌 ★★★
+        shuffleArray(questions);
+        
+        loadQuestion();
+    }
+
+    // 啟動遊戲 (先洗牌)
+    shuffleArray(questions);
+    loadQuestion();
+
+</script>
+
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

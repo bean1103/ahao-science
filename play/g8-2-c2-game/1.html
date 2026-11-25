@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>氧化還原觀念挑戰</title>
+    <style>
+        :root {
+            /* 氧化還原風格：氧化紅配火焰橘 */
+            --primary-color: #d63031; 
+            --secondary-color: #e17055;
+            --bg-color: #fff0f0; /* 淡淡的淺紅背景 */
+            --card-bg: #ffffff;
+            --text-color: #2d3436;
+        }
+
+        body {
+            font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#fab1a0 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 嵌入高度優化 */
+            min-height: 90vh; 
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-color);
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(214, 48, 49, 0.15);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: 6px solid var(--primary-color);
+        }
+
+        /* 進度條 */
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #dfe6e9;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.05);
+        }
+
+        .score-board {
+            font-size: 1.2rem;
+            color: #636e72;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            background: #f1f2f6;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 50px;
+        }
+
+        .question-box {
+            font-size: 1.3rem;
+            font-weight: 600;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            padding: 20px;
+            background: #fff5f5;
+            border-radius: 15px;
+            border: 2px dashed #fab1a0;
+            color: #2d3436;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .btn {
+            border: none;
+            padding: 15px 0;
+            font-size: 1.8rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 130px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-true {
+            background-color: #fff;
+            border: 3px solid #27ae60;
+            color: #27ae60;
+        }
+
+        .btn-false {
+            background-color: #fff;
+            border: 3px solid #d63031;
+            color: #d63031;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-true:hover { background-color: #eafaf1; }
+        .btn-false:hover { background-color: #fff0f0; }
+
+        /* 回饋區塊 */
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.4s;
+            text-align: left;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .feedback.correct {
+            background-color: #dff9fb;
+            color: #00b894;
+            border-left: 5px solid #00b894;
+        }
+        .feedback.wrong {
+            background-color: #ffeaa7;
+            color: #d35400;
+            border-left: 5px solid #d35400;
+        }
+
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.3);
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background-color: #b71c1c;
+        }
+
+        .result-screen {
+            display: none;
+        }
+        
+        /* 火焰動畫 */
+        .fire-anim {
+            font-size: 5rem;
+            margin: 20px 0;
+            display: inline-block;
+            animation: burn 1.5s infinite alternate;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes burn {
+            0% { transform: scale(1); filter: brightness(100%); }
+            100% { transform: scale(1.1); filter: brightness(120%); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- 遊戲進行畫面 -->
+    <div id="quiz-screen">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <h1>🔥 氧化還原大挑戰</h1>
+        <div class="score-board">目前得分: <span id="score">0</span></div>
+        
+        <div class="question-box">
+             <span id="question-text">題目載入中...</span>
+        </div>
+
+        <div class="btn-container" id="options">
+            <button class="btn btn-true" onclick="checkAnswer(true)">
+                <span>⭕</span> 對
+            </button>
+            <button class="btn btn-false" onclick="checkAnswer(false)">
+                <span>❌</span> 錯
+            </button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">下一題 ➜</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="result-screen" class="result-screen">
+        <h1>挑戰完成！</h1>
+        <div class="fire-anim">🔥</div>
+        <h2 id="final-score" style="font-size: 2.5rem; color: var(--text-color);"></h2>
+        <p id="comment" style="font-size: 1.2rem; color: #666;"></p>
+        <button class="btn" style="background:var(--primary-color); color:white; border:none; margin-top:20px; width: auto; padding: 12px 30px;" onclick="restartGame()">再試一次</button>
+    </div>
+</div>
+
+<script>
+    // --- 氧化還原題目資料 ---
+    let questions = [
+        {
+            q: "鎂帶在空氣中燃燒時會發出強烈的白光，其燃燒後的白色產物溶於水後，可使紅色石蕊試紙變藍色。",
+            a: true,
+            explain: "【正確】鎂燃燒產生氧化鎂（白色固體），氧化鎂溶於水形成氫氧化鎂，呈鹼性，可使紅色石蕊試紙變藍。"
+        },
+        {
+            q: "銅對氧的活性很小，即使加熱也不會燃燒，但表面會生成一層黑色的氧化銅。",
+            a: true,
+            explain: "【正確】銅活性小，加熱時不產生火焰（不燃燒），但高溫下會與氧反應生成黑色的氧化銅（CuO）。"
+        },
+        {
+            q: "非金屬元素如硫粉燃燒後產生的氣體（二氧化硫），溶於水後會形成酸性溶液，能使藍色石蕊試紙變紅色。",
+            a: true,
+            explain: "【正確】硫燃燒產生二氧化硫，溶於水形成亞硫酸，呈酸性，可使藍色石蕊試紙變紅。"
+        },
+        {
+            q: "在化學反應 2Mg + CO₂ → 2MgO + C 中，鎂奪取了二氧化碳中的氧，因此鎂擔任「氧化劑」的角色。",
+            a: false,
+            explain: "【錯誤】鎂奪取氧，代表鎂被氧化，因此鎂是「還原劑」；二氧化碳失去氧被還原，才是氧化劑。"
+        },
+        {
+            q: "氧化與還原反應必相伴發生，在一個反應中若有物質被氧化，則必有另一物質被還原。",
+            a: true,
+            explain: "【正確】氧化與還原是電子或氧原子轉移的過程，兩者同時發生，不可單獨存在。"
+        },
+        {
+            q: "食品包裝中常見的「脫氧劑」，其主要成分通常是鐵粉，利用鐵粉易與氧反應的特性來消耗包裝內的氧氣，此過程鐵粉發生了還原反應。",
+            a: false,
+            explain: "【錯誤】鐵粉與氧反應生成氧化鐵，鐵粉得到氧，所以是發生了「氧化反應」（擔任還原劑）。"
+        },
+        {
+            q: "將鋅片放入硫酸銅水溶液中，因為鋅的活性大於銅，所以鋅會溶解，且表面會有紅色的銅析出。",
+            a: true,
+            explain: "【正確】活性大小：鋅＞銅。活性大的金屬（鋅）可將活性小的金屬（銅）從其化合物（硫酸銅）中取代出來，故鋅溶解、銅析出。"
+        },
+        {
+            q: "氮氣在常溫下活性很小，不易與其他物質反應，因此博物館常利用氮氣填充來保存珍貴的史料或畫冊，防止其氧化。",
+            a: true,
+            explain: "【正確】氮氣（N₂）化學性質安定（活性小），常用於食品保鮮或文物保存以隔絕氧氣。"
+        },
+        {
+            q: "在高爐煉鐵的過程中，加入煤焦（碳）的主要目的是為了燃燒產生熱量，並作為還原劑將氧化鐵還原成鐵。",
+            a: true,
+            explain: "【正確】煤焦（主要成分為碳）在高爐中有雙重功能：一是燃燒提供高溫熱源，二是作為還原劑奪取氧化鐵中的氧。"
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const totalQuestions = questions.length;
+    const scorePerQuestion = Math.round(100 / totalQuestions);
+
+    const questionText = document.getElementById('question-text');
+    const scoreDisplay = document.getElementById('score');
+    const progressBar = document.getElementById('progressBar');
+    const feedbackDiv = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    const optionsDiv = document.getElementById('options');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+
+    // ★★★ 隨機洗牌函式 ★★★
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function loadQuestion() {
+        feedbackDiv.style.display = 'none';
+        nextBtn.style.display = 'none';
+        optionsDiv.style.pointerEvents = 'auto'; 
+        optionsDiv.style.opacity = '1';
+        
+        // 更新進度條
+        const progress = (currentQuestionIndex / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // 顯示題目 (自動加上題號 Q1, Q2)
+        questionText.innerText = `Q${currentQuestionIndex + 1}. ${questions[currentQuestionIndex].q}`;
+    }
+
+    function checkAnswer(userAnswer) {
+        const currentQ = questions[currentQuestionIndex];
+        const isCorrect = (userAnswer === currentQ.a);
+
+        optionsDiv.style.pointerEvents = 'none';
+        optionsDiv.style.opacity = '0.6';
+
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            score += scorePerQuestion;
+            // 滿分修正
+            if (currentQuestionIndex === totalQuestions - 1 && score >= 98) score = 100;
+
+            scoreDisplay.innerText = score;
+            feedbackDiv.className = 'feedback correct';
+            feedbackDiv.innerHTML = `<strong>🎉 觀念正確！</strong><br>${currentQ.explain}`;
+        } else {
+            feedbackDiv.className = 'feedback wrong';
+            feedbackDiv.innerHTML = `<strong>💥 觀念修正：</strong><br>${currentQ.explain}`;
+        }
+
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+            loadQuestion();
+        } else {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        progressBar.style.width = '100%';
+        document.getElementById('final-score').innerText = `${score} 分`;
+        
+        let comment = "";
+        if(score === 100) comment = "太強了！氧化還原大師就是你！🔥✨";
+        else if(score >= 80) comment = "很棒喔！活性大小和氧化劑都分得很清楚！👍";
+        else if(score >= 60) comment = "及格了！小心分辨氧化與還原的定義喔！🧐";
+        else comment = "別灰心！把詳解再看一次，下次一定會更好！💪";
+        
+        document.getElementById('comment').innerText = comment;
+    }
+
+    function restartGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreDisplay.innerText = "0";
+        quizScreen.style.display = 'block';
+        resultScreen.style.display = 'none';
+        
+        // ★★★ 重新開始時，再次洗牌 ★★★
+        shuffleArray(questions);
+        
+        loadQuestion();
+    }
+
+    // 啟動遊戲 (先洗牌)
+    shuffleArray(questions);
+    loadQuestion();
+
+</script>
+
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

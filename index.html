@@ -188,6 +188,8 @@ section.block{margin-top:32px}
 
 <script>
 const OLD="https://sites.google.com/view/ahaos-teaching-channel/";
+const PLAY={"首頁/基會試煉/八年級上學期/八上-ch-5溫度與熱": "play/g8-1-c5-game/", "首頁/基會試煉/八年級上學期/八上-ch-6元素與化合物": "play/g8-1-c6-game/", "首頁/基會試煉/八年級上學期/八上-ch-5-基會試煉": "play/g8-1-c5-quiz/", "首頁/基會試煉/八年級上學期/八上-ch-6-基會試煉": "play/g8-1-c6-quiz/", "首頁/基會試煉/八年級下學期/八下-ch-1-化學反應": "play/g8-2-c1-game/", "首頁/基會試煉/八年級下學期/八下-ch-2-氧化還原": "play/g8-2-c2-game/", "首頁/基會試煉/八年級下學期/八下-ch-3-酸鹼鹽": "play/g8-2-c3-game/", "首頁/基會試煉/八年級下學期/八下-ch-4-反應速率與平衡": "play/g8-2-c4-game/", "首頁/基會試煉/九年級上學期/九上ch-7-浩瀚的宇宙": "play/g9-1-c7-game/", "首頁/基會試煉/九年級上學期/九上-ch-7-基會試煉": "play/g9-1-c7-quiz/", "首頁/基會試煉/九年級上學期/九上-ch-4-基會試煉": "play/g9-1-c4-quiz/", "110115-會考自然解析": "play/exam-110-115/", "考試時程": "play/exam-schedule/", "模擬考時程": "play/mock-schedule/", "模擬考-詳解": "play/mock-answers/", "島嶼課程複習/g9_1_c3": "play/g9-1-c3-island/", "島嶼課程複習/g7_1_c3": "play/g7-1-c3-island/", "島嶼課程複習/g9_1_c2": "play/g9-1-c2-island/", "島嶼課程複習/g7_1_c4": "play/g7-1-c4-island/", "g9_1_c6": "play/g9-1-c6-island/"};
+const P=p=>PLAY[p]||OLD+p;
 const YT=q=>"https://www.youtube.com/channel/UCJtQ4k093PWRBCbzpuM9fVQ/search?query="+encodeURIComponent(q);
 const DATA=[
  {g:"7",label:"七年級",sems:[
@@ -306,7 +308,7 @@ function home(){
     <a class="mbtn" href="#map"><img class="pic" style="width:63px" src="${CHAR.magnify}" alt=""><b>冒險地圖</b><span>依章節複習</span></a>
     <a class="mbtn" href="#exam"><img class="pic" style="width:76px" src="${CHAR.book}" alt=""><b>會考大魔王</b><span>110～115 解析、模擬考</span></a>
     <a class="mbtn" href="#videos"><img class="pic" style="width:74px" src="${CHAR.laptop}" alt=""><b>新影片</b><span>上傳後自動出現</span></a>
-    <a class="mbtn" href="#tools"><img class="pic" style="width:84px" src="${CHAR.present}" alt=""><b>教室工具</b><span>考試時程、海螺計分</span></a>
+    <a class="mbtn" href="#tools"><img class="pic" style="width:84px" src="${CHAR.present}" alt=""><b>教室工具</b><span>考試時程、模擬考時程</span></a>
   </div>
 
   <section class="block" id="map">
@@ -325,17 +327,16 @@ function home(){
   <section class="block" id="exam">
     <div class="block-head"><h2>會考大魔王</h2><span class="sub">九年級最終關卡</span></div>
     <div class="links">
-      <a class="lk" href="${OLD}110115-會考自然解析" target="_blank" rel="noopener">🏆 110～115 會考自然解析<small>歷屆試題逐題解析</small></a>
-      <a class="lk" href="${OLD}模擬考-詳解" target="_blank" rel="noopener">📝 模擬考詳解<small>每次模擬考的題目解說</small></a>
+      <a class="lk" href="play/exam-110-115/">🏆 110～115 會考自然解析<small>歷屆試題逐題解析</small></a>
+      <a class="lk" href="play/mock-answers/">📝 模擬考詳解<small>每次模擬考的題目解說</small></a>
     </div>
   </section>
 
   <section class="block" id="tools">
     <div class="block-head"><h2>教室工具</h2><span class="sub">上課時用</span></div>
     <div class="links">
-      <a class="lk" href="${OLD}考試時程" target="_blank" rel="noopener">🗓️ 考試時程<small>本學期段考日期與範圍</small></a>
-      <a class="lk" href="${OLD}模擬考時程" target="_blank" rel="noopener">🗓️ 模擬考時程<small>九年級模擬考日期</small></a>
-      <a class="lk" href="${OLD}海螺計分" target="_blank" rel="noopener">🐚 海螺計分<small>分組與課堂計分</small></a>
+      <a class="lk" href="play/exam-schedule/">🗓️ 考試時程<small>本學期段考日期與範圍</small></a>
+      <a class="lk" href="play/mock-schedule/">🗓️ 模擬考時程<small>九年級模擬考日期</small></a>
     </div>
   </section>`;
 }
@@ -358,9 +359,9 @@ function level(id){
         <a href="${WATCH(v.id)}" target="_blank" rel="noopener"><span class="play" aria-hidden="true">▶</span><span class="t">${esc(v.title)}<small>${v.kind}${v.date?"　"+v.date:""}</small></span></a></div>`}).join(""):`<div class="boss off"><span class="ico">🎬</span><span>影片整理中<small>阿豪老師上傳後會自動出現</small></span></div>`}</div></section>
     <section><div class="boss-head"><h2>Boss 戰</h2><img src="${CHAR.hazmat}" alt=""></div>
       <div class="vids">
-        ${c.game?`<a class="boss game" href="${OLD+c.game}" target="_blank" rel="noopener"><span class="ico">🎮</span><span>互動小遊戲<small>邊玩邊複習觀念</small></span></a>`:`<div class="boss off"><span class="ico">🎮</span><span>互動小遊戲<small>這座島還沒有</small></span></div>`}
-        ${c.quiz?`<a class="boss quiz" href="${OLD+c.quiz}" target="_blank" rel="noopener"><span class="ico">👑</span><span>基會試煉<small>會考程度的 Boss</small></span></a>`:`<div class="boss off"><span class="ico">👑</span><span>基會試煉<small>這座島還沒有</small></span></div>`}
-        ${c.isl?`<a class="boss isl" href="${OLD+c.isl}" target="_blank" rel="noopener"><span class="ico">🏝️</span><span>島嶼課程複習<small>G${c.g}_${c.s}_C${c.c}</small></span></a>`:""}
+        ${c.game?`<a class="boss game" href="${P(c.game)}"><span class="ico">🎮</span><span>互動小遊戲<small>邊玩邊複習觀念</small></span></a>`:`<div class="boss off"><span class="ico">🎮</span><span>互動小遊戲<small>這座島還沒有</small></span></div>`}
+        ${c.quiz?`<a class="boss quiz" href="${P(c.quiz)}"><span class="ico">👑</span><span>基會試煉<small>會考程度的 Boss</small></span></a>`:`<div class="boss off"><span class="ico">👑</span><span>基會試煉<small>這座島還沒有</small></span></div>`}
+        ${c.isl?`<a class="boss isl" href="${P(c.isl)}"><span class="ico">🏝️</span><span>島嶼課程複習<small>G${c.g}_${c.s}_C${c.c}</small></span></a>`:""}
       </div>
       ${st==="clear"?`<div class="win"><img src="${CHAR.cheer}" alt="阿豪老師歡呼"><div><b>恭喜通關！</b><span class="sub">這座島已經點亮了</span></div></div>`:""}
       <button class="clearbtn" id="clear" aria-pressed="${st==="clear"}">${st==="clear"?"★ 已通關（再按一次取消）":"我通關了！點亮這座島"}</button>

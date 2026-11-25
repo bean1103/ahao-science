@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自然基會試煉 G8-1-C5</title>
+    
+    <!-- 載入 React, ReactDOM, Babel, Tailwind -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 設定 Tailwind Dark Mode 與自定義顏色 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dopamine: {
+                            yellow: '#FFD93D',
+                            pink: '#FF6B6B',
+                            blue: '#4D96FF',
+                            green: '#6BCB77',
+                            cream: '#FFFBEB'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #FFFBEB; 
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* 浮動動畫 */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+        
+        /* 彈出動畫 */
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-in { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* 列印設定 */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background-color: white; -webkit-print-color-adjust: exact; }
+            .break-page { page-break-after: always; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 1. 定義 SVG 圖示元件 (內嵌以確保穩定性) ---
+        const Icons = {
+            Star: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-dopamine-yellow" {...props}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-5.82 3.25L7.38 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            ),
+            ChevronRight: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m9 18 6-6-6-6"/></svg>
+            ),
+            ChevronLeft: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15 18-6-6 6-6"/></svg>
+            ),
+            CheckCircle: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            ),
+            XCircle: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+            ),
+            Download: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            ),
+            Printer: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+            ),
+            Award: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            ),
+            BookOpen: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            ),
+            Zap: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-dopamine-yellow" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            )
+        };
+        const { Star, ChevronRight, ChevronLeft, CheckCircle, XCircle, Download, Printer, Award, BookOpen, Zap } = Icons;
+
+        // --- 2. 題目資料庫 (G8-1-C5 熱學) ---
+        const questionsData = [
+            {
+                id: 1,
+                text: "玲玲在三個相同燒杯中，各加入質量50g、溫度20℃的甲、乙、丙三種不同的溶液，放在相同的穩定熱源上加熱。加熱5分鐘後，甲溫70℃、乙溫80℃、丙溫90℃。請問三種溶液何者的比熱最大？",
+                options: [
+                    { id: 'A', text: "甲" },
+                    { id: 'B', text: "乙" },
+                    { id: 'C', text: "丙" },
+                    { id: 'D', text: "三者相同" }
+                ],
+                correct: 'A',
+                source: "【90-1基測】",
+                explanation: "比熱越大的物質，溫度越難升降。在吸收相同熱量(加熱時間相同)的情況下，甲的溫度上升最少(50度)，表示其比熱最大。"
+            },
+            {
+                id: 2,
+                text: "小立以相同的燒杯盛等量的水，分別以隔水加熱(甲)、隔油加熱(乙)、隔砂加熱(丙)。若測得外鍋溫度分別為水溫100℃、油溫300℃、砂溫600℃，且三杯水均呈沸騰狀態，則此三杯水的溫度高低順序為何？",
+                options: [
+                    { id: 'A', text: "甲＞乙＞丙" },
+                    { id: 'B', text: "甲＜乙＜丙" },
+                    { id: 'C', text: "甲＜乙＝丙" },
+                    { id: 'D', text: "甲＝乙＝丙" }
+                ],
+                correct: 'D',
+                source: "【90-1基測】",
+                explanation: "水在常壓下的沸點固定為100℃。既然三杯水都已經沸騰，無論外鍋溫度多高，水溫都維持在100℃，故三者相等。"
+            },
+            {
+                id: 3,
+                text: "若甲溶液由20℃加熱至40℃需1000卡熱量；乙溶液由32℃加熱至56℃也需1000卡熱量。已知熱源穩定，加熱2分鐘供應1000卡。若要將丙溶液由20℃加熱至90℃(需加熱5分鐘)，則需要多少熱量？",
+                options: [
+                    { id: 'A', text: "1500卡" },
+                    { id: 'B', text: "2000卡" },
+                    { id: 'C', text: "2500卡" },
+                    { id: 'D', text: "3000卡" }
+                ],
+                correct: 'C',
+                source: "【90-2基測】",
+                explanation: "加熱2分鐘提供1000卡，代表每分鐘提供500卡。丙溶液加熱了5分鐘，故吸收熱量 = 5 × 500 = 2500卡。"
+            },
+            {
+                id: 4,
+                text: "欲了解水溫變化和加熱時間的關係，以燒杯裝100公克20℃的水均勻加熱。若熱源每分鐘提供75卡熱量，不計熱量散失，加熱約幾分鐘後水溫可達50℃？",
+                options: [
+                    { id: 'A', text: "15" },
+                    { id: 'B', text: "20" },
+                    { id: 'C', text: "30" },
+                    { id: 'D', text: "40" }
+                ],
+                correct: 'D',
+                source: "【91-1基測】",
+                explanation: "所需熱量 H = m × s × ΔT = 100 × 1 × (50 - 20) = 3000卡。所需時間 = 總熱量 / 每分鐘供熱 = 3000 / 75 = 40分鐘。"
+            },
+            {
+                id: 5,
+                text: "分別取油85克與水85克，以相同的熱源加熱。若水的比熱為1.0，油的比熱為0.6。若取170克的某液體(比熱0.5)以相同熱源加熱，其溫度上升速度會比水和油如何？",
+                options: [
+                    { id: 'A', text: "比水慢" },
+                    { id: 'B', text: "介於水和油之間" },
+                    { id: 'C', text: "與水重疊" },
+                    { id: 'D', text: "比油快" }
+                ],
+                source: "【92-1基測】(改編)",
+                explanation: "溫度上升的快慢與「質量×比熱」（熱容量）成反比。水：85×1.0＝85；油：85×0.6＝51；某液體：170×0.5＝85。某液體的熱容量與水相同，用相同熱源加熱時升溫速度一樣，所以溫度曲線會與水重疊。",
+                correct: 'C'
+            },
+            {
+                id: 6,
+                text: "已知1g的水上升1℃需1卡，1g的酒精上升1℃需小於1卡。若將100g、20℃的酒精與100g、60℃的水混合，且無熱量散失，平衡末溫會是多少？",
+                options: [
+                    { id: 'A', text: "小於30℃" },
+                    { id: 'B', text: "介於30℃與40℃之間" },
+                    { id: 'C', text: "等於40℃" },
+                    { id: 'D', text: "介於40℃與60℃之間" }
+                ],
+                correct: 'D',
+                source: "【93-1基測】",
+                explanation: "若兩者比熱相同，末溫會是平均值40℃。但水的比熱(1)大於酒精(<1)，水放出的熱量會使酒精溫度上升較多，或者說「熱容量大的水主導溫度」，故末溫會偏向水原本的溫度(60℃)，即大於40℃。"
+            },
+            {
+                id: 7,
+                text: "小敏使用同一熱源分別對相同質量的水及乾砂加熱。加熱8分鐘時，兩者吸收的熱量關係為何？(假設無熱量散失)",
+                options: [
+                    { id: 'A', text: "水吸收較多" },
+                    { id: 'B', text: "乾砂吸收較多" },
+                    { id: 'C', text: "兩者吸收一樣多" },
+                    { id: 'D', text: "無法比較" }
+                ],
+                correct: 'C',
+                source: "【93-2基測】",
+                explanation: "熱源相同、加熱時間相同，所提供的熱量就相同。物質吸收的熱量等於熱源提供的熱量(無散失)，故兩者吸收一樣多。"
+            },
+            {
+                id: 8,
+                text: "阿漢洗澡時，浴缸內有200L、30℃的水。他加入60℃的熱水後，水溫達到40℃。若忽略熱量散失，請問他加入了多少60℃的熱水？",
+                options: [
+                    { id: 'A', text: "50L" },
+                    { id: 'B', text: "100L" },
+                    { id: 'C', text: "150L" },
+                    { id: 'D', text: "200L" }
+                ],
+                correct: 'B',
+                source: "【95-2基測】",
+                explanation: "設加入X公升。吸熱 = 放熱。200 × 1 × (40-30) = X × 1 × (60-40)。2000 = 20X，故 X = 100L。"
+            },
+            {
+                id: 9,
+                text: "有關熱的傳播，下列敘述何者正確？",
+                options: [
+                    { id: 'A', text: "在空氣中，熱只能以對流方式傳播" },
+                    { id: 'B', text: "在空氣中，熱只能以傳導方式傳播" },
+                    { id: 'C', text: "在真空中，熱只能以輻射方式傳播" },
+                    { id: 'D', text: "在真空中，熱只能以對流方式傳播" }
+                ],
+                correct: 'C',
+                source: "【97-1基測】",
+                explanation: "真空沒有介質，無法進行傳導和對流，熱只能透過輻射的方式傳播（如太陽熱能傳到地球）。"
+            },
+            {
+                id: 10,
+                text: "質量相同、溫度相同的甲、乙、丙、丁四金屬球，比熱分別為0.113、0.113、0.217、0.217。若同時在空氣中自然冷卻至室溫20℃，何者散失的熱量最多？(假設初溫甲丙80℃、乙丁60℃)",
+                // 修正題目邏輯以符合原題：甲乙為鐵(0.113)，丙丁為鋁(0.217)。初溫：甲丙80，乙丁60。求降至20度誰散熱多。
+                // H = m s dt. 
+                // 甲: m * 0.113 * 60 = 6.78m
+                // 乙: m * 0.113 * 40 = 4.52m
+                // 丙: m * 0.217 * 60 = 13.02m
+                // 丁: m * 0.217 * 40 = 8.68m
+                // 題目原文質量不同：甲丙100g, 乙丁200g。
+                // 重新計算：
+                // 甲: 100 * 0.113 * 60 = 678
+                // 乙: 200 * 0.113 * 40 = 904
+                // 丙: 100 * 0.217 * 60 = 1302
+                // 丁: 200 * 0.217 * 40 = 1736
+                // 故丁最多。
+                text: "有四個金屬塊：甲(鐵,100g,80℃)、乙(鐵,200g,60℃)、丙(鋁,100g,80℃)、丁(鋁,200g,60℃)。已知鐵比熱0.113、鋁比熱0.217。若皆降溫至20℃，何者散失熱量最多？",
+                options: [
+                    { id: 'A', text: "甲" },
+                    { id: 'B', text: "乙" },
+                    { id: 'C', text: "丙" },
+                    { id: 'D', text: "丁" }
+                ],
+                correct: 'D',
+                source: "【103會考】",
+                explanation: "計算散失熱量 H = m × s × ΔT。甲: 100×0.113×60=678。乙: 200×0.113×40=904。丙: 100×0.217×60=1302。丁: 200×0.217×40=1736。故丁散失最多。"
+            }
+        ];
+
+        // 3. 勵志格言
+        const quote = "「溫度決定物質的狀態，熱情決定你的人生高度。」";
+
+        // 4. 主應用程式
+        const App = () => {
+            const [screen, setScreen] = useState('welcome'); // welcome, quiz, result
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [userAnswers, setUserAnswers] = useState({});
+            const [userInfo, setUserInfo] = useState({ name: '', seat: '' });
+            const [score, setScore] = useState(0);
+            const [showConfirm, setShowConfirm] = useState(false);
+
+            // 開始測驗
+            const handleStart = () => {
+                if (userInfo.name && userInfo.seat) {
+                    setScreen('quiz');
+                } else {
+                    alert("請輸入座號和姓名才能開始挑戰喔！");
+                }
+            };
+
+            // 選擇答案
+            const handleAnswer = (optionId) => {
+                setUserAnswers({
+                    ...userAnswers,
+                    [questionsData[currentQuestion].id]: optionId
+                });
+            };
+
+            // 下一題
+            const nextQuestion = () => {
+                if (currentQuestion < questionsData.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                } else {
+                    setShowConfirm(true);
+                }
+            };
+
+            // 上一題
+            const prevQuestion = () => {
+                if (currentQuestion > 0) {
+                    setCurrentQuestion(currentQuestion - 1);
+                    setShowConfirm(false);
+                }
+            };
+
+            // 繳交計算分數
+            const submitQuiz = () => {
+                let rawScore = 0;
+                let correctCount = 0;
+
+                questionsData.forEach(q => {
+                    if (userAnswers[q.id] === q.correct) {
+                        rawScore += 10;
+                        correctCount++;
+                    }
+                });
+
+                // 全對獎勵：超過 100 分
+                let bonus = 0;
+                if (correctCount === questionsData.length) {
+                    bonus = 10; // 滿分額外加 10 分
+                }
+
+                setScore(rawScore + bonus);
+                setScreen('result');
+                setShowConfirm(false);
+            };
+
+            // 下載 CSV
+            const downloadCSV = () => {
+                const bom = "\uFEFF"; // 解決中文亂碼
+                const header = ["座號", "姓名", "總分", "題目ID", "作答", "正確答案", "出處"];
+                const rows = questionsData.map(q => [
+                    userInfo.seat,
+                    userInfo.name,
+                    score,
+                    q.id,
+                    userAnswers[q.id] || "未作答",
+                    q.correct,
+                    q.source
+                ]);
+                
+                let csvContent = "data:text/csv;charset=utf-8," + bom;
+                csvContent += header.join(",") + "\n";
+                rows.forEach(row => {
+                    csvContent += row.join(",") + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `${userInfo.seat}_${userInfo.name}_G8-1-C5測驗結果.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            // 列印功能 (可另存 PDF)
+            const printResult = () => {
+                window.print();
+            };
+
+            return (
+                <div className="min-h-screen pb-10">
+                    
+                    {/* --- 歡迎頁面 --- */}
+                    {screen === 'welcome' && (
+                        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+                            <div className="bg-white p-8 rounded-3xl shadow-[8px_8px_0px_0px_#22D3EE] border-4 border-dopamine-yellow max-w-md w-full text-center float-anim">
+                                <div className="flex justify-center mb-4 text-dopamine-pink">
+                                    <BookOpen width={64} height={64} />
+                                </div>
+                                <h1 className="text-3xl font-black text-gray-800 mb-2 tracking-wider">自然基會試煉</h1>
+                                <h2 className="text-xl font-bold text-dopamine-blue mb-6">G8-1-C5 熱與生活</h2>
+                                
+                                <div className="space-y-4 mb-6 text-left">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">座號</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-dopamine-green focus:outline-none transition-colors bg-gray-50"
+                                            placeholder="請輸入座號 (例: 05)"
+                                            value={userInfo.seat}
+                                            onChange={(e) => setUserInfo({...userInfo, seat: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">姓名</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-dopamine-green focus:outline-none transition-colors bg-gray-50"
+                                            placeholder="請輸入姓名"
+                                            value={userInfo.name}
+                                            onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="bg-dopamine-cream p-4 rounded-xl mb-6 border border-dopamine-yellow">
+                                    <p className="text-gray-600 font-medium italic text-sm">
+                                        <Star className="inline w-4 h-4 mb-1 mr-1 text-dopamine-yellow" />
+                                        {quote}
+                                    </p>
+                                </div>
+
+                                <button 
+                                    onClick={handleStart}
+                                    className="w-full py-4 bg-dopamine-pink hover:bg-red-400 text-white font-black text-xl rounded-2xl shadow-lg transition-transform active:scale-95 flex justify-center items-center gap-2"
+                                >
+                                    開始挑戰 <ChevronRight />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- 測驗頁面 --- */}
+                    {screen === 'quiz' && (
+                        <div className="max-w-2xl mx-auto p-4 pt-10 pop-in">
+                            {/* 進度條與資訊 */}
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="font-bold text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-200">
+                                    考生: {userInfo.seat} {userInfo.name}
+                                </span>
+                                <div className="px-4 py-1 bg-dopamine-cream text-dopamine-pink rounded-full font-bold border border-dopamine-pink">
+                                    第 {currentQuestion + 1} / {questionsData.length} 題
+                                </div>
+                            </div>
+
+                            <div className="w-full bg-white h-4 rounded-full mb-8 overflow-hidden border border-gray-200 p-1">
+                                <div 
+                                    className="bg-dopamine-green h-full rounded-full transition-all duration-500 ease-out"
+                                    style={{ width: `${((currentQuestion + 1) / questionsData.length) * 100}%` }}
+                                ></div>
+                            </div>
+
+                            {/* 題目卡片 */}
+                            <div className="bg-white p-6 rounded-3xl shadow-[8px_8px_0px_0px_#FF6B6B] border-4 border-gray-100 mb-8 min-h-[350px] flex flex-col justify-between relative">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                         <span className="inline-block px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full font-bold">
+                                            {questionsData[currentQuestion].source}
+                                        </span>
+                                    </div>
+                                    
+                                    <h3 className="text-xl font-bold text-gray-800 leading-relaxed mb-6">
+                                        {questionsData[currentQuestion].text}
+                                    </h3>
+
+                                    <div className="space-y-3">
+                                        {questionsData[currentQuestion].options.map((opt) => (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => handleAnswer(opt.id)}
+                                                className={`w-full text-left p-4 rounded-xl border-2 font-medium transition-all duration-200 flex items-center
+                                                    ${userAnswers[questionsData[currentQuestion].id] === opt.id 
+                                                        ? 'border-dopamine-blue bg-blue-50 text-dopamine-blue shadow-md' 
+                                                        : 'border-gray-100 hover:border-dopamine-yellow hover:bg-yellow-50 text-gray-600'
+                                                    }`}
+                                            >
+                                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full mr-3 text-sm font-bold flex-shrink-0
+                                                    ${userAnswers[questionsData[currentQuestion].id] === opt.id 
+                                                        ? 'bg-dopamine-blue text-white' 
+                                                        : 'bg-gray-100 text-gray-500'
+                                                    }`}>
+                                                    {opt.id}
+                                                </span>
+                                                {opt.text}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 導航按鈕 */}
+                            <div className="flex justify-between items-center">
+                                <button 
+                                    onClick={prevQuestion}
+                                    disabled={currentQuestion === 0}
+                                    className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors
+                                        ${currentQuestion === 0 
+                                            ? 'text-gray-300 cursor-not-allowed' 
+                                            : 'text-gray-600 bg-white hover:bg-gray-100 shadow-sm border border-gray-200'}`}
+                                >
+                                    <ChevronLeft /> 上一題
+                                </button>
+
+                                {showConfirm ? (
+                                    <button 
+                                        onClick={submitQuiz}
+                                        className="px-8 py-3 bg-dopamine-green hover:bg-green-500 text-white font-bold rounded-xl shadow-[4px_4px_0px_0px_#10B981] flex items-center gap-2 animate-bounce"
+                                    >
+                                        確定繳交 <CheckCircle />
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={nextQuestion}
+                                        className="px-6 py-3 bg-dopamine-blue hover:bg-blue-600 text-white font-bold rounded-xl shadow-[4px_4px_0px_0px_#2563EB] active:translate-y-1 active:shadow-none flex items-center gap-2"
+                                    >
+                                        下一題 <ChevronRight />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- 結果頁面 --- */}
+                    {screen === 'result' && (
+                        <div className="max-w-4xl mx-auto p-4 pt-10 pop-in">
+                            {/* 不列印區域: 標題與賀詞 */}
+                            <div className="text-center mb-8 no-print">
+                                <div className="inline-block p-4 rounded-full bg-yellow-100 text-dopamine-yellow mb-4 float-anim border-4 border-white shadow-lg">
+                                    <Award width={64} height={64} />
+                                </div>
+                                <h2 className="text-4xl font-black text-gray-800 mb-2">測驗完成！</h2>
+                                <p className="text-gray-500">做得好，{userInfo.name}！熱學大師就是你！</p>
+                            </div>
+
+                            {/* 成績卡 (列印區域) */}
+                            <div className="bg-white p-8 rounded-3xl border-4 border-dopamine-yellow text-center mb-8 shadow-xl relative overflow-hidden print:border-2 print:shadow-none">
+                                <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-dopamine-pink via-dopamine-yellow to-dopamine-blue"></div>
+                                
+                                <div className="flex justify-between items-end border-b border-gray-100 pb-4 mb-4">
+                                    <div className="text-left">
+                                        <div className="text-sm text-gray-400">考生姓名</div>
+                                        <div className="text-xl font-bold text-gray-800">{userInfo.seat} {userInfo.name}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm text-gray-400">測驗日期</div>
+                                        <div className="text-lg font-bold text-gray-800">{new Date().toLocaleDateString()}</div>
+                                    </div>
+                                </div>
+
+                                <div className="py-6">
+                                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Total Score</div>
+                                    <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-dopamine-pink to-dopamine-yellow inline-block">
+                                        {score}
+                                    </div>
+                                    {score > 100 && (
+                                        <div className="mt-2 text-dopamine-pink font-bold text-lg animate-pulse flex items-center justify-center gap-2">
+                                            <Zap className="w-5 h-5" /> 完美全對！獲得熱情加分！ <Zap className="w-5 h-5" />
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="mt-6 flex justify-center gap-4 no-print">
+                                    <button 
+                                        onClick={downloadCSV}
+                                        className="px-5 py-3 bg-dopamine-green text-white rounded-xl font-bold hover:bg-green-600 shadow-md flex items-center gap-2 transition-transform hover:scale-105"
+                                    >
+                                        <Download width={20} /> 下載成績單 (CSV)
+                                    </button>
+                                    <button 
+                                        onClick={printResult}
+                                        className="px-5 py-3 bg-dopamine-blue text-white rounded-xl font-bold hover:bg-blue-600 shadow-md flex items-center gap-2 transition-transform hover:scale-105"
+                                    >
+                                        <Printer width={20} /> 列印 / 存為 PDF
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 詳解列表 */}
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-bold text-gray-700 border-l-8 border-dopamine-pink pl-4">詳細解析</h3>
+                                {questionsData.map((q, index) => {
+                                    const isCorrect = userAnswers[q.id] === q.correct;
+                                    return (
+                                        <div key={q.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm break-page">
+                                            <div className="flex gap-4">
+                                                <div className="flex-shrink-0 mt-1">
+                                                    {isCorrect ? (
+                                                        <CheckCircle className="w-8 h-8 text-dopamine-green" />
+                                                    ) : (
+                                                        <XCircle className="w-8 h-8 text-dopamine-pink" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h4 className="font-bold text-lg text-gray-800">第 {index + 1} 題</h4>
+                                                        <span className="text-xs font-bold px-2 py-1 bg-gray-100 text-gray-500 rounded">
+                                                            {q.source}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-gray-700 mb-4 font-medium">{q.text}</p>
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <div className={`p-3 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                                            <span className="text-xs font-bold block mb-1 text-gray-500">你的答案</span>
+                                                            <span className={`font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                                                {userAnswers[q.id] || "未作答"} : {q.options.find(o => o.id === userAnswers[q.id])?.text || "-"}
+                                                            </span>
+                                                        </div>
+                                                        <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                                                            <span className="text-xs font-bold block mb-1 text-gray-500">正確答案</span>
+                                                            <span className="font-bold text-blue-700">{q.correct} : {q.options.find(o => o.id === q.correct)?.text}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-dopamine-cream p-4 rounded-xl text-sm text-gray-700 border border-dopamine-yellow">
+                                                        <span className="font-bold text-dopamine-yellow block mb-1 flex items-center gap-1">
+                                                            <Zap width={14} /> 解析：
+                                                        </span>
+                                                        {q.explanation}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="mt-10 text-center text-gray-400 text-sm print-only">
+                                自然基會試煉 G8-1-C5 | 考生：{userInfo.seat} {userInfo.name}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+<a id="ahao-back" href="../../index.html#ch-8-1-5" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

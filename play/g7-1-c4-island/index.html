@@ -1,0 +1,3420 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="IsleForge">
+<meta name="description" content="阿豪老師自然G7_1_C4：生物體的運輸作用——3D 浮空群島跑酷挑戰，給國中學生。">
+<title>阿豪老師自然G7_1_C4｜生物體的運輸作用</title>
+<style>
+:root{
+  --bg:#16222e; --ink:#f3f6f8; --muted:#b7c4cf; --panel:rgba(22,34,46,.94); --card:rgba(255,255,255,.08); --line:rgba(255,255,255,.18);
+  --primary:#2f7a6b; --primary-ink:#fff; --accent:#d9792f; --focus:#ffd84a;
+  --font:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",system-ui,sans-serif;
+  --bar-h:64px;
+}
+:root[data-mode="light"]{
+  --ink:#1c2a33; --muted:#4b5d69; --panel:rgba(255,255,255,.95); --card:rgba(20,40,50,.06); --line:rgba(20,40,50,.2);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;overscroll-behavior:none}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+[hidden]{display:none!important}
+.skip{position:absolute;left:-999px;top:0;background:#fff;color:#000;padding:8px 12px;z-index:200}
+.skip:focus{left:8px;top:8px}
+
+#stage{position:fixed;inset:0;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%}
+#labels{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;pointer-events:auto;background:var(--panel);color:var(--ink);border:2px solid var(--c,var(--primary));
+  border-radius:14px;padding:3px 10px;font-weight:700;font-size:14px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;will-change:transform}
+.lbl small{display:block;font-weight:500;font-size:11px;color:var(--muted)}
+.lbl.center{--c:var(--accent)}
+
+/* 按鈕 */
+.btn{min-height:44px;min-width:44px;padding:6px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);backdrop-filter:blur(6px);font-weight:600}
+.btn:hover{border-color:var(--primary)}
+.btn.primary{background:var(--primary);color:var(--primary-ink);border-color:transparent}
+.btn.accent{background:var(--accent);color:#fff;border-color:transparent}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.chip{min-height:44px;padding:4px 14px;border-radius:22px;border:1.5px solid var(--line);background:var(--card);font-weight:600}
+.chip.on,.chip[aria-pressed="true"]{background:var(--primary);color:#fff;border-color:transparent}
+
+/* 上方列 */
+#bar{position:fixed;left:0;right:0;top:0;min-height:var(--bar-h);display:flex;align-items:center;gap:10px;padding:8px 12px;z-index:20;
+  background:linear-gradient(var(--panel),transparent);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.brand .logo{font-size:30px}
+.brand h1{font-size:18px;margin:0;line-height:1.2}
+.brand p{margin:0;font-size:12px;color:var(--muted)}
+.hud{display:flex;gap:8px;font-weight:700;font-size:14px;margin-left:auto}
+.hud span{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 10px;white-space:nowrap}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.tools .btn{display:inline-flex;align-items:center;gap:4px;padding:6px 10px}
+.tools .btn span{font-size:13px}
+#settings{position:absolute;right:12px;top:calc(var(--bar-h) + 4px);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:calc(100vw - 24px)}
+#settings .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#settings .row b{width:42px;font-size:13px}
+
+/* 內容面板 */
+#panel{position:fixed;right:0;top:var(--bar-h);bottom:0;width:min(430px,92vw);background:var(--panel);border-left:2px solid var(--line);z-index:15;overflow:auto;padding:16px 18px 28px;backdrop-filter:blur(8px)}
+#panel .close{position:absolute;right:10px;top:10px}
+#panel h2{margin:0 44px 4px 0;font-size:22px}
+.tag{display:inline-block;font-size:12px;background:var(--c,var(--primary));color:#fff;border-radius:10px;padding:1px 10px;margin-bottom:8px}
+.sec{margin-top:16px}
+.sec h3{font-size:15px;margin:0 0 6px;color:var(--c,var(--primary))}
+:root[data-mode="dark"] .sec h3{color:#9fe0cf}
+.sec ul{margin:0;padding-left:20px}
+.sec li{margin:3px 0}
+.rule{background:var(--card);border-left:4px solid var(--accent);padding:8px 12px;border-radius:8px}
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lv .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;line-height:1.25}
+.lv .btn small{font-weight:500;color:var(--muted)}
+.lv .btn.pass{border-color:#3fb36b}
+.links a{color:inherit;display:block;margin:4px 0;text-decoration:underline}
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.kcard{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px;min-height:96px}
+.kcard b{display:block;margin-bottom:4px}
+.kcard.lock{opacity:.55;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.small{font-size:13px;color:var(--muted)}
+table.hq{width:100%;border-collapse:collapse;font-size:14px}
+table.hq th,table.hq td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:center}
+table.hq td:first-child,table.hq th:first-child{text-align:left}
+.demo{color:var(--accent);font-size:12px}
+
+/* 文字清單 */
+#list-view{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto}
+.list-in{max-width:860px;margin:0 auto;padding:16px 16px 60px}
+.list-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.list-head h2{margin:0}
+.list-item{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;margin:14px 0}
+.list-item h3{margin:0 0 6px;font-size:19px}
+
+/* 彈窗 */
+#modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px}
+.modal-in{position:relative;background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:20px;width:min(640px,100%);max-height:92vh;overflow:auto;padding:20px}
+.modal-in .close{position:absolute;right:10px;top:10px}
+.modal-in h2{margin:0 44px 10px 0}
+.opts{display:grid;gap:8px;margin:10px 0}
+.opts .btn{text-align:left;justify-content:flex-start}
+.opts .btn.right{background:#2fa04a;color:#fff;border-color:transparent}
+.opts .btn.wrong{background:#d0453b;color:#fff;border-color:transparent}
+.fb{min-height:48px;font-size:14px}
+.chat{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow:auto;margin:10px 0}
+.msg{padding:8px 12px;border-radius:14px;max-width:92%;background:var(--card)}
+.msg.me{align-self:flex-end;background:var(--primary);color:#fff}
+.askrow{display:flex;gap:8px}
+.askrow input{flex:1;min-height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;font-family:inherit;font-size:16px}
+.src{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* 居民對話泡泡 */
+#bubble{position:fixed;z-index:30;max-width:min(300px,86vw);background:#fffdf4;color:#2b2b2b;border:2px solid #333;border-radius:16px;padding:10px 12px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.35);transform:translate(-50%,-100%)}
+#bubble b{display:block;font-size:12px;color:#8a5a1f}
+#bubble .btn{margin-top:6px;min-height:44px;background:#ffe7a8;color:#333;border-color:#333}
+#bubble .x{position:absolute;right:2px;top:-2px;border:0;background:transparent;min-width:36px;min-height:36px;font-size:16px;color:#333}
+
+/* 開場 */
+#intro{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#intro .intro-title{text-align:center;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.6);opacity:0;animation:fadeT 4.6s ease forwards .6s}
+#intro .intro-title span{font-size:52px}
+#intro h2{font-size:clamp(26px,6vw,46px);margin:6px 0}
+#intro p{margin:0;font-size:clamp(16px,3vw,22px)}
+#intro #intro-skip{position:absolute;bottom:22px;pointer-events:auto}
+@keyframes fadeT{0%{opacity:0;transform:translateY(10px)}25%,70%{opacity:1;transform:none}100%{opacity:0}}
+
+#fallback-note{position:fixed;left:50%;top:calc(var(--bar-h) + 8px);transform:translateX(-50%);z-index:12;background:var(--panel);border:1.5px solid var(--accent);border-radius:12px;padding:8px 14px;max-width:92vw;font-size:14px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#222;color:#fff;border-radius:22px;padding:8px 18px;font-size:14px;opacity:0;transition:.25s;z-index:90;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+body.nogl #stage{background:radial-gradient(circle at 50% 30%,#2c4a58,var(--bg))}
+
+/* 跑酷 */
+#runner{position:fixed;inset:0;z-index:100;background:#000}
+.rn-wrap{position:absolute;inset:0;overflow:hidden;color:#fff;user-select:none;touch-action:none}
+.rn-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rn-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:10px;padding:8px 10px;background:linear-gradient(rgba(0,0,0,.55),transparent)}
+.rn-top .btn{background:rgba(0,0,0,.45);color:#fff}
+.rn-info{display:flex;flex-direction:column;line-height:1.2;font-size:14px;min-width:0}
+.rn-info span{font-size:12px;opacity:.85}
+.rn-hud{margin-left:auto;display:flex;gap:12px;font-weight:800;font-size:18px;align-items:center}
+.rn-lives{color:#ff6b6b;letter-spacing:2px}
+.rn-q{position:absolute;left:50%;top:58px;transform:translateX(-50%);width:min(780px,94vw);text-align:center;background:rgba(0,0,0,.66);border-radius:14px;padding:8px 14px 10px;transition:background .2s}
+.rn-q.hide{display:none}
+.rn-qn{font-size:13px;font-weight:700;opacity:.85}
+.rn-qt{font-size:clamp(17px,3.4vw,24px);font-weight:800;line-height:1.35}
+.rn-bar{height:5px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:6px;overflow:hidden}
+.rn-bar i{display:block;height:100%;background:#ffd84a;transform-origin:left;transform:scaleX(1)}
+.rn-q.ok{background:rgba(34,140,70,.94)}
+.rn-q.bad{background:rgba(190,60,50,.95)}
+.rn-q.ok .rn-qn,.rn-q.bad .rn-qn{font-size:clamp(16px,3vw,20px);opacity:1}
+.rn-q.ok .rn-qt,.rn-q.bad .rn-qt{font-size:clamp(14px,2.8vw,18px);font-weight:600}
+.rn-q.ok .rn-bar,.rn-q.bad .rn-bar{visibility:hidden}
+.rn-lanes{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.rn-lanes .btn{min-height:56px;padding:6px 8px;font-size:clamp(13px,2.6vw,17px);line-height:1.25;background:var(--lc,#445);color:#fff;border:3px solid transparent;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.rn-lanes .btn.on{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.4)}
+.rn-lanes .btn.right{background:#2fa04a;border-color:#fff}
+.rn-lanes .btn.wrong{background:#d0453b;border-color:#fff}
+.rn-lanes .btn.dim{opacity:.45}
+.rn-pause{font-size:16px}
+.rn-overlay{position:absolute;inset:0;background:rgba(10,15,25,.72);display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}
+.rn-card{background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:20px;padding:20px;width:min(560px,100%);max-height:94%;overflow:auto}
+.rn-card h2{margin:0 0 4px}
+.rn-sub{color:var(--muted);margin:0 0 8px}
+.rn-help{padding-left:20px;font-size:14px}
+.rn-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.rn-rev{padding-left:18px;font-size:14px}
+.rn-rev li{margin:6px 0}
+
+/* 手機：面板改成底部抽屜 */
+@media (max-width:700px){
+  :root{--bar-h:56px}
+  .brand h1{font-size:15px}.brand p{display:none}
+  .brand .logo{font-size:24px}
+  .hud{font-size:12px;gap:4px}
+  .hud span{padding:2px 6px}
+  #hud-clock{display:none}
+  .tools{width:100%;justify-content:space-between;gap:4px}
+  .tools .btn{flex:1;padding:4px 2px;min-width:44px;justify-content:center}
+  .tools .btn span{display:none}
+  #bar{padding:6px 8px;gap:6px}
+  #panel{top:auto;left:0;right:0;width:100%;height:62vh;border-left:0;border-top:2px solid var(--line);border-radius:20px 20px 0 0}
+  #panel .grab{width:44px;height:5px;background:var(--line);border-radius:3px;margin:-6px auto 8px}
+  .lbl{font-size:12px;padding:2px 8px}.lbl small{display:none}
+  #settings{left:8px;right:8px}
+}
+@media (min-width:701px){#panel .grab{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+:root[data-motion="off"] *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<a class="skip" href="#list-view">跳到文字清單</a>
+
+<div id="stage" aria-label="3D 浮空群島（可拖曳旋轉、滾輪或雙指縮放、點島進入）"></div>
+<div id="labels" aria-hidden="true"></div>
+
+<header id="bar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">🧙</span>
+    <div><h1 id="site-title">阿豪老師自然G7_1_C4</h1><p id="site-tag">生物體的運輸作用</p></div>
+  </div>
+  <div class="hud">
+    <span id="hud-progress" title="探索進度">🏝 0/4</span>
+    <span id="hud-stars" title="星星（可跟居民交換知識卡）">⭐ 0</span>
+    <span id="hud-clock" title="目前時間與天色"></span>
+  </div>
+  <nav class="tools" aria-label="功能">
+    <button class="btn" id="b-home" title="回到全景">🏠<span>全景</span></button>
+    <button class="btn" id="b-list" title="文字清單">📋<span>清單</span></button>
+    <button class="btn" id="b-cards" title="收集圖鑑">🃏<span>圖鑑</span></button>
+    <button class="btn" id="b-quiz" title="小測驗">📝<span>測驗</span></button>
+    <button class="btn" id="b-guide" title="小嚮導問答">💬<span>嚮導</span></button>
+    <button class="btn" id="b-set" title="設定" aria-haspopup="true" aria-expanded="false">⚙<span>設定</span></button>
+  </nav>
+  <div id="settings" hidden>
+    <div class="row"><b>底色</b>
+      <button class="chip" data-theme="auto">自動</button>
+      <button class="chip" data-theme="夜海">夜海</button>
+      <button class="chip" data-theme="晨光">晨光</button>
+      <button class="chip" data-theme="海霧">海霧</button></div>
+    <div class="row"><b>天色</b>
+      <button class="chip" data-time="auto">循環</button>
+      <button class="chip" data-time="realtime">即時</button>
+      <button class="chip" data-time="day">白天</button>
+      <button class="chip" data-time="dusk">黃昏</button>
+      <button class="chip" data-time="night">夜晚</button></div>
+    <div class="row"><b>其他</b>
+      <button class="chip" id="s-music" aria-pressed="false">🎵 背景音樂</button>
+      <button class="chip" id="s-motion" aria-pressed="false">減少動態</button>
+      <button class="chip" id="s-reset">清除進度</button></div>
+  </div>
+</header>
+
+<aside id="panel" hidden aria-label="內容面板">
+  <div class="grab" aria-hidden="true"></div>
+  <button class="btn close" id="panel-x" aria-label="關閉面板（Esc）">✕</button>
+  <div id="panel-body"></div>
+</aside>
+
+<section id="list-view" hidden aria-label="地點清單（純文字版）">
+  <div class="list-in"><div class="list-head"><h2>文字清單</h2><button class="btn" id="list-x">✕ 關閉</button></div><div id="list-body"></div></div>
+</section>
+
+<div id="modal" hidden><div class="modal-in" role="dialog" aria-modal="true"><button class="btn close" id="modal-x" aria-label="關閉">✕</button><div id="modal-body"></div></div></div>
+<div id="runner" hidden></div>
+
+<div id="bubble" hidden></div>
+<div id="intro" hidden><div class="intro-title"><span>🧙</span><h2>阿豪老師自然G7_1_C4</h2><p>生物體的運輸作用</p></div><button class="btn" id="intro-skip">略過開場（Esc）</button></div>
+<div id="fallback-note" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="content-json">{
+ "animals": [
+  {
+   "id": "squirrel",
+   "icon": "🐿️",
+   "name": "松鼠",
+   "where": "land"
+  },
+  {
+   "id": "rabbit",
+   "icon": "🐰",
+   "name": "兔子",
+   "where": "land"
+  },
+  {
+   "id": "duck",
+   "icon": "🦆",
+   "name": "鴨子",
+   "where": "shore"
+  },
+  {
+   "id": "butterfly",
+   "icon": "🦋",
+   "name": "蝴蝶",
+   "where": "air"
+  },
+  {
+   "id": "cat",
+   "icon": "🐱",
+   "name": "貓咪",
+   "where": "land"
+  },
+  {
+   "id": "crab",
+   "icon": "🦀",
+   "name": "螃蟹",
+   "where": "shore"
+  },
+  {
+   "id": "frog",
+   "icon": "🐸",
+   "name": "青蛙",
+   "where": "shore"
+  },
+  {
+   "id": "seagull",
+   "icon": "🕊️",
+   "name": "海鷗",
+   "where": "air"
+  },
+  {
+   "id": "whale",
+   "icon": "🐋",
+   "name": "鯨魚",
+   "where": "sea"
+  },
+  {
+   "id": "seal",
+   "icon": "🦭",
+   "name": "海豹",
+   "where": "shore"
+  },
+  {
+   "id": "chick",
+   "icon": "🐥",
+   "name": "小雞",
+   "where": "land"
+  }
+ ],
+ "site": {
+  "title": "阿豪老師自然G7_1_C4",
+  "tagline": "生物體的運輸作用",
+  "audience": "國中學生",
+  "mascot": {
+   "name": "阿豪",
+   "desc": "魔法師造型"
+  },
+  "source": "七年級自然科學第一冊 第4章（講義）"
+ },
+ "center": {
+  "name": "阿豪老師自然G7_1_C4",
+  "role": "挑戰總部",
+  "intro": "歡迎來到挑戰總部！選擇單元與難度（初級／中級／高級），進島跑酷，左右換道吃對的答案、閃開錯的。",
+  "residents": [
+   {
+    "name": "阿豪（吉祥物）",
+    "say": "我是魔法師阿豪！跑酷拿到的 ⭐ 可以跟島上的居民換知識卡喔。"
+   },
+   {
+    "name": "郵差小飛（示意角色）",
+    "say": "每座島的居民都有一張珍藏知識卡，用 ⭐ 就能交換！"
+   }
+  ]
+ },
+ "levels": [
+  {
+   "id": "easy",
+   "name": "初級",
+   "speed": 0.42,
+   "lives": 3,
+   "desc": "認識名詞與基本功能"
+  },
+  {
+   "id": "mid",
+   "name": "中級",
+   "speed": 0.55,
+   "lives": 3,
+   "desc": "位置、方向與比較"
+  },
+  {
+   "id": "hard",
+   "name": "高級",
+   "speed": 0.7,
+   "lives": 3,
+   "desc": "情境推理"
+  }
+ ],
+ "islands": [
+  {
+   "id": "island-01",
+   "name": "4-1 植物的運輸構造",
+   "short": "4-1",
+   "landmark": "樹幹橫切面塔",
+   "color": "#2f7a6b",
+   "intro": "植物靠維管束運送水分和養分：木質部送水，韌皮部送養分，形成層負責長粗。",
+   "points": [
+    "植物體內負責運輸的構造叫「維管束」，「管」代表管狀，「束」代表很多條管子聚在一起。",
+    "根、莖、葉、花、果實內部都有維管束；維管束除了運輸，也有支持植物體的功能。",
+    "木質部：運輸水分與礦物質；韌皮部：運輸光合作用產生的養分。",
+    "莖的橫切面：木質部在內側、韌皮部在外側；葉脈中：木質部在上側、韌皮部在下側。",
+    "維管束排列方式：單子葉植物（玉米、水稻、蔥、椰子）為散生排列；雙子葉植物（芹菜、高麗菜、向日葵）為環狀排列。",
+    "環狀排列的植物有形成層：形成層細胞分裂，向內產生新的木質部、向外產生新的韌皮部，使莖加粗。",
+    "年輪是不同季節產生的木質部顏色不同形成的；四季暖溼的地方年輪不明顯。",
+    "樹皮被環狀破壞，韌皮部被破壞，養分無法往下運送，根部會先因缺乏養分而死亡。"
+   ],
+   "rule": "三條跑道：木質部／韌皮部／形成層（或位置、方向）。水分與礦物質走木質部，光合作用養分走韌皮部，會分裂長粗的是形成層。",
+   "links": [
+    {
+     "t": "Wordwall：4-1 維管束的功能",
+     "u": "https://wordwall.net/resource/37986329"
+    },
+    {
+     "t": "Wordwall：植物的運輸構造",
+     "u": "https://wordwall.net/resource/30596283"
+    }
+   ],
+   "cards": [
+    {
+     "id": "c1-1",
+     "t": "木質部",
+     "x": "運輸水分與礦物質，水只能由下往上；在莖的內側、葉脈的上側。"
+    },
+    {
+     "id": "c1-2",
+     "t": "韌皮部",
+     "x": "運輸光合作用產生的養分（醣類），可上下雙向；在莖的外側、葉脈的下側。"
+    },
+    {
+     "id": "c1-3",
+     "t": "形成層",
+     "x": "會細胞分裂，向內生木質部、向外生韌皮部，使莖加粗（環狀排列的雙子葉植物才有）。"
+    },
+    {
+     "id": "c1-4",
+     "t": "年輪",
+     "x": "不同季節生成的木質部顏色不同形成環紋，數環紋可估計樹木年齡。"
+    }
+   ],
+   "residents": [
+    {
+     "name": "小木（示意角色）",
+     "say": "樹皮被環狀剝掉，韌皮部就斷了，養分送不到根，根會先餓死喔！",
+     "offer": "c1-3",
+     "cost": 3
+    },
+    {
+     "name": "小輪（示意角色）",
+     "say": "春夏長得快、細胞大、顏色淺；秋冬長得慢、細胞小、顏色深，所以才有年輪。",
+     "offer": "c1-4",
+     "cost": 3
+    }
+   ],
+   "gates": {
+    "easy": [
+     {
+      "q": "水分要走哪條管道？",
+      "o": [
+       "木質部",
+       "韌皮部",
+       "形成層"
+      ],
+      "a": 0,
+      "e": "木質部運輸水分與礦物質。"
+     },
+     {
+      "q": "光合作用產生的養分（葡萄糖）走哪裡？",
+      "o": [
+       "韌皮部",
+       "木質部",
+       "形成層"
+      ],
+      "a": 0,
+      "e": "韌皮部運輸光合作用產生的養分。"
+     },
+     {
+      "q": "肥料中的氮、磷、鉀（礦物質）走哪裡？",
+      "o": [
+       "木質部",
+       "韌皮部",
+       "形成層"
+      ],
+      "a": 0,
+      "e": "礦物質和水分一起由木質部運送。"
+     },
+     {
+      "q": "哪個構造會細胞分裂，向內生木質部、向外生韌皮部？",
+      "o": [
+       "形成層",
+       "木質部",
+       "韌皮部"
+      ],
+      "a": 0,
+      "e": "形成層會細胞分裂，使莖加粗。"
+     },
+     {
+      "q": "維管束名稱裡的「束」代表什麼？",
+      "o": [
+       "很多條管子聚在一起",
+       "只有一根管子",
+       "實心的棒子"
+      ],
+      "a": 0,
+      "e": "「管」是管狀，「束」表示有很多條管子。"
+     },
+     {
+      "q": "維管束除了運輸物質，還有什麼功能？",
+      "o": [
+       "支持植物體",
+       "進行光合作用",
+       "製造種子"
+      ],
+      "a": 0,
+      "e": "維管束也有支持植物體的功能。"
+     },
+     {
+      "q": "哪些部位有維管束？",
+      "o": [
+       "根、莖、葉、花、果實",
+       "只有根",
+       "只有葉"
+      ],
+      "a": 0,
+      "e": "植物的根、莖、葉、花、果實內部都有維管束。"
+     }
+    ],
+    "mid": [
+     {
+      "q": "莖的橫切面，木質部在哪裡？",
+      "o": [
+       "內側",
+       "外側",
+       "正中央空洞"
+      ],
+      "a": 0,
+      "e": "莖中木質部在內側、韌皮部在外側。"
+     },
+     {
+      "q": "葉脈中，韌皮部在哪裡？",
+      "o": [
+       "下側",
+       "上側",
+       "葉緣"
+      ],
+      "a": 0,
+      "e": "葉脈中木質部在上側、韌皮部在下側。"
+     },
+     {
+      "q": "木質部運輸水分的方向是？",
+      "o": [
+       "只能由下往上",
+       "只能由上往下",
+       "上下雙向"
+      ],
+      "a": 0,
+      "e": "水分只能由下往上單向運輸。"
+     },
+     {
+      "q": "韌皮部運輸養分的方向是？",
+      "o": [
+       "可上下雙向",
+       "只能由下往上",
+       "只能由上往下"
+      ],
+      "a": 0,
+      "e": "韌皮部由「提供」的地方送到「需求」的地方，可由上往下或由下往上。"
+     },
+     {
+      "q": "玉米、水稻、蔥的維管束是怎麼排列的？",
+      "o": [
+       "散生排列",
+       "環狀排列",
+       "沒有維管束"
+      ],
+      "a": 0,
+      "e": "它們是單子葉植物，維管束散生排列。"
+     },
+     {
+      "q": "芹菜、高麗菜、向日葵的維管束是怎麼排列的？",
+      "o": [
+       "環狀排列",
+       "散生排列",
+       "只有一條"
+      ],
+      "a": 0,
+      "e": "它們是雙子葉植物，維管束環狀排列。"
+     },
+     {
+      "q": "哪一種排列方式的植物有形成層？",
+      "o": [
+       "環狀排列",
+       "散生排列",
+       "兩種都沒有"
+      ],
+      "a": 0,
+      "e": "環狀排列的雙子葉植物才有形成層。"
+     },
+     {
+      "q": "形成層持續分裂，會使莖怎麼樣？",
+      "o": [
+       "加粗",
+       "變高",
+       "變細"
+      ],
+      "a": 0,
+      "e": "形成層分裂產生新的木質部與韌皮部，使莖加粗。"
+     }
+    ],
+    "hard": [
+     {
+      "q": "樹皮被環狀剝除，先被破壞的是？",
+      "o": [
+       "韌皮部",
+       "木質部",
+       "葉片"
+      ],
+      "a": 0,
+      "e": "樹皮中是韌皮部，被破壞後養分無法往下運送。"
+     },
+     {
+      "q": "樹皮被環狀剝除後，哪個部位會先缺養分死亡？",
+      "o": [
+       "根部",
+       "葉片",
+       "花朵"
+      ],
+      "a": 0,
+      "e": "養分無法往下送，根部先因缺乏養分而死亡。"
+     },
+     {
+      "q": "樹木中心的老化木材被啃食，植株會？",
+      "o": [
+       "仍可運水、可正常存活",
+       "無法運水立刻死亡",
+       "韌皮部全被破壞"
+      ],
+      "a": 0,
+      "e": "新生木質部仍可運送水分，所以植株可以存活。"
+     },
+     {
+      "q": "春夏生成的木質部，顏色通常比較？",
+      "o": [
+       "淺（細胞大、長得快）",
+       "深（細胞小）",
+       "跟秋冬完全一樣"
+      ],
+      "a": 0,
+      "e": "春夏溫度高、雨量多，細胞生長快、體積大、顏色淺。"
+     },
+     {
+      "q": "某棵樹的年輪不明顯，最可能生長在？",
+      "o": [
+       "四季暖溼的環境",
+       "四季分明的環境",
+       "只有冬天的地方"
+      ],
+      "a": 0,
+      "e": "年輪不明顯表示四季細胞生長狀況一樣，沒有細胞大小的差別。"
+     },
+     {
+      "q": "剔除莖的形成層外圍構造後，植株逐漸死亡，最可能是？",
+      "o": [
+       "雙子葉植物（環狀排列）",
+       "單子葉植物（散生排列）",
+       "兩種都不會死"
+      ],
+      "a": 0,
+      "e": "環狀排列的韌皮部全被破壞，根得不到養分。"
+     },
+     {
+      "q": "單子葉植物莖外圍被剔除，為何較不受影響？",
+      "o": [
+       "內部還有很多未被破壞的維管束",
+       "它沒有韌皮部",
+       "它不需要運輸養分"
+      ],
+      "a": 0,
+      "e": "散生排列的維管束分布在莖內部，水分、養分運輸不受影響。"
+     },
+     {
+      "q": "介殼蟲吸食的汁液主要含有？",
+      "o": [
+       "光合作用產生的養分",
+       "水分和礦物質",
+       "二氧化碳"
+      ],
+      "a": 0,
+      "e": "介殼蟲吸食韌皮部汁液，內含光合作用產生的養分。"
+     }
+    ]
+   }
+  },
+  {
+   "id": "island-02",
+   "name": "4-2 植物體內的物質運輸",
+   "short": "4-2",
+   "landmark": "水塔與蒸散噴泉",
+   "color": "#3a8fb7",
+   "intro": "根毛吸水後，水沿木質部往上送，大部分由氣孔蒸散；養分則由韌皮部在葉與其他部位間運送。",
+   "points": [
+    "木質部：根部表皮的根毛吸收水分，水分與礦物質由根往莖、葉運輸，方向只能由下往上、單向運輸。",
+    "韌皮部：光合作用的養分由「提供」的地方運到「需求」的地方，可由葉向下送到根或莖儲存，也可從儲存部位向上送到葉和花芽，為雙向運輸。",
+    "少部分的水供細胞利用，大部分的水變成水蒸氣，由氣孔散失，這就是蒸散作用。",
+    "蒸散作用是水分在木質部向上運送的主要動力：木質部連成充滿水的細管，氣孔蒸散會產生拉力。",
+    "氣孔大小由保衛細胞控制：白天且水分充足時打開、蒸散增加；夜晚或缺水時關閉、蒸散減少。",
+    "施肥是添加礦物質，由木質部運送；澆水要澆濕土壤，因為水分由根吸收。",
+    "芹菜實驗：有葉片的那一杯液面下降較多，因為葉片能進行蒸散作用；被染色的環狀部分是維管束（木質部）。",
+    "鮮花垂頭，可剪除充滿空氣的莖末端再放入水中；在水中切取葉柄，是避免空氣進入妨礙水分運輸。"
+   ],
+   "rule": "三條跑道：選項依題目而變。水分礦物質→木質部、養分→韌皮部；氣孔白天水足→打開、夜晚缺水→關閉。",
+   "links": [
+    {
+     "t": "Wordwall：植物體內水分和養分運輸的過程",
+     "u": "https://wordwall.net/resource/30428309"
+    }
+   ],
+   "cards": [
+    {
+     "id": "c2-1",
+     "t": "根毛",
+     "x": "根部表皮細胞向外突出的構造，負責吸收水分。"
+    },
+    {
+     "id": "c2-2",
+     "t": "蒸散作用",
+     "x": "水蒸氣由氣孔散失的現象，是水分在木質部向上運送的主要動力。"
+    },
+    {
+     "id": "c2-3",
+     "t": "保衛細胞",
+     "x": "控制氣孔開關：白天水足時打開，夜晚或缺水時關閉。"
+    },
+    {
+     "id": "c2-4",
+     "t": "葉下表皮",
+     "x": "塗白膠的比較實驗顯示，氣孔主要分布在葉片下表皮。"
+    }
+   ],
+   "residents": [
+    {
+     "name": "小滴（示意角色）",
+     "say": "植物沒有抽水馬達，是葉子蒸散產生拉力，把水一路往上拉的！",
+     "offer": "c2-2",
+     "cost": 3
+    },
+    {
+     "name": "小孔（示意角色）",
+     "say": "白天水夠的時候，保衛細胞會把氣孔打開；夜晚或缺水就關起來省水。",
+     "offer": "c2-3",
+     "cost": 3
+    }
+   ],
+   "gates": {
+    "easy": [
+     {
+      "q": "蒸散作用是水蒸氣由哪裡散失？",
+      "o": [
+       "氣孔",
+       "根毛",
+       "形成層"
+      ],
+      "a": 0,
+      "e": "水蒸氣由氣孔散失。"
+     },
+     {
+      "q": "負責吸收水分的是根部的什麼？",
+      "o": [
+       "根毛",
+       "氣孔",
+       "年輪"
+      ],
+      "a": 0,
+      "e": "根毛是根部表皮細胞向外突出的構造，負責吸水。"
+     },
+     {
+      "q": "施肥的氮、磷、鉀由哪裡運送？",
+      "o": [
+       "木質部",
+       "韌皮部",
+       "氣孔"
+      ],
+      "a": 0,
+      "e": "礦物質由木質部運送。"
+     },
+     {
+      "q": "澆水時應該澆在哪裡？",
+      "o": [
+       "土壤",
+       "葉片",
+       "花朵"
+      ],
+      "a": 0,
+      "e": "水分由根吸收，所以要把土壤澆濕。"
+     },
+     {
+      "q": "蒸散作用是水分向上運送的什麼？",
+      "o": [
+       "主要動力",
+       "阻力",
+       "廢物"
+      ],
+      "a": 0,
+      "e": "蒸散作用是水分在木質部向上運送的主要動力。"
+     },
+     {
+      "q": "控制氣孔大小的是？",
+      "o": [
+       "保衛細胞",
+       "根毛",
+       "形成層"
+      ],
+      "a": 0,
+      "e": "氣孔大小由保衛細胞控制。"
+     },
+     {
+      "q": "大部分的水最後去哪裡？",
+      "o": [
+       "變水蒸氣由氣孔散失",
+       "全部供細胞使用",
+       "全部儲存在根"
+      ],
+      "a": 0,
+      "e": "只有少部分供細胞利用，大部分由氣孔散失。"
+     }
+    ],
+    "mid": [
+     {
+      "q": "白天且水分充足時，氣孔與蒸散作用是？",
+      "o": [
+       "氣孔打開、蒸散增加",
+       "氣孔關閉、蒸散增加",
+       "氣孔打開、蒸散減少"
+      ],
+      "a": 0,
+      "e": "白天水分充足時氣孔打開，蒸散增加。"
+     },
+     {
+      "q": "夜晚或缺水時，氣孔與蒸散作用是？",
+      "o": [
+       "氣孔關閉、蒸散減少",
+       "氣孔打開、蒸散增加",
+       "氣孔關閉、蒸散增加"
+      ],
+      "a": 0,
+      "e": "夜晚或缺水時氣孔關閉，蒸散減少。"
+     },
+     {
+      "q": "芹菜實驗中，哪一杯液面下降較多？",
+      "o": [
+       "有葉片的那杯",
+       "摘除葉片的那杯",
+       "兩杯一樣多"
+      ],
+      "a": 0,
+      "e": "有葉片可以進行蒸散作用，水分散失較多。"
+     },
+     {
+      "q": "芹菜為什麼要在水中切取葉柄？",
+      "o": [
+       "避免空氣進入妨礙水分運輸",
+       "讓芹菜變甜",
+       "讓葉片變大"
+      ],
+      "a": 0,
+      "e": "若有空氣進入，會妨礙水分運輸。"
+     },
+     {
+      "q": "氣孔蒸散時，充滿水的木質部細管會產生？",
+      "o": [
+       "拉力",
+       "浮力",
+       "磁力"
+      ],
+      "a": 0,
+      "e": "蒸散產生一股拉力，把水往上拉。"
+     },
+     {
+      "q": "實驗中被染色的環狀部分是？",
+      "o": [
+       "維管束（木質部）",
+       "葉綠體",
+       "年輪"
+      ],
+      "a": 0,
+      "e": "被染色的部分是木質部，可以運輸水分。"
+     },
+     {
+      "q": "塗白膠實驗顯示，氣孔主要分布在？",
+      "o": [
+       "葉片下表皮",
+       "葉片上表皮",
+       "平均分布上下表皮"
+      ],
+      "a": 0,
+      "e": "水分多由下表皮散失，氣孔主要在葉下表皮。"
+     }
+    ],
+    "hard": [
+     {
+      "q": "移植樹木時，夜晚進行比白天好，主要原因是？",
+      "o": [
+       "減少蒸散作用",
+       "增加光合作用",
+       "讓根長得更快"
+      ],
+      "a": 0,
+      "e": "夜晚氣孔關閉，蒸散作用減少，水分不易散失。"
+     },
+     {
+      "q": "移植時剪除部分枝葉，主要原因是？",
+      "o": [
+       "減少水分散失",
+       "讓樹變輕",
+       "促進韌皮部運輸"
+      ],
+      "a": 0,
+      "e": "枝葉減少，蒸散作用減少，水分散失較少。"
+     },
+     {
+      "q": "移植後不要立即施高濃度肥料，主要原因是？",
+      "o": [
+       "避免根部的水分流失",
+       "讓葉片變多",
+       "促進氣孔打開"
+      ],
+      "a": 0,
+      "e": "高濃度肥料會讓根部水分流失。"
+     },
+     {
+      "q": "鮮花剪下一段時間才插水而垂頭，該怎麼救？",
+      "o": [
+       "剪除充滿空氣的莖末端再放入水中",
+       "把花瓣淋濕",
+       "把樹皮環狀剝除"
+      ],
+      "a": 0,
+      "e": "莖末端充滿空氣會妨礙水分運輸，剪掉再放入水中。"
+     },
+     {
+      "q": "白天旺盛蒸散時，水分運輸方向與氣孔狀態是？",
+      "o": [
+       "由下往上、氣孔打開",
+       "由上往下、氣孔打開",
+       "由下往上、氣孔關閉"
+      ],
+      "a": 0,
+      "e": "水分只能由下往上；蒸散時氣孔打開。"
+     },
+     {
+      "q": "竹子送往竹筍的物質X（來自光合作用，向下運輸）是？",
+      "o": [
+       "醣類，由韌皮部運輸",
+       "醣類，由木質部運輸",
+       "水分，由木質部運輸"
+      ],
+      "a": 0,
+      "e": "光合作用產物是葡萄糖，由韌皮部運輸。"
+     },
+     {
+      "q": "維管束內的物質可由上往下，也可由下往上，這是？",
+      "o": [
+       "韌皮部運送醣類",
+       "木質部運送礦物質",
+       "木質部運送醣類"
+      ],
+      "a": 0,
+      "e": "能雙向運輸的是韌皮部，運送養分（醣類）。"
+     },
+     {
+      "q": "塗白膠實驗中，上下表皮都塗膠的枝條，水分散失會？",
+      "o": [
+       "最少",
+       "最多",
+       "和沒塗的一樣多"
+      ],
+      "a": 0,
+      "e": "氣孔被封住，無法蒸散，散失的水分最少。"
+     }
+    ]
+   }
+  },
+  {
+   "id": "island-03",
+   "name": "4-3 人體心血管系統的組成",
+   "short": "4-3",
+   "landmark": "跳動的心臟",
+   "color": "#c8453b",
+   "intro": "人體的血液循環系統由心臟、血管、血液三部分組成，三種血管與三種血球各有分工。",
+   "points": [
+    "人類負責物質運輸的血液循環系統，由心臟、血管、血液三個部分組成。",
+    "心臟有四個腔室：左心房、左心室、右心房、右心室；瓣膜的功能是防止血液逆流。",
+    "心臟收縮時，血液由心室擠壓進入動脈；心臟舒張時，血液由靜脈流回心房，再進入心室。",
+    "動脈：血液離開心臟；靜脈：血液回到心臟；微血管：物質交換的主要場所，管壁僅一層細胞。",
+    "充氧血的血管不一定是動脈（肺靜脈是充氧血）；缺氧血的血管不一定是靜脈（肺動脈是缺氧血）。",
+    "血液靜置或離心後分成血球和血漿：血球有紅血球、白血球、血小板。",
+    "血漿含水、養分、廢物、二氧化碳、抗體、激素等；紅血球運送氧氣，白血球與免疫有關，血小板與血液凝固有關。",
+    "運動後心搏與脈搏次數增加，因為身體需要更多氧氣與養分。"
+   ],
+   "rule": "三條跑道：動脈／靜脈／微血管（或紅血球／白血球／血小板）。看血液流向、構造與功能來判斷。",
+   "links": [
+    {
+     "t": "Wordwall：心血管構造，小心昏了你的頭",
+     "u": "https://wordwall.net/resource/18934734/"
+    },
+    {
+     "t": "Wordwall：血球",
+     "u": "https://wordwall.net/resource/36849276/"
+    },
+    {
+     "t": "Wordwall：人體內物質的運輸",
+     "u": "https://wordwall.net/resource/30431035"
+    }
+   ],
+   "cards": [
+    {
+     "id": "c3-1",
+     "t": "心臟四腔室",
+     "x": "左心房、左心室、右心房、右心室；左邊是充氧血，右邊是缺氧血。"
+    },
+    {
+     "id": "c3-2",
+     "t": "三種血管",
+     "x": "動脈離開心臟、靜脈回到心臟、微血管是物質交換的場所。"
+    },
+    {
+     "id": "c3-3",
+     "t": "三種血球",
+     "x": "紅血球運氧、白血球防禦、血小板幫助凝血。"
+    },
+    {
+     "id": "c3-4",
+     "t": "血漿",
+     "x": "血液中非血球的部分，含大量水分、養分、廢物、抗體、激素等。"
+    }
+   ],
+   "residents": [
+    {
+     "name": "小心（示意角色）",
+     "say": "心臟收縮，血液從心室擠進動脈；舒張時，靜脈的血流回心房。瓣膜防止血液倒流！",
+     "offer": "c3-1",
+     "cost": 3
+    },
+    {
+     "name": "小球（示意角色）",
+     "say": "白血球變多代表可能在發炎；紅血球讓血液呈紅色、負責運送氧氣。",
+     "offer": "c3-3",
+     "cost": 3
+    }
+   ],
+   "gates": {
+    "easy": [
+     {
+      "q": "人體血液循環系統由哪三部分組成？",
+      "o": [
+       "心臟、血管、血液",
+       "心臟、肺、肝",
+       "血管、骨骼、肌肉"
+      ],
+      "a": 0,
+      "e": "由心臟、血管、血液組成。"
+     },
+     {
+      "q": "心臟收縮時，血液由心室擠進哪裡？",
+      "o": [
+       "動脈",
+       "靜脈",
+       "心房"
+      ],
+      "a": 0,
+      "e": "心臟收縮，血液由心室擠壓進入動脈。"
+     },
+     {
+      "q": "瓣膜的功能是什麼？",
+      "o": [
+       "防止血液逆流",
+       "製造血球",
+       "儲存氧氣"
+      ],
+      "a": 0,
+      "e": "瓣膜可防止血液逆流。"
+     },
+     {
+      "q": "負責運送氧氣的血球是？",
+      "o": [
+       "紅血球",
+       "白血球",
+       "血小板"
+      ],
+      "a": 0,
+      "e": "紅血球負責運送氧氣。"
+     },
+     {
+      "q": "與血液凝固有關的是？",
+      "o": [
+       "血小板",
+       "紅血球",
+       "白血球"
+      ],
+      "a": 0,
+      "e": "血小板幫助血液凝固。"
+     },
+     {
+      "q": "傷口感染化膿時，數目會增加的血球是？",
+      "o": [
+       "白血球",
+       "紅血球",
+       "血小板"
+      ],
+      "a": 0,
+      "e": "白血球與免疫有關，感染時會增加。"
+     },
+     {
+      "q": "血液離心後分成血球和什麼？",
+      "o": [
+       "血漿",
+       "淋巴",
+       "組織液"
+      ],
+      "a": 0,
+      "e": "血液分成血球與血漿。"
+     },
+     {
+      "q": "物質交換的主要場所是哪種血管？",
+      "o": [
+       "微血管",
+       "動脈",
+       "靜脈"
+      ],
+      "a": 0,
+      "e": "微血管是血液與細胞間物質交換的場所。"
+     }
+    ],
+    "mid": [
+     {
+      "q": "管壁最厚、彈性最佳、血壓最高的是？",
+      "o": [
+       "動脈",
+       "靜脈",
+       "微血管"
+      ],
+      "a": 0,
+      "e": "動脈要承受心臟擠出的高壓血液。"
+     },
+     {
+      "q": "把血液送回心臟、且具有瓣膜的血管是？",
+      "o": [
+       "靜脈",
+       "動脈",
+       "微血管"
+      ],
+      "a": 0,
+      "e": "靜脈運送血液流回心臟，並有瓣膜防止逆流。"
+     },
+     {
+      "q": "管壁僅由單一層細胞構成的是？",
+      "o": [
+       "微血管",
+       "動脈",
+       "靜脈"
+      ],
+      "a": 0,
+      "e": "微血管管壁極薄，適合物質交換。"
+     },
+     {
+      "q": "手腕可以測得脈搏，是哪種血管？",
+      "o": [
+       "動脈",
+       "靜脈",
+       "微血管"
+      ],
+      "a": 0,
+      "e": "動脈會隨心臟收縮而產生脈搏。"
+     },
+     {
+      "q": "人類成熟紅血球的特徵是？",
+      "o": [
+       "雙凹圓盤、沒有細胞核",
+       "圓球、有細胞核",
+       "不規則形、有細胞核"
+      ],
+      "a": 0,
+      "e": "人類成熟紅血球呈雙凹圓盤狀，沒有細胞核。"
+     },
+     {
+      "q": "血漿中的二氧化碳，要送到哪裡排出？",
+      "o": [
+       "肺臟（呼氣）",
+       "腎臟（尿液）",
+       "皮膚（汗水）"
+      ],
+      "a": 0,
+      "e": "二氧化碳送到肺臟，透過呼氣排出體外。"
+     },
+     {
+      "q": "血漿中的抗體有什麼功能？",
+      "o": [
+       "抵抗病原體",
+       "讓血液呈紅色",
+       "幫助凝血"
+      ],
+      "a": 0,
+      "e": "抗體用來抵抗病原體。"
+     }
+    ],
+    "hard": [
+     {
+      "q": "心臟收縮時，血液流向是？",
+      "o": [
+       "心室 → 動脈",
+       "靜脈 → 心房",
+       "動脈 → 心室"
+      ],
+      "a": 0,
+      "e": "收縮時血液由心室進入動脈。"
+     },
+     {
+      "q": "充氧血的血管一定是動脈嗎？",
+      "o": [
+       "不一定，肺靜脈也是充氧血",
+       "一定是",
+       "不是，主動脈是缺氧血"
+      ],
+      "a": 0,
+      "e": "肺靜脈運送的是充氧血。"
+     },
+     {
+      "q": "缺氧血的血管一定是靜脈嗎？",
+      "o": [
+       "不一定，肺動脈也是缺氧血",
+       "一定是",
+       "不是，微血管沒有血"
+      ],
+      "a": 0,
+      "e": "肺動脈運送的是缺氧血。"
+     },
+     {
+      "q": "用橡皮軟管綁住手臂上端，靜脈浮現，是因為？",
+      "o": [
+       "血液流回心臟受阻，靜脈血量增多",
+       "血液流向手掌受阻，靜脈血量增多",
+       "靜脈變細"
+      ],
+      "a": 0,
+      "e": "靜脈血回心臟的路被擋住，血量增多而浮現。"
+     },
+     {
+      "q": "運動後心搏與脈搏次數會怎樣？為什麼？",
+      "o": [
+       "增加，因為需要更多氧氣與養分",
+       "減少，因為要休息",
+       "不變"
+      ],
+      "a": 0,
+      "e": "運動時身體需要更多氧氣與養分供應。"
+     },
+     {
+      "q": "肝糖分解成的葡萄糖，在血液中由什麼運輸？",
+      "o": [
+       "血漿",
+       "紅血球",
+       "白血球"
+      ],
+      "a": 0,
+      "e": "葡萄糖等養分溶在血漿中運送。"
+     },
+     {
+      "q": "白血球 3000（正常 4500～11000），最可能出問題的功能是？",
+      "o": [
+       "抵抗細菌入侵",
+       "運輸氧氣",
+       "幫助凝血"
+      ],
+      "a": 0,
+      "e": "白血球低於正常值，與免疫有關。"
+     },
+     {
+      "q": "下列哪一種不經由血漿運送？",
+      "o": [
+       "胰液",
+       "抗體",
+       "激素"
+      ],
+      "a": 0,
+      "e": "胰液送往消化道，其他兩者在血漿中運送。"
+     }
+    ]
+   }
+  },
+  {
+   "id": "island-04",
+   "name": "4-4 人體的循環系統",
+   "short": "4-4",
+   "landmark": "雙循環環形跑道",
+   "color": "#7a4fb0",
+   "intro": "血液循環分體循環與肺循環，同時進行；淋巴循環回收組織液，防禦作用有三道防線。",
+   "points": [
+    "人體心血管系統包括體循環與肺循環，兩個循環相連且同時進行。",
+    "體循環：心臟與全身之間；肺循環：心臟與肺臟之間。",
+    "體循環：左心室 → 主動脈 → 小動脈 → 微血管 → 小靜脈 → 大靜脈 → 右心房；肺循環：右心室 → 肺動脈 → 肺微血管 → 肺靜脈 → 左心房。",
+    "氧氣由微血管擴散到組織細胞，組織細胞產生的二氧化碳擴散進入微血管；在肺部則相反。",
+    "左心室肌肉比右心室厚，因為左心室要把血液送往全身，需要很大的血壓。",
+    "淋巴系統由淋巴管、淋巴結、淋巴組成；血漿滲出微血管形成組織液，組織液進入淋巴管形成淋巴，再送回靜脈，維持血液量恆定。",
+    "淋巴結可以過濾病原體，並由聚集的白血球清除病原體；淋巴中沒有紅血球。",
+    "人體三道防線：第一道是皮膚與黏膜；第二道是白血球吞噬與發炎反應；第三道是專一性防禦，由淋巴球負責，具有記憶性，疫苗就是利用它。"
+   ],
+   "rule": "三條跑道：選項依題目而變。路線題看「離開心臟＝動脈、回到心臟＝靜脈」；充氧血或缺氧血看是否剛經過肺。",
+   "links": [
+    {
+     "t": "Wordwall：充氧血與減氧血",
+     "u": "https://wordwall.net/resource/24122587/"
+    },
+    {
+     "t": "Wordwall：血液循環",
+     "u": "https://wordwall.net/resource/32771769/"
+    },
+    {
+     "t": "Wordwall：人體血液循環（老師說明）",
+     "u": "https://wordwall.net/resource/19201850"
+    },
+    {
+     "t": "Wordwall：奔跑吧！血液",
+     "u": "https://wordwall.net/resource/19200421"
+    },
+    {
+     "t": "Wordwall：血液循環（3-3）",
+     "u": "https://wordwall.net/resource/30430547"
+    },
+    {
+     "t": "Wordwall：人體的防禦作用",
+     "u": "https://wordwall.net/resource/30431686"
+    }
+   ],
+   "cards": [
+    {
+     "id": "c4-1",
+     "t": "體循環",
+     "x": "左心室 → 主動脈 → 全身微血管 → 大靜脈 → 右心房，送氧並帶回二氧化碳。"
+    },
+    {
+     "id": "c4-2",
+     "t": "肺循環",
+     "x": "右心室 → 肺動脈 → 肺微血管 → 肺靜脈 → 左心房，在肺部進行氣體交換。"
+    },
+    {
+     "id": "c4-3",
+     "t": "淋巴循環",
+     "x": "組織液進入淋巴管成為淋巴，最後回到靜脈，維持血液量恆定。"
+    },
+    {
+     "id": "c4-4",
+     "t": "三道防線",
+     "x": "皮膚黏膜 → 白血球吞噬與發炎 → 淋巴球的專一性防禦（有記憶性）。"
+    }
+   ],
+   "residents": [
+    {
+     "name": "小環（示意角色）",
+     "say": "體循環和肺循環是同時進行的。血液最後回到右心房，再去肺部補充氧氣！",
+     "offer": "c4-1",
+     "cost": 3
+    },
+    {
+     "name": "小盾（示意角色）",
+     "say": "疫苗利用第三道防線的記憶性，下次病原體入侵時，反應會更快、更強。",
+     "offer": "c4-4",
+     "cost": 3
+    }
+   ],
+   "gates": {
+    "easy": [
+     {
+      "q": "人體心血管系統包括哪兩種途徑？",
+      "o": [
+       "體循環和肺循環",
+       "動脈循環和靜脈循環",
+       "肝循環和腎循環"
+      ],
+      "a": 0,
+      "e": "包括體循環和肺循環。"
+     },
+     {
+      "q": "體循環是心臟與哪裡之間的血液循環？",
+      "o": [
+       "全身",
+       "肺臟",
+       "大腦"
+      ],
+      "a": 0,
+      "e": "體循環在心臟與全身之間。"
+     },
+     {
+      "q": "肺循環是心臟與哪裡之間的血液循環？",
+      "o": [
+       "肺臟",
+       "全身",
+       "肝臟"
+      ],
+      "a": 0,
+      "e": "肺循環在心臟與肺臟之間。"
+     },
+     {
+      "q": "體循環與肺循環的進行順序是？",
+      "o": [
+       "兩者同時進行",
+       "先肺循環再體循環",
+       "先體循環再肺循環"
+      ],
+      "a": 0,
+      "e": "兩個循環相連且同時進行。"
+     },
+     {
+      "q": "組織細胞產生的什麼會擴散進入微血管？",
+      "o": [
+       "二氧化碳",
+       "氧氣",
+       "葡萄糖"
+      ],
+      "a": 0,
+      "e": "氧氣擴散到細胞，二氧化碳擴散進入微血管。"
+     },
+     {
+      "q": "淋巴系統由哪些部分組成？",
+      "o": [
+       "淋巴管、淋巴結、淋巴",
+       "心臟、血管、血液",
+       "氣管、支氣管、肺泡"
+      ],
+      "a": 0,
+      "e": "淋巴系統由淋巴管、淋巴結和淋巴組成。"
+     },
+     {
+      "q": "人體的第一道防線是？",
+      "o": [
+       "皮膚與黏膜",
+       "白血球吞噬",
+       "淋巴球"
+      ],
+      "a": 0,
+      "e": "第一道防線是皮膚與黏膜。"
+     },
+     {
+      "q": "施打疫苗是利用第三道防線的什麼特性？",
+      "o": [
+       "記憶性",
+       "發炎反應",
+       "吞噬作用"
+      ],
+      "a": 0,
+      "e": "第三道防線有記憶性，再次入侵時反應更快更強。"
+     }
+    ],
+    "mid": [
+     {
+      "q": "體循環最後血液回到哪裡？",
+      "o": [
+       "右心房",
+       "左心房",
+       "右心室"
+      ],
+      "a": 0,
+      "e": "體循環的血液回到右心房。"
+     },
+     {
+      "q": "肺循環最後血液回到哪裡？",
+      "o": [
+       "左心房",
+       "右心房",
+       "左心室"
+      ],
+      "a": 0,
+      "e": "肺循環的血液經肺靜脈回到左心房。"
+     },
+     {
+      "q": "肺靜脈裡流的是？",
+      "o": [
+       "充氧血",
+       "缺氧血",
+       "淋巴"
+      ],
+      "a": 0,
+      "e": "血液在肺部獲得氧氣，肺靜脈為充氧血。"
+     },
+     {
+      "q": "肺動脈裡流的是？",
+      "o": [
+       "缺氧血",
+       "充氧血",
+       "血漿"
+      ],
+      "a": 0,
+      "e": "肺動脈把缺氧血送往肺臟。"
+     },
+     {
+      "q": "為什麼左心室肌肉比右心室厚？",
+      "o": [
+       "要把血液送往全身，需要很大的血壓",
+       "要儲存更多血液",
+       "右心室不需要肌肉"
+      ],
+      "a": 0,
+      "e": "左心室負責體循環，輸出的血壓要很大。"
+     },
+     {
+      "q": "組織液滲入淋巴管後形成？",
+      "o": [
+       "淋巴",
+       "血漿",
+       "紅血球"
+      ],
+      "a": 0,
+      "e": "組織液滲入淋巴管就形成淋巴。"
+     },
+     {
+      "q": "淋巴結的功能是？",
+      "o": [
+       "過濾病原體，由白血球清除",
+       "製造紅血球",
+       "運送氧氣"
+      ],
+      "a": 0,
+      "e": "淋巴結過濾病原體，聚集的白血球會清除它們。"
+     },
+     {
+      "q": "第二道防線包括？",
+      "o": [
+       "白血球吞噬與發炎反應",
+       "皮膚與黏膜",
+       "製造抗體的淋巴球"
+      ],
+      "a": 0,
+      "e": "第二道防線是白血球吞噬與發炎反應。"
+     }
+    ],
+    "hard": [
+     {
+      "q": "藥劑由手臂靜脈注射，最先進入心臟的哪個腔室？",
+      "o": [
+       "右心房",
+       "左心房",
+       "左心室"
+      ],
+      "a": 0,
+      "e": "靜脈血經大靜脈回到右心房。"
+     },
+     {
+      "q": "腦細胞的代謝廢物進入血液後，最先到達哪個腔室？",
+      "o": [
+       "右心房",
+       "左心房",
+       "左心室"
+      ],
+      "a": 0,
+      "e": "廢物經上大靜脈回到右心房。"
+     },
+     {
+      "q": "血液由肝臟流到右手上臂，路線是？",
+      "o": [
+       "右心房→右心室→肺→左心房→左心室→主動脈",
+       "右心房→左心房→主動脈",
+       "右心室→左心室→肺"
+      ],
+      "a": 0,
+      "e": "必須先經肺循環，再經左心室、主動脈送到全身。"
+     },
+     {
+      "q": "微血管滲出的液體要由什麼回收，血液量才能維持恆定？",
+      "o": [
+       "淋巴系統（送回靜脈）",
+       "動脈",
+       "肺泡"
+      ],
+      "a": 0,
+      "e": "淋巴系統把組織液送回心血管系統的靜脈。"
+     },
+     {
+      "q": "淋巴管裡有沒有紅血球？",
+      "o": [
+       "沒有",
+       "有很多",
+       "只有血小板"
+      ],
+      "a": 0,
+      "e": "淋巴中沒有紅血球；動脈和靜脈的血液才有。"
+     },
+     {
+      "q": "肺動脈與肺靜脈相比，氧氣含量是？",
+      "o": [
+       "肺動脈較低",
+       "肺動脈較高",
+       "一樣多"
+      ],
+      "a": 0,
+      "e": "肺動脈是缺氧血，肺靜脈是充氧血。"
+     },
+     {
+      "q": "肝動脈與肝靜脈相比，氧氣含量是？",
+      "o": [
+       "肝動脈較高",
+       "肝靜脈較高",
+       "一樣多"
+      ],
+      "a": 0,
+      "e": "肝動脈、肝靜脈屬於體循環：動脈為充氧血、靜脈為缺氧血。"
+     },
+     {
+      "q": "某器官動脈含氧量比靜脈低，最可能是？",
+      "o": [
+       "肺臟",
+       "腎臟",
+       "大腦"
+      ],
+      "a": 0,
+      "e": "只有肺臟會讓血液獲得氧氣，所以靜脈含氧量較高。"
+     }
+    ]
+   }
+  }
+ ]
+}</script>
+<script type="module">
+const __m = {};
+__m.store = (() => {
+// 共用狀態：存在瀏覽器 localStorage（讀寫都包 try/catch，被封鎖時仍可正常使用）
+const KEY = 'isleforge-g7c4-v1';
+
+function read() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
+}
+const saved = read();
+
+const state = Object.assign({
+  visited: {},      // { islandId: true }
+  best: {},         // { 'island-01:easy': 分數 }
+  passed: {},       // { 'island-01:easy': true }
+  stars: 0,         // ⭐ 數量（可跟居民交換知識卡）
+  cards: {},        // { cardId: true } 已收集
+  theme: 'auto',    // auto | 夜海 | 晨光 | 海霧
+  timeMode: 'auto', // day | dusk | night | auto | realtime
+  reduced: false,
+  guideSeen: false
+}, saved);
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* 忽略 */ }
+}
+
+// 簡易事件
+const subs = {};
+function on(name, fn) { (subs[name] = subs[name] || []).push(fn); }
+function emit(name, data) { (subs[name] || []).forEach(fn => { try { fn(data); } catch (e) { console.error(e); } }); }
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function prefersReduced() {
+  return state.reduced || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+function key(islandId, levelId) { return islandId + ':' + levelId; }
+
+// 跑酷結果記錄：最佳成績、通過難度、⭐、已看過
+function recordResult(island, level, res) {
+  const k = key(island.id, level.id);
+  state.visited[island.id] = true;
+  if (!state.best[k] || res.score > state.best[k]) state.best[k] = res.score;
+  let bonus = 0;
+  if (res.passed && !state.passed[k]) { state.passed[k] = true; bonus = 3; }
+  const gained = res.correct + bonus;
+  state.stars += gained;
+  save();
+  emit('progress');
+  return { gained, bonus };
+}
+
+// 用 ⭐ 跟居民交換知識卡
+function trade(cardId, cost) {
+  if (state.cards[cardId]) return 'have';
+  if (state.stars < cost) return 'poor';
+  state.stars -= cost;
+  state.cards[cardId] = true;
+  save();
+  emit('progress');
+  return 'ok';
+}
+
+return {state, save, on, emit, $, $$, esc, shuffle, toast, prefersReduced, key, recordResult, trade};
+})();
+
+__m.runner = (() => {
+const { state, shuffle, esc, prefersReduced } = __m.store;
+// 跑酷挑戰：三跑道，左右換道，吃對的答案、閃開錯的。使用 Canvas 2D 偽 3D 透視，不依賴 WebGL。
+// 出題方式：一次只出一題。上一題判定、顯示回饋後，才「即時產生」下一題：
+// 題目與三個答案先出現在上方與下方按鈕，關卡從遠方跑過來；抵達時間依題目長短計算，保證有足夠的讀題時間。
+
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>';
+const ICON_PLAY = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>';
+const SPEED = { easy: 2.6, mid: 3.0, hard: 3.4 };     // 路面前進速度（距離單位／秒），整局固定，畫面比較順
+const READ_BASE = { easy: 4.6, mid: 3.9, hard: 3.3 }; // 每題基本讀題秒數
+const READ_PER_CHAR = 0.045;                          // 題目＋選項每多一個字，多給的秒數
+const READ_MIN = 3.6, READ_MAX = 9;
+const FEED_OK = 1.5, FEED_BAD = 2.6;                  // 回饋顯示秒數（答錯多給一點時間看正確答案）
+const HIT_Z = 0.2;                                    // 關卡抵達玩家的位置
+const DRAW_FAR = 26;                                  // 多遠以內畫出關卡
+const LANE_COLORS = ['#4aa3df', '#f0a030', '#6cc46c'];
+
+function openRunner(host, island, level, hooks) {
+  const reduced = prefersReduced();
+  const speed = SPEED[level.id] * (reduced ? 0.85 : 1);
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#16222e';
+
+  host.hidden = false;
+  host.innerHTML = `
+  <div class="rn-wrap" role="dialog" aria-modal="true" aria-label="跑酷挑戰：${esc(island.name)}">
+    <canvas class="rn-cv"></canvas>
+    <div class="rn-top">
+      <button class="btn rn-x" aria-label="離開跑酷">✕</button>
+      <div class="rn-info"><b>${esc(island.name)}</b><span>${esc(level.name)}</span></div>
+      <div class="rn-hud"><span class="rn-lives" aria-label="生命"></span><span class="rn-score" aria-label="分數">0</span>
+        <button class="btn rn-pause" aria-label="暫停（P）"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg></button></div>
+    </div>
+    <div class="rn-q" aria-live="polite"><div class="rn-qn"></div><div class="rn-qt"></div><div class="rn-bar"><i></i></div></div>
+    <div class="rn-lanes" role="group" aria-label="三條跑道，按一下切換">
+      <button class="btn" data-l="0"></button><button class="btn" data-l="1"></button><button class="btn" data-l="2"></button>
+    </div>
+    <div class="rn-overlay"></div>
+  </div>`;
+
+  const cv = host.querySelector('.rn-cv');
+  const ctx = cv.getContext('2d');
+  const elQ = host.querySelector('.rn-q');
+  const elQn = host.querySelector('.rn-qn');
+  const elQt = host.querySelector('.rn-qt');
+  const elBar = host.querySelector('.rn-bar i');
+  const elLives = host.querySelector('.rn-lives');
+  const elScore = host.querySelector('.rn-score');
+  const laneBtns = Array.from(host.querySelectorAll('.rn-lanes button'));
+  const overlay = host.querySelector('.rn-overlay');
+  const pauseBtn = host.querySelector('.rn-pause');
+
+  // ---- 畫布：大螢幕限制像素量，避免每幀負擔過重 ----
+  let W = 0, H = 0, dpr = 1, bgLayer = null;
+  function resize() {
+    W = cv.clientWidth; H = cv.clientHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const maxPx = 2.4e6;
+    if (W * H * dpr * dpr > maxPx) dpr = Math.max(1, Math.sqrt(maxPx / (W * H)));
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    bgLayer = null;            // 背景（天空、遠山、地面）重畫一次後快取
+    wrapCache.clear();
+  }
+
+  // ---- 遊戲狀態 ----
+  // 每次開局都重新洗牌題目順序；每題的三個答案位置也重新洗牌
+  const S = window.__runner = {
+    phase: 'ready', lane: 1, px: 1, lives: level.lives, score: 0, combo: 0, correct: 0, dist: 0,
+    gates: shuffle(island.gates[level.id]).map(g => {
+      const perm = shuffle([0, 1, 2]);
+      return { g, perm, correctLane: perm.indexOf(0), z: 0, done: false, res: null, pickLane: -1, spawned: false, read: 0 };
+    }),
+    active: null, next: 0, feed: 0, log: [], shake: 0, parts: [], flash: 0, paused: false
+  };
+  S.total = S.gates.length;
+  S.correctLane = () => (S.active && !S.active.done ? S.active.correctLane : -1);
+
+  function renderLives() {
+    elLives.textContent = '❤'.repeat(Math.max(0, S.lives)) + '♡'.repeat(Math.max(0, level.lives - S.lives));
+  }
+  renderLives();
+
+  function readTime(g) {
+    const chars = g.q.length + g.o.reduce((n, o) => n + o.length, 0);
+    return Math.max(READ_MIN, Math.min(READ_MAX, READ_BASE[level.id] + chars * READ_PER_CHAR)) * (reduced ? 1.15 : 1);
+  }
+
+  // 即時產生下一題：題目、三個答案按鈕與關卡同時出現
+  function spawnNext() {
+    const g = S.gates[S.next++];
+    if (!g) { S.active = null; return; }
+    g.read = readTime(g.g);
+    g.z = HIT_Z + speed * g.read;
+    g.spawned = true;
+    g.t0 = performance.now();
+    S.active = g;
+    elQ.className = 'rn-q';
+    elQn.textContent = `第 ${S.next}/${S.total} 題`;
+    elQt.textContent = g.g.q;
+    laneBtns.forEach((b, i) => {
+      b.textContent = g.g.o[g.perm[i]];
+      b.className = 'btn' + (i === S.lane ? ' on' : '');
+      b.style.setProperty('--lc', LANE_COLORS[i]);
+    });
+  }
+
+  function setLane(l) {
+    S.lane = Math.max(0, Math.min(2, l));
+    if (S.phase === 'run' && S.active && !S.active.done) laneBtns.forEach((b, i) => b.classList.toggle('on', i === S.lane));
+  }
+
+  // ---- 輸入：鍵盤、點跑道按鈕、滑動 ----
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if ((e.key === 'p' || e.key === 'P') && (S.phase === 'run')) { e.preventDefault(); togglePause(); return; }
+    if (S.phase !== 'run' || S.paused) return;
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); setLane(S.lane - 1); }
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); setLane(S.lane + 1); }
+    else if (e.key === '1' || e.key === '2' || e.key === '3') setLane(Number(e.key) - 1);
+  }
+  window.addEventListener('keydown', onKey);
+  laneBtns.forEach((b, i) => b.addEventListener('click', () => { if (S.phase === 'run' && !S.paused) setLane(i); }));
+  let tx = null;
+  cv.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  cv.addEventListener('touchend', e => {
+    if (tx == null || S.phase !== 'run' || S.paused) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 28) setLane(S.lane + (dx > 0 ? 1 : -1));
+    tx = null;
+  }, { passive: true });
+  cv.addEventListener('pointerdown', e => {
+    if (S.phase !== 'run' || S.paused || e.pointerType === 'touch') return;
+    const r = cv.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    setLane(x < 0.38 ? 0 : x > 0.62 ? 2 : 1);
+  });
+  host.querySelector('.rn-x').addEventListener('click', close);
+  pauseBtn.addEventListener('click', togglePause);
+  function onVis() { if (document.hidden && S.phase === 'run' && !S.paused) togglePause(); }
+  document.addEventListener('visibilitychange', onVis);
+
+  // ---- 暫停 ----
+  function togglePause() {
+    if (S.phase !== 'run') return;
+    S.paused = !S.paused;
+    pauseBtn.innerHTML = S.paused ? ICON_PLAY : ICON_PAUSE;
+    pauseBtn.setAttribute('aria-label', S.paused ? '繼續（P）' : '暫停（P）');
+    if (S.paused) {
+      overlay.hidden = false;
+      overlay.innerHTML = `<div class="rn-card"><h2>⏸ 暫停中</h2><p>題目會停在原地，慢慢讀沒關係。</p>
+        <div class="rn-actions"><button class="btn primary rn-resume">繼續（P）</button><button class="btn rn-quit">離開</button></div></div>`;
+      overlay.querySelector('.rn-resume').addEventListener('click', togglePause);
+      overlay.querySelector('.rn-quit').addEventListener('click', close);
+      overlay.querySelector('.rn-resume').focus();
+    } else {
+      overlay.hidden = true; overlay.innerHTML = '';
+      last = performance.now();
+    }
+  }
+
+  // ---- 開始 / 結束 ----
+  function showReady() {
+    overlay.hidden = false;
+    overlay.innerHTML = `<div class="rn-card">
+      <h2>${esc(island.name)}</h2>
+      <p class="rn-sub">${esc(level.name)}：${esc(level.desc)}　共 ${S.total} 題，${level.lives} 條命</p>
+      <p>${esc(island.rule)}</p>
+      <ul class="rn-help"><li>題目出現在上方，三個答案在下方按鈕，也寫在跑過來的關卡上</li>
+      <li>電腦：← → 或 A D 換道（也可按 1 2 3），P 暫停</li><li>手機：左右滑動，或直接點下面的答案按鈕</li>
+      <li>關卡通過的瞬間，你所在的跑道就是你的答案；上方的進度條跑完，關卡就到了</li></ul>
+      <button class="btn primary rn-go">開始挑戰</button></div>`;
+    const go = overlay.querySelector('.rn-go');
+    go.addEventListener('click', start);
+    go.focus();
+  }
+  function start() {
+    if (S.phase !== 'ready') return;
+    S.phase = 'run';
+    overlay.hidden = true;
+    overlay.innerHTML = '';
+    last = performance.now();
+    setLane(1);
+    spawnNext();
+  }
+
+  function finish() {
+    S.phase = 'over';
+    elQ.className = 'rn-q hide';
+    const passed = S.lives > 0;
+    const res = { score: S.score, correct: S.correct, total: S.total, lives: S.lives, passed };
+    const info = hooks.onFinish ? hooks.onFinish(res) : { gained: 0, bonus: 0 };
+    const wrong = S.log.filter(x => !x.ok);
+    const unanswered = S.total - S.log.length;
+    const k = island.id + ':' + level.id;
+    overlay.hidden = false;
+    const nextIdx = ['easy', 'mid', 'hard'].indexOf(level.id) + 1;
+    overlay.innerHTML = `<div class="rn-card">
+      <h2>${passed ? '🎉 挑戰成功！' : '💪 再試一次吧'}</h2>
+      <p class="rn-sub">答對 ${S.correct}/${S.total} 題　得分 ${S.score}　最佳 ${state.best[k] || S.score}</p>
+      <p>獲得 ⭐ ${info.gained}${info.bonus ? `（含首次通過獎勵 ${info.bonus}）` : ''}。可以拿去跟島上的居民交換知識卡。${unanswered ? `<br><small>還有 ${unanswered} 題沒有出場，再玩一次題目順序會重新洗牌。</small>` : ''}</p>
+      ${wrong.length ? `<details open><summary>答錯的題目複習（${wrong.length}）</summary><ul class="rn-rev">${wrong.map(w => `<li><b>${esc(w.q)}</b><br>正確答案：${esc(w.ans)}<br><small>${esc(w.e)}</small></li>`).join('')}</ul></details>` : '<p>全部答對，太厲害了！</p>'}
+      <div class="rn-actions">
+        <button class="btn primary rn-again">再玩一次</button>
+        ${passed && nextIdx < 3 ? '<button class="btn rn-next">挑戰下一級</button>' : ''}
+        <button class="btn rn-back">回群島</button>
+      </div></div>`;
+    overlay.querySelector('.rn-again').addEventListener('click', () => { cleanup(); hooks.onRestart && hooks.onRestart(island, level); });
+    const nx = overlay.querySelector('.rn-next');
+    if (nx) nx.addEventListener('click', () => { cleanup(); hooks.onRestart && hooks.onRestart(island, hooks.levels[nextIdx]); });
+    overlay.querySelector('.rn-back').addEventListener('click', close);
+    overlay.querySelector('.rn-again').focus();
+  }
+
+  // ---- 判定：關卡抵達玩家的瞬間 ----
+  function resolve(g) {
+    g.done = true;
+    g.pickLane = S.lane;
+    const ok = S.lane === g.correctLane;
+    g.res = ok ? 'ok' : 'bad';
+    const px = laneX(S.lane, 1);
+    if (ok) {
+      S.correct++; S.combo++;
+      S.score += 100 + Math.min(S.combo, 5) * 10;
+      elQ.className = 'rn-q ok';
+      elQn.textContent = S.combo >= 2 ? `✔ 答對了！連續 ${S.combo} 題` : '✔ 答對了！';
+      elQt.textContent = g.g.e;
+      if (!reduced) for (let i = 0; i < 12; i++) S.parts.push({ x: px, y: py() - 60, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 280 - 60, life: 0.8 });
+    } else {
+      S.lives--; S.combo = 0;
+      if (!reduced) S.shake = 0.3;
+      S.flash = 0.3;
+      elQ.className = 'rn-q bad';
+      elQn.textContent = '✘ 正確答案：' + g.g.o[0];
+      elQt.textContent = g.g.e;
+      renderLives();
+    }
+    // 下方按鈕標出對錯
+    laneBtns.forEach((b, i) => {
+      b.classList.remove('on');
+      if (i === g.correctLane) b.classList.add('right');
+      else if (i === g.pickLane) b.classList.add('wrong');
+      else b.classList.add('dim');
+    });
+    elBar.style.transform = 'scaleX(0)';
+    S.log.push({ ok, q: g.g.q, ans: g.g.o[0], e: g.g.e });
+    elScore.textContent = S.score;
+    S.feed = ok ? FEED_OK : FEED_BAD;
+  }
+
+  // ---- 繪圖 ----
+  const sc = z => 1 / (1 + z * 0.28);
+  const hy = () => H * 0.3;
+  const py = () => H * 0.8;
+  const Y = s => hy() + (py() - hy()) * s;
+  const laneW = () => Math.min(W * 0.24, H * 0.34);
+  function laneX(l, s) { return W / 2 + (l - 1) * laneW() * s; }
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  const wrapCache = new Map();
+  function wrapText(t, maxW, fs) {
+    const k = t + '|' + fs + '|' + Math.round(maxW / 4);
+    let lines = wrapCache.get(k);
+    if (lines) return lines;
+    lines = []; let cur = '';
+    for (const ch of t) {
+      if (ctx.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ch; } else cur += ch;
+    }
+    if (cur) lines.push(cur);
+    lines = lines.slice(0, 5);
+    if (wrapCache.size > 400) wrapCache.clear();
+    wrapCache.set(k, lines);
+    return lines;
+  }
+
+  function buildBg() {
+    const c = document.createElement('canvas');
+    c.width = cv.width; c.height = cv.height;
+    const x = c.getContext('2d');
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const g = x.createLinearGradient(0, 0, 0, hy());
+    g.addColorStop(0, bg); g.addColorStop(1, island.color + 'cc');
+    x.fillStyle = g; x.fillRect(0, 0, W, hy() + 2);
+    x.fillStyle = shade(island.color, -0.25); x.fillRect(0, hy(), W, H - hy());
+    x.fillStyle = shade(island.color, -0.1);
+    for (let i = 0; i < 7; i++) { const mx = (i / 6) * W; x.beginPath(); x.moveTo(mx - 90, hy()); x.lineTo(mx, hy() - 40 - (i % 2) * 22); x.lineTo(mx + 90, hy()); x.fill(); }
+    // 路面與色帶是靜態的，也一起畫進快取
+    const sFar = 0.035, sNear = 1.5;
+    x.fillStyle = '#d9c9a3';
+    x.beginPath(); x.moveTo(laneX(-0.5, sFar), Y(sFar)); x.lineTo(laneX(2.5, sFar), Y(sFar)); x.lineTo(laneX(2.5, sNear), Y(sNear)); x.lineTo(laneX(-0.5, sNear), Y(sNear)); x.fill();
+    for (let l = 0; l < 3; l++) {
+      x.fillStyle = LANE_COLORS[l] + '33';
+      x.beginPath(); x.moveTo(laneX(l - 0.5, sFar), Y(sFar)); x.lineTo(laneX(l + 0.5, sFar), Y(sFar)); x.lineTo(laneX(l + 0.5, sNear), Y(sNear)); x.lineTo(laneX(l - 0.5, sNear), Y(sNear)); x.fill();
+    }
+    bgLayer = c;
+  }
+
+  function drawScene(time) {
+    if (!bgLayer) buildBg();
+    const shx = S.shake > 0 ? (Math.random() - 0.5) * 10 * S.shake / 0.3 : 0;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(bgLayer, 0, 0);
+    ctx.setTransform(dpr, 0, 0, dpr, shx * dpr, 0);
+    // 虛線（隨距離捲動）
+    ctx.strokeStyle = 'rgba(255,255,255,.85)';
+    const off = S.dist % 2;
+    for (let k = -1; k < 22; k += 2) {
+      const z0 = Math.max(0, k - off), z1 = Math.max(0, k + 1 - off);
+      if (z1 <= 0) continue;
+      ctx.lineWidth = Math.max(1, 4 * sc(z0));
+      ctx.beginPath();
+      for (const ln of [0.5, 1.5]) { ctx.moveTo(laneX(ln, sc(z0)), Y(sc(z0))); ctx.lineTo(laneX(ln, sc(z1)), Y(sc(z1))); }
+      ctx.stroke();
+    }
+    // 路旁的樹（遠到近）
+    const step = 3, base = Math.floor(S.dist / step);
+    for (let k = 9; k >= -1; k--) {
+      const z = k * step - (S.dist % step) - 1;
+      if (z < -1) continue;
+      const s = sc(Math.max(z, 0));
+      const n = base + k;
+      for (const side of [-1, 1]) {
+        const x = laneX(1 + side * 2.4, s), y = Y(s), u = laneW() * s;
+        ctx.fillStyle = '#6b4a2f'; ctx.fillRect(x - u * 0.06, y - u * 0.55, u * 0.12, u * 0.55);
+        ctx.fillStyle = ((n + (side > 0 ? 1 : 0)) % 2) ? '#3f8f4a' : '#52a85a';
+        ctx.beginPath(); ctx.arc(x, y - u * 0.75, u * 0.34, 0, 6.3); ctx.fill();
+      }
+    }
+    // 關卡（遠到近）：目前的題目，以及剛判定完、正在退場的上一題
+    const gs = S.gates.filter(x => x.spawned && x.z > -1.6 && x.z < DRAW_FAR).sort((a, b) => b.z - a.z);
+    for (const gt of gs) drawGate(gt);
+    drawPlayer(time);
+    // 星星粒子（用圖形畫，比 emoji 快）
+    ctx.fillStyle = '#ffd84a';
+    for (const p of S.parts) { ctx.globalAlpha = Math.max(0, p.life / 0.8); star(p.x, p.y, 7); }
+    ctx.globalAlpha = 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (S.flash > 0) { ctx.fillStyle = `rgba(220,60,50,${S.flash})`; ctx.fillRect(0, 0, W, H); }
+  }
+  function star(x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr2 = i % 2 ? r * 0.45 : r; ctx.lineTo(x + Math.cos(a) * rr2, y + Math.sin(a) * rr2); }
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawGate(gt) {
+    const z = Math.max(gt.z, -0.5);
+    const s = sc(z);
+    const alpha = gt.z < -0.2 ? Math.max(0, 1 + (gt.z + 0.2) / 1.2) : Math.min(1, (DRAW_FAR - gt.z) / 4);
+    const w = laneW() * 0.88 * s, h = laneW() * 0.78 * s, y = Y(s) - h - laneW() * 0.05 * s;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = 'rgba(40,40,60,.75)';
+    ctx.fillRect(laneX(-0.5, s) - 4 * s, y - 6 * s, laneW() * 3 * s + 8 * s, 6 * s);
+    for (let l = 0; l < 3; l++) {
+      const x = laneX(l, s) - w / 2;
+      let col = LANE_COLORS[l], mark = '';
+      if (gt.res) {
+        if (l === gt.correctLane) { col = '#2fa04a'; mark = '✔'; }
+        else if (l === gt.pickLane) { col = '#d0453b'; mark = '✘'; }
+        else col = '#8a8f99';
+      }
+      ctx.fillStyle = col; rr(x, y, w, h, 10 * s); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = Math.max(1, 3 * s); ctx.stroke();
+      const fs = Math.round(Math.max(10, Math.min(26, laneW() * 0.13 * s)));
+      if (s > 0.2 && w - 10 * s >= fs * 3.2) {           // 卡片太窄（遠處或手機）時不硬塞字，答案看下方按鈕
+        ctx.font = `700 ${fs}px "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif`;
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const lines = wrapText(gt.g.o[gt.perm[l]], w - 10 * s, fs);
+        const lh = fs * 1.25, y0 = y + h / 2 - (lines.length - 1) * lh / 2;
+        for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x + w / 2, y0 + i * lh);
+        if (mark) { ctx.font = `${Math.round(Math.max(18, 44 * s))}px sans-serif`; ctx.fillText(mark, x + w / 2, y - 14 * s); }
+        ctx.textBaseline = 'alphabetic';
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawPlayer(time) {
+    const u = Math.min(H, 900) / 700;
+    const x = laneX(S.px, 1), bob = S.phase === 'run' && !S.paused && !reduced ? Math.abs(Math.sin(time * 0.012)) * 8 * u : 0;
+    const y = py() - bob;
+    ctx.save(); ctx.translate(x, y); ctx.scale(u, u);
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 4 + bob / u, 30, 9, 0, 0, 6.3); ctx.fill();
+    ctx.fillStyle = '#3d5fc4'; ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(-14, -62); ctx.lineTo(14, -62); ctx.lineTo(26, 0); ctx.closePath(); ctx.fill();   // 長袍
+    ctx.fillStyle = '#f4c58f'; ctx.beginPath(); ctx.arc(0, -76, 17, 0, 6.3); ctx.fill();                                                                 // 臉
+    ctx.fillStyle = '#2a2a3a'; ctx.beginPath(); ctx.arc(-6, -77, 2.2, 0, 6.3); ctx.arc(6, -77, 2.2, 0, 6.3); ctx.fill();
+    ctx.fillStyle = '#7a3fb8'; ctx.beginPath(); ctx.moveTo(-24, -86); ctx.lineTo(0, -128); ctx.lineTo(24, -86); ctx.closePath(); ctx.fill();            // 魔法帽
+    ctx.fillRect(-28, -90, 56, 7);
+    ctx.fillStyle = '#ffd84a'; ctx.beginPath(); ctx.arc(0, -108, 5, 0, 6.3); ctx.fill();
+    ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(30, -80); ctx.stroke();                              // 法杖
+    ctx.fillStyle = '#ff7ac8'; ctx.beginPath(); ctx.arc(30, -86, 7, 0, 6.3); ctx.fill();
+    ctx.restore();
+  }
+
+  function shade(hex, amt) {
+    const n = parseInt(hex.slice(1), 16);
+    const f = c => Math.max(0, Math.min(255, Math.round(c + 255 * amt)));
+    return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+  }
+
+  // ---- 主迴圈 ----
+  let last = performance.now(), raf = 0, closed = false, endTimer = 0;
+  function loop(now) {
+    if (closed) return;
+    let dt = (now - last) / 1000; last = now;
+    if (dt > 0.25) dt = 0;              // 分頁切走又回來：不要一口氣跳太遠
+    dt = Math.min(dt, 0.05);
+    if (S.paused) dt = 0;
+    S.px += (S.lane - S.px) * Math.min(1, dt * 14);
+    if (S.phase === 'run' && dt > 0) {
+      S.dist += speed * dt;
+      for (const g of S.gates) if (g.spawned) g.z -= speed * dt;
+      const a = S.active;
+      if (a && !a.done) {
+        elBar.style.transform = `scaleX(${Math.max(0, Math.min(1, (a.z - HIT_Z) / (speed * a.read))).toFixed(3)})`;
+        if (a.z <= HIT_Z) resolve(a);
+      } else if (a && a.done) {
+        S.feed -= dt;
+        if (S.feed <= 0) {
+          if (S.lives <= 0 || S.next >= S.total) { S.phase = 'ending'; endTimer = setTimeout(finish, 300); }
+          else spawnNext();
+        }
+      }
+    } else if (S.phase === 'ending') {
+      S.dist += speed * dt * 0.5;
+    }
+    S.shake = Math.max(0, S.shake - dt); S.flash = Math.max(0, S.flash - dt);
+    for (const p of S.parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 600 * dt; p.life -= dt; }
+    if (S.parts.length) S.parts = S.parts.filter(p => p.life > 0);
+    if (W !== cv.clientWidth || H !== cv.clientHeight) resize();
+    drawScene(now);
+    raf = requestAnimationFrame(loop);
+  }
+
+  function cleanup() {
+    closed = true;
+    cancelAnimationFrame(raf);
+    clearTimeout(endTimer);
+    window.removeEventListener('keydown', onKey);
+    document.removeEventListener('visibilitychange', onVis);
+    host.innerHTML = '';
+    host.hidden = true;
+    delete window.__runner;
+    hooks.onCleanup && hooks.onCleanup();
+  }
+  function close() {
+    if (closed) return;
+    cleanup();
+    hooks.onClose && hooks.onClose();
+  }
+
+  resize();
+  elQ.className = 'rn-q hide';
+  showReady();
+  raf = requestAnimationFrame(loop);
+  return { close };
+}
+
+return {openRunner};
+})();
+
+__m.ui = (() => {
+const { state, save, on, emit, $, $$, esc, shuffle, toast, trade, key, prefersReduced } = __m.store;
+// 介面：內容面板、文字清單、測驗、小嚮導、圖鑑、居民對話與交易、設定（底色／天色／音樂／減少動態）
+
+const BG = { '夜海': '#16222e', '晨光': '#f6f0e4', '海霧': '#dcebee' };
+const AUTO_THEME = { day: '晨光', dusk: '海霧', night: '夜海' };
+let C, A;                 // C: 內容資料；A: 主程式提供的動作
+const byId = {};
+let panelId = null;
+let lastTod = 'day', lastHour = 12;
+
+function initUI(content, api) {
+  C = content; A = api;
+  C.islands.forEach(i => byId[i.id] = i);
+  $('#site-title').textContent = C.site.title;
+  $('#site-tag').textContent = C.site.tagline;
+
+  $('#panel-x').addEventListener('click', () => { closePanel(); A.home(); });
+  $('#b-home').addEventListener('click', () => { closePanel(); A.home(); });
+  $('#b-list').addEventListener('click', openList);
+  $('#list-x').addEventListener('click', closeList);
+  $('#b-cards').addEventListener('click', openCards);
+  $('#b-quiz').addEventListener('click', () => openQuiz(panelId && panelId !== 'center' ? panelId : null));
+  $('#b-guide').addEventListener('click', openGuide);
+  $('#modal-x').addEventListener('click', closeModal);
+  $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+  $('#b-set').addEventListener('click', toggleSettings);
+
+  // 設定
+  $('#settings').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.theme) { state.theme = b.dataset.theme; save(); applyTheme(); }
+    else if (b.dataset.time) { state.timeMode = b.dataset.time; save(); A.setTimeMode(state.timeMode); markSettings(); }
+    else if (b.id === 's-music') { toggleMusic(); }
+    else if (b.id === 's-motion') { state.reduced = !state.reduced; save(); applyMotion(); }
+    else if (b.id === 's-reset') {
+      if (confirm('確定要清除探索進度、星星與圖鑑嗎？')) {
+        state.visited = {}; state.best = {}; state.passed = {}; state.stars = 0; state.cards = {};
+        save(); emit('progress'); toast('進度已清除');
+      }
+    }
+  });
+
+  // 委派：面板與清單裡的按鈕
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-act]'); if (!t) return;
+    const act = t.dataset.act;
+    if (act === 'run') {
+      const isl = byId[t.dataset.island], lv = C.levels.find(l => l.id === t.dataset.level);
+      closeList(); closePanel(); closeModal(); A.startRunner(isl, lv);
+    } else if (act === 'quiz') { closeList(); openQuiz(t.dataset.island || null); }
+    else if (act === 'trade') { doTrade(t.dataset.card, Number(t.dataset.cost)); }
+    else if (act === 'open') { closeList(); A.focus(t.dataset.island); }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('#runner').hidden) return;               // 跑酷自己處理
+    if (!$('#bubble').hidden) { hideBubble(); return; }
+    if (!$('#modal').hidden) { closeModal(); return; }
+    if (!$('#settings').hidden) { toggleSettings(); return; }
+    if (!$('#list-view').hidden) { closeList(); return; }
+    if (!$('#panel').hidden) { closePanel(); A.home(); return; }
+  });
+  document.addEventListener('pointerdown', e => {
+    if (!$('#settings').hidden && !e.target.closest('#settings') && !e.target.closest('#b-set')) toggleSettings(false);
+  });
+
+  on('progress', () => { renderHud(); if (panelId) renderPanel(); if ($('#list-view') && !$('#list-view').hidden) renderList(); });
+  markSettings(); applyMotion(); applyTheme(); renderHud();
+}
+
+/* ---------- 頂端狀態 ---------- */
+function renderHud() {
+  const n = C.islands.filter(i => state.visited[i.id]).length;
+  $('#hud-progress').textContent = `🏝 ${n}/${C.islands.length}`;
+  $('#hud-stars').textContent = `⭐ ${state.stars}`;
+}
+function labelInfo(id) {
+  if (id === 'center') return { title: C.center.name, sub: `⭐ ${state.stars}・挑戰總部` };
+  const i = byId[id];
+  const p = C.levels.filter(l => state.passed[key(id, l.id)]).length;
+  return { title: i.name, short: i.short, sub: p ? `通過 ${p}/3 級` : (state.visited[id] ? '已看過' : '點我進島') };
+}
+
+/* ---------- 底色與天色 ---------- */
+function tick(hour, tod) {
+  lastHour = hour; lastTod = tod;
+  const hh = String(Math.floor(hour)).padStart(2, '0'), mm = String(Math.floor((hour % 1) * 60)).padStart(2, '0');
+  $('#hud-clock').textContent = `${tod === 'day' ? '☀️ 白天' : tod === 'dusk' ? '🌇 黃昏' : '🌙 夜晚'} ${hh}:${mm}`;
+  if (state.theme === 'auto' && effective() !== curTheme) applyTheme();
+}
+let curTheme = null;
+function effective() { return state.theme === 'auto' ? AUTO_THEME[lastTod] : state.theme; }
+function applyTheme() {
+  const name = effective();
+  curTheme = name;
+  const bg = BG[name] || BG['夜海'];
+  const r = document.documentElement;
+  r.style.setProperty('--bg', bg);
+  const n = parseInt(bg.slice(1), 16), lum = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+  r.dataset.mode = lum > 0.5 ? 'light' : 'dark';
+  r.style.setProperty('--panel', lum > 0.5 ? 'rgba(255,255,255,.95)' : 'rgba(22,34,46,.94)');
+  if (A && A.setBackground) A.setBackground(bg, lum > 0.5);
+  markSettings();
+}
+function markSettings() {
+  $$('#settings [data-theme]').forEach(b => b.classList.toggle('on', b.dataset.theme === state.theme));
+  $$('#settings [data-time]').forEach(b => b.classList.toggle('on', b.dataset.time === state.timeMode));
+  $('#s-motion').setAttribute('aria-pressed', String(state.reduced));
+  $('#s-music').setAttribute('aria-pressed', String(musicOn));
+}
+function applyMotion() {
+  document.documentElement.dataset.motion = state.reduced ? 'off' : 'on';
+  if (A && A.setReduced) A.setReduced(prefersReduced());
+  markSettings();
+}
+function toggleSettings(force) {
+  const s = $('#settings');
+  const show = force === undefined ? s.hidden : force;
+  s.hidden = !show;
+  $('#b-set').setAttribute('aria-expanded', String(show));
+}
+
+/* ---------- 背景音樂（使用者按下才播放） ---------- */
+let ac = null, mTimer = 0, musicOn = false, mGain = null, step = 0;
+function toggleMusic() {
+  if (musicOn) { musicOn = false; clearInterval(mTimer); if (mGain) mGain.gain.value = 0; markSettings(); return; }
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    mGain = mGain || ac.createGain(); mGain.gain.value = 0.5; mGain.connect(ac.destination);
+  } catch (e) { toast('這個瀏覽器不支援音樂'); return; }
+  musicOn = true;
+  const scale = [262, 294, 330, 392, 440, 523, 587];
+  mTimer = setInterval(() => {
+    if (!ac) return;
+    step = Math.max(0, Math.min(scale.length - 1, step + [-2, -1, 0, 1, 2][Math.floor(Math.random() * 5)]));
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.value = scale[step];
+    const t = ac.currentTime;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0008, t + 1.2);
+    o.connect(g); g.connect(mGain); o.start(t); o.stop(t + 1.3);
+  }, 650);
+  markSettings();
+}
+
+/* ---------- 內容面板 ---------- */
+function openPanel(id) {
+  panelId = id;
+  if (id !== 'center' && !state.visited[id]) { state.visited[id] = true; save(); emit('progress'); }
+  renderPanel();
+  $('#panel').hidden = false;
+  $('#panel').scrollTop = 0;
+}
+function closePanel() { panelId = null; $('#panel').hidden = true; }
+function currentPanel() { return panelId; }
+
+function levelButtons(i) {
+  return `<div class="lv">${C.levels.map(l => {
+    const k = key(i.id, l.id), ok = state.passed[k];
+    return `<button class="btn ${ok ? 'pass' : ''}" data-act="run" data-island="${i.id}" data-level="${l.id}"><span>${ok ? '✔ ' : ''}${esc(l.name)}</span><small>${state.best[k] ? '最佳 ' + state.best[k] : esc(l.desc)}</small></button>`;
+  }).join('')}</div>`;
+}
+function cardGrid(i) {
+  return `<div class="cardgrid">${i.cards.map(c => state.cards[c.id]
+    ? `<div class="kcard"><b>🃏 ${esc(c.t)}</b>${esc(c.x)}</div>`
+    : `<div class="kcard lock"><span>🔒</span><small>未收集</small></div>`).join('')}</div>`;
+}
+function residentsHtml(i) {
+  return i.residents.map(r => {
+    const owned = state.cards[r.offer];
+    const card = i.cards.find(c => c.id === r.offer);
+    return `<div class="kcard" style="margin:6px 0"><b>${esc(r.name)}</b>${esc(r.say)}<br>
+      <button class="btn" style="margin-top:6px" data-act="trade" data-card="${r.offer}" data-cost="${r.cost}" ${owned ? 'disabled' : ''}>${owned ? '已收集 ✔' : `用 ${r.cost} ⭐ 換「${esc(card.t)}」`}</button></div>`;
+  }).join('');
+}
+
+function renderPanel() {
+  const body = $('#panel-body');
+  if (panelId === 'center') {
+    const total = C.islands.reduce((n, i) => n + i.cards.length, 0), have = Object.keys(state.cards).length;
+    body.innerHTML = `
+      <h2>${esc(C.center.name)}</h2><span class="tag" style="--c:var(--accent)">挑戰總部</span>
+      <p>${esc(C.center.intro)}</p>
+      <div class="sec"><h3>各單元成績</h3>
+        <table class="hq"><thead><tr><th>單元</th>${C.levels.map(l => `<th>${esc(l.name)}</th>`).join('')}</tr></thead><tbody>
+        ${C.islands.map(i => `<tr><td><button class="btn" style="min-height:44px" data-act="open" data-island="${i.id}">${esc(i.short)}</button></td>${C.levels.map(l => {
+          const k = key(i.id, l.id); return `<td>${state.passed[k] ? '✔ ' : ''}${state.best[k] || '—'}</td>`;
+        }).join('')}</tr>`).join('')}
+        </tbody></table><p class="small">✔ 表示已通過該難度；數字是最佳分數。</p></div>
+      <div class="sec"><h3>我的收穫</h3><p>⭐ ${state.stars}　🃏 ${have}/${total}　🏝 ${C.islands.filter(i => state.visited[i.id]).length}/${C.islands.length}</p>
+        <button class="btn" onclick="document.getElementById('b-cards').click()">看收集圖鑑</button>
+        <button class="btn" data-act="quiz">總部小測驗</button></div>
+      <div class="sec"><h3>居民</h3>${C.center.residents.map(r => `<div class="kcard" style="margin:6px 0"><b>${esc(r.name)}</b>${esc(r.say)}</div>`).join('')}</div>`;
+    return;
+  }
+  const i = byId[panelId]; if (!i) return;
+  body.style.setProperty('--c', i.color);
+  body.innerHTML = `
+    <h2>${esc(i.name)}</h2><span class="tag" style="--c:${i.color}">地標：${esc(i.landmark)}</span>
+    <p>${esc(i.intro)}</p>
+    <div class="sec" style="--c:${i.color}"><h3>🏃 跑酷挑戰（選難度）</h3>${levelButtons(i)}</div>
+    <div class="sec" style="--c:${i.color}"><h3>內容重點</h3><ul>${i.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
+    <div class="sec" style="--c:${i.color}"><h3>${esc(C.extraLabel || '判斷規則')}</h3><div class="rule">${esc(i.rule)}</div></div>
+    <div class="sec" style="--c:${i.color}"><h3>練習連結（外部網站，使用者提供）</h3><div class="links">${i.links.map(l => `<a href="${esc(l.u)}" target="_blank" rel="noopener noreferrer">${esc(l.t)} ↗</a>`).join('')}</div></div>
+    <div class="sec" style="--c:${i.color}"><h3>知識卡</h3>${cardGrid(i)}</div>
+    <div class="sec" style="--c:${i.color}"><h3>島上居民（點島上的居民也能聊天交換）</h3>${residentsHtml(i)}</div>
+    <div class="sec"><button class="btn" data-act="quiz" data-island="${i.id}">📝 這座島的小測驗</button> <button class="btn" onclick="document.getElementById('b-home').click()">回到全景</button></div>
+    <p class="small">內容整理自：${esc(C.site.source)}。居民為示意角色。</p>`;
+}
+
+/* ---------- 文字清單（不用 3D 也能讀完全部） ---------- */
+function openList() { renderList(); if (A.setPaused) A.setPaused(true); $('#list-view').hidden = false; $('#list-view').scrollTop = 0; $('#list-x').focus(); }
+function closeList() { if (!$('#list-view').hidden && A.setPaused) A.setPaused(false); $('#list-view').hidden = true; }
+function renderList() {
+  $('#list-body').innerHTML = `
+    <div class="list-item"><h3>🏠 ${esc(C.center.name)}（挑戰總部）</h3><p>${esc(C.center.intro)}</p>
+      <p>⭐ ${state.stars}　🏝 ${C.islands.filter(i => state.visited[i.id]).length}/${C.islands.length}</p>
+      <button class="btn" data-act="quiz">總部小測驗</button></div>` +
+    C.islands.map(i => `<article class="list-item" style="--c:${i.color}">
+      <h3>${esc(i.name)}</h3><p>${esc(i.intro)}</p>
+      <div class="sec"><h3>🏃 跑酷挑戰</h3>${levelButtons(i)}</div>
+      <div class="sec"><h3>內容重點</h3><ul>${i.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
+      <div class="sec"><h3>${esc(C.extraLabel || '判斷規則')}</h3><div class="rule">${esc(i.rule)}</div></div>
+      <div class="sec"><h3>練習連結</h3><div class="links">${i.links.map(l => `<a href="${esc(l.u)}" target="_blank" rel="noopener noreferrer">${esc(l.t)} ↗</a>`).join('')}</div></div>
+      <div class="sec"><h3>知識卡與居民</h3>${cardGrid(i)}${residentsHtml(i)}</div>
+      <button class="btn" data-act="quiz" data-island="${i.id}">📝 小測驗</button>
+      <button class="btn" data-act="open" data-island="${i.id}">🏝 到 3D 島上看看</button></article>`).join('');
+}
+
+/* ---------- 彈窗 ---------- */
+let modalFrom = null;
+function openModal(html) {
+  modalFrom = document.activeElement;
+  $('#modal-body').innerHTML = html;
+  $('#modal').hidden = false;
+  $('#modal-x').focus();
+}
+function closeModal() {
+  if (!$('#modal').hidden) { $('#modal').hidden = true; $('#modal-body').innerHTML = ''; }
+  if (modalFrom && modalFrom.focus) { try { modalFrom.focus(); } catch (e) { /* 忽略 */ } }
+}
+
+/* ---------- 小測驗 ---------- */
+function openQuiz(islandId) {
+  const src = islandId ? [byId[islandId]] : C.islands;
+  let pool = [];
+  src.forEach(i => C.levels.forEach(l => i.gates[l.id].forEach(g => pool.push({ g, i, l }))));
+  const n = islandId ? 6 : 10;
+  const qs = shuffle(pool).slice(0, n).map(x => ({ ...x, opts: shuffle([0, 1, 2]) }));
+  let idx = 0, score = 0;
+  const title = islandId ? byId[islandId].name : '總部綜合測驗';
+  function show() {
+    if (idx >= qs.length) {
+      $('#modal-body').innerHTML = `<h2>測驗完成！</h2><p style="font-size:20px">${score} / ${qs.length} 題答對 ${score === qs.length ? '🎉' : ''}</p>
+        <button class="btn primary" id="qz-again">再測一次</button> <button class="btn" id="qz-close">關閉</button>`;
+      $('#qz-again').onclick = () => openQuiz(islandId); $('#qz-close').onclick = closeModal; return;
+    }
+    const q = qs[idx];
+    $('#modal-body').innerHTML = `<h2>📝 ${esc(title)}</h2><p class="small">第 ${idx + 1}/${qs.length} 題・${esc(q.i.short)} ${esc(q.l.name)}</p>
+      <p style="font-size:18px;font-weight:700">${esc(q.g.q)}</p>
+      <div class="opts">${q.opts.map(o => `<button class="btn" data-o="${o}">${esc(q.g.o[o])}</button>`).join('')}</div>
+      <div class="fb" aria-live="polite"></div><button class="btn primary" id="qz-next" hidden>${idx + 1 === qs.length ? '看結果' : '下一題'}</button>`;
+    $$('#modal-body .opts .btn').forEach(b => b.addEventListener('click', () => {
+      const ok = Number(b.dataset.o) === 0;
+      $$('#modal-body .opts .btn').forEach(x => { x.disabled = true; if (Number(x.dataset.o) === 0) x.classList.add('right'); });
+      if (!ok) b.classList.add('wrong'); else score++;
+      $('#modal-body .fb').textContent = (ok ? '✔ 答對了！' : '✘ 再想想。') + q.g.e;
+      const nx = $('#qz-next'); nx.hidden = false; nx.focus();
+      nx.onclick = () => { idx++; show(); };
+    }));
+  }
+  openModal('');
+  show();
+}
+
+/* ---------- 小嚮導問答：只從網站內容找答案，附出處，不需 API 金鑰 ---------- */
+function buildCorpus() {
+  const c = [];
+  C.islands.forEach(i => {
+    c.push({ t: i.intro, src: `${i.name}・一句介紹` });
+    i.points.forEach(p => c.push({ t: p, src: `${i.name}・內容重點` }));
+    c.push({ t: i.rule, src: `${i.name}・判斷規則` });
+    i.cards.forEach(k => c.push({ t: `${k.t}：${k.x}`, src: `${i.name}・知識卡` }));
+    ['easy', 'mid', 'hard'].forEach(l => i.gates[l].forEach(g => c.push({ t: `${g.q} ${g.o[0]}。${g.e}`, src: `${i.name}・跑酷題庫` })));
+  });
+  return c;
+}
+function bigrams(s) {
+  s = s.replace(/[\s，。？！、：；「」（）()?,.!:;"'\-—…／/]/g, '');
+  const out = new Set();
+  for (let k = 0; k < s.length - 1; k++) out.add(s.slice(k, k + 2));
+  return out;
+}
+const STOP = new Set(['什麼', '是什', '麼是', '為什', '什麼', '嗎', '怎麼', '如何', '哪些', '有哪', '請問', '可以', '的是', '是哪', '哪裡', '裡有', '有什']);
+function answer(q) {
+  const qg = [...bigrams(q)].filter(b => !STOP.has(b));
+  if (!qg.length) return null;
+  const corpus = buildCorpus();
+  const scored = corpus.map(e => {
+    const tg = bigrams(e.t); let s = 0;
+    qg.forEach(b => { if (tg.has(b)) s++; });
+    return { e, s: s - e.t.length / 400 };     // 命中的詞組越多越好，同分時偏好簡短的句子
+  }).filter(x => x.s >= 1.9).sort((a, b) => b.s - a.s);
+  const seen = new Set(), out = [];
+  for (const x of scored) { if (!seen.has(x.e.t)) { seen.add(x.e.t); out.push(x.e); } if (out.length >= 2) break; }
+  return out.length ? out : null;
+}
+function openGuide() {
+  const ex = ['木質部運輸什麼？', '氣孔什麼時候打開？', '動脈和靜脈有什麼不同？', '體循環和肺循環的差別？', '疫苗利用什麼特性？'];
+  openModal(`<h2>💬 小嚮導 阿豪</h2><p class="small">我只會從這個網站的內容找答案，並告訴你出處。</p>
+    <div class="chat" id="chat" aria-live="polite"><div class="msg">嗨！我是魔法師阿豪，想知道什麼呢？</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${ex.map(e => `<button class="chip" data-q="${esc(e)}">${esc(e)}</button>`).join('')}</div>
+    <form class="askrow" id="askf"><input id="ask" placeholder="輸入問題，例如：形成層有什麼功能？" aria-label="問題" autocomplete="off"><button class="btn primary" type="submit">問</button></form>`);
+  const chat = $('#chat');
+  function ask(q) {
+    q = q.trim(); if (!q) return;
+    chat.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(q)}</div>`);
+    const r = answer(q);
+    chat.insertAdjacentHTML('beforeend', r
+      ? `<div class="msg">${r.map(x => `<div>${esc(x.t)}<div class="src">出處：${esc(x.src)}</div></div>`).join('<hr>')}</div>`
+      : `<div class="msg">網站內容裡找不到這個答案。可以換個關鍵字，例如「木質部」「氣孔」「動脈」「淋巴」。</div>`);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  $('#askf').addEventListener('submit', e => { e.preventDefault(); const v = $('#ask').value; $('#ask').value = ''; ask(v); });
+  $$('#modal-body [data-q]').forEach(b => b.addEventListener('click', () => ask(b.dataset.q)));
+  $('#ask').focus();
+}
+
+/* ---------- 收集圖鑑 ---------- */
+function openCards() {
+  const total = C.islands.reduce((n, i) => n + i.cards.length, 0), have = Object.keys(state.cards).length;
+  openModal(`<h2>🃏 收集圖鑑 ${have}/${total}</h2><p class="small">⭐ ${state.stars}。跑酷答對可得 ⭐，到島上找居民（或在島的面板裡）交換知識卡。</p>` +
+    C.islands.map(i => `<div class="sec" style="--c:${i.color}"><h3>${esc(i.name)}</h3>${cardGrid(i)}</div>`).join(''));
+}
+
+/* ---------- 居民對話與交易 ---------- */
+function doTrade(cardId, cost) {
+  const r = trade(cardId, cost);
+  if (r === 'ok') toast('交換成功！已收進圖鑑 🃏');
+  else if (r === 'poor') toast(`⭐ 不夠喔，還差 ${cost - state.stars} 顆，去跑酷賺星星吧`);
+  else toast('這張卡你已經有了');
+  if (!$('#bubble').hidden) hideBubble();
+}
+function showBubble(res, islandId, x, y) {
+  const b = $('#bubble');
+  const i = byId[islandId];
+  let tradeHtml = '';
+  if (i && res.offer) {
+    const card = i.cards.find(c => c.id === res.offer), owned = state.cards[res.offer];
+    tradeHtml = `<button class="btn" data-act="trade" data-card="${res.offer}" data-cost="${res.cost}" ${owned ? 'disabled' : ''}>${owned ? '已收集 ✔' : `用 ${res.cost} ⭐ 換「${esc(card.t)}」`}</button>`;
+  }
+  b.innerHTML = `<button class="x" aria-label="關閉對話">✕</button><b>${esc(res.name)}</b>${esc(res.say)}<br>${tradeHtml}`;
+  b.hidden = false;
+  placeBubble(x, y);
+  b.querySelector('.x').addEventListener('click', hideBubble);
+}
+function placeBubble(x, y) {
+  const b = $('#bubble'); if (b.hidden) return;
+  const w = Math.min(300, innerWidth * 0.86);
+  b.style.left = Math.max(w / 2 + 6, Math.min(innerWidth - w / 2 - 6, x)) + 'px';
+  b.style.top = Math.max(150, y) + 'px';
+}
+function hideBubble() { $('#bubble').hidden = true; A.endTalk && A.endTalk(); }
+
+return {initUI, renderHud, labelInfo, tick, applyTheme, openPanel, closePanel, currentPanel, openList, closeList, closeModal, openQuiz, openGuide, openCards, showBubble, placeBubble, hideBubble};
+})();
+
+__m.world = (() => {
+// 3D 浮空群島（Three.js r160）。這個檔案只負責畫面：島、橋、居民、動物、天空、日夜與運鏡。
+// 若 Three.js 載入失敗或沒有 WebGL，main.js 會改用文字清單版。
+
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const SURF = 0.48;       // 島面高度
+const SEA = -13;         // 海面高度
+
+function nightFactor(h) {
+  if (h >= 7 && h < 17) return 0;
+  if (h >= 17 && h < 19.5) return (h - 17) / 2.5;
+  if (h >= 19.5 || h < 4.5) return 1;
+  return 1 - (h - 4.5) / 2.5;
+}
+function warmFactor(h) { return Math.max(0, 1 - Math.min(Math.abs(h - 18), Math.abs(h - 6)) / 1.8); }
+
+async function createWorld(container, C, hooks) {
+  const THREE = await import('three');
+  const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });   // 沒有 WebGL 會在這裡丟錯 → 改用文字清單
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  container.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#16222e');
+  scene.fog = new THREE.Fog('#16222e', 70, 230);
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 600);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.enablePan = false; controls.minDistance = 12; controls.maxDistance = 140;
+  controls.maxPolarAngle = 1.45; controls.rotateSpeed = 0.7;
+
+  let motion = 1;                 // 0 = 減少動態
+  const anims = [];               // 每幀要跑的小動畫
+  const glowMats = [];            // 夜晚會亮的材質
+  const pointLights = [];
+  const matCache = new Map();
+
+  /* ---------- 小工具 ---------- */
+  const M = (hex, o) => {
+    const k = hex + (o ? JSON.stringify(o) : '');
+    if (!matCache.has(k)) matCache.set(k, new THREE.MeshStandardMaterial(Object.assign({ color: hex, flatShading: true, roughness: 0.85, metalness: 0 }, o || {})));
+    return matCache.get(k);
+  };
+  const glowMat = (hex, max) => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: 0, flatShading: true, roughness: 0.6 });
+    glowMats.push({ m, max: max || 2 });
+    return m;
+  };
+  const mesh = (geo, mat, x, y, z, cast = true) => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x || 0, y || 0, z || 0);
+    m.castShadow = cast; m.receiveShadow = true;
+    return m;
+  };
+  const cyl = (rt, rb, h, seg, mat, x, y, z) => mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 12), mat, x, y, z);
+  const cone = (r, h, seg, mat, x, y, z) => mesh(new THREE.ConeGeometry(r, h, seg || 8), mat, x, y, z);
+  const box = (w, h, d, mat, x, y, z) => mesh(new THREE.BoxGeometry(w, h, d), mat, x, y, z);
+  const sph = (r, mat, x, y, z, ws = 10, hs = 8) => mesh(new THREE.SphereGeometry(r, ws, hs), mat, x, y, z);
+  const ico = (r, mat, x, y, z) => mesh(new THREE.IcosahedronGeometry(r, 0), mat, x, y, z);
+
+  const emojiTex = {};
+  function emojiSprite(ch, size) {
+    if (!emojiTex[ch]) {
+      const c = document.createElement('canvas'); c.width = c.height = 128;
+      const x = c.getContext('2d');
+      x.font = '96px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(ch, 64, 70);
+      const t = new THREE.CanvasTexture(c);
+      if (THREE.SRGBColorSpace) t.colorSpace = THREE.SRGBColorSpace;
+      emojiTex[ch] = new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false });
+    }
+    const s = new THREE.Sprite(emojiTex[ch]);
+    s.scale.set(size, size, 1);
+    return s;
+  }
+
+  /* ---------- 燈光 ---------- */
+  const hemi = new THREE.HemisphereLight('#bfe3ff', '#6a5a48', 0.85);
+  scene.add(hemi);
+  const sun = new THREE.DirectionalLight('#ffffff', 1.2);
+  sun.position.set(30, 45, 20);
+  sun.castShadow = true;
+  const shadowSize = window.innerWidth <= 700 ? 1024 : 2048;   // 手機用較小的陰影貼圖，比較不卡
+  sun.shadow.mapSize.set(shadowSize, shadowSize);
+  const sc = sun.shadow.camera; sc.left = -45; sc.right = 45; sc.top = 45; sc.bottom = -45; sc.near = 5; sc.far = 140;
+  sc.updateProjectionMatrix();
+  sun.shadow.bias = -0.0006;
+  scene.add(sun);
+  const sunBall = sph(2.2, new THREE.MeshBasicMaterial({ color: '#ffe08a' }), 0, 0, 0); sunBall.castShadow = false; sunBall.receiveShadow = false; scene.add(sunBall);
+  const moonBall = sph(1.8, new THREE.MeshBasicMaterial({ color: '#e6ecff' }), 0, 0, 0); moonBall.castShadow = false; moonBall.receiveShadow = false; scene.add(moonBall);
+
+  /* ---------- 海 ---------- */
+  const seaGeo = new THREE.PlaneGeometry(420, 420, 56, 56);
+  const sea = new THREE.Mesh(seaGeo, new THREE.MeshStandardMaterial({ color: '#2b86b0', flatShading: true, roughness: 0.55, metalness: 0.05 }));
+  sea.rotation.x = -Math.PI / 2; sea.position.y = SEA; sea.receiveShadow = true;
+  scene.add(sea);
+  const seaPos = seaGeo.attributes.position;
+  const seaBase = Float32Array.from(seaPos.array);
+  let seaFrame = 0;
+  function animateSea(t) {
+    if (motion === 0) return;
+    if ((seaFrame++ & 1) === 0) return;
+    const a = seaPos.array;
+    for (let i = 0; i < a.length; i += 3) {
+      const x = seaBase[i], y = seaBase[i + 1];
+      a[i + 2] = Math.sin(x * 0.09 + t * 0.9) * 0.35 + Math.cos(y * 0.11 + t * 1.2) * 0.3;
+    }
+    seaPos.needsUpdate = true;
+  }
+
+  /* ---------- 島 ---------- */
+  const GRASS = ['#4f9f55', '#66b862', '#86cf78'];
+  function buildIsland(R, seed) {
+    const g = new THREE.Group();
+    const r = rng(seed);
+    const rockH = R * 1.15;
+    const rock = cone(R * 0.98, rockH, 9, M('#7b7f8a'), 0, -SURF - rockH / 2 + 0.05, 0); rock.rotation.x = Math.PI; g.add(rock);
+    for (let k = 0; k < 4; k++) {
+      const a = r() * 6.28, d = R * (0.3 + r() * 0.4), h = 1 + r() * 1.6;
+      const s = cone(0.5 + r() * 0.5, h, 6, M(k % 2 ? '#9a9ea8' : '#6a6e79'), Math.cos(a) * d, -SURF - rockH * 0.55 - h * 0.1, Math.sin(a) * d); s.rotation.x = Math.PI; g.add(s);
+    }
+    g.add(cyl(R, R * 0.96, 0.5, 30, M('#8a6a4a'), 0, -0.2, 0));                  // 土層
+    g.add(cyl(R * 0.98, R, 0.3, 30, M(GRASS[0]), 0, 0.1, 0));                    // 草層 1
+    g.add(cyl(R * 0.9, R * 0.94, 0.2, 30, M(GRASS[1]), 0, 0.35, 0));             // 草層 2
+    g.add(cyl(R * 0.62, R * 0.64, 0.04, 26, M(GRASS[2]), 0, SURF + 0.0, 0, false)); // 草層 3（亮色草地）
+    return { g, r };
+  }
+
+  function path(g, R, facing) {
+    const dstone = M('#c9c2b4'), dstone2 = M('#b3ab9c');
+    const n = 22;
+    for (let k = 0; k < n; k++) {
+      const a = (k / n) * Math.PI * 2;
+      const s = cyl(0.34, 0.36, 0.06, 7, k % 2 ? dstone : dstone2, Math.cos(a) * R * 0.56, SURF + 0.03, Math.sin(a) * R * 0.56); s.rotation.y = k; g.add(s);
+    }
+    for (let d = R * 0.6; d < R * 0.92; d += 0.5) {
+      const s = cyl(0.32, 0.34, 0.06, 7, dstone, Math.cos(facing) * d, SURF + 0.03, Math.sin(facing) * d); g.add(s);
+    }
+  }
+  function fence(g, R, a0, a1) {
+    const wood = M('#a87b4f'), n = 9, rr = R * 0.82;
+    let prev = null;
+    for (let k = 0; k <= n; k++) {
+      const a = lerp(a0, a1, k / n), x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+      g.add(box(0.1, 0.5, 0.1, wood, x, SURF + 0.25, z));
+      if (prev) {
+        const dx = x - prev.x, dz = z - prev.z, len = Math.hypot(dx, dz);
+        for (const hh of [0.2, 0.38]) {
+          const rail = box(len, 0.06, 0.05, wood, (x + prev.x) / 2, SURF + hh, (z + prev.z) / 2);
+          rail.rotation.y = -Math.atan2(dz, dx); g.add(rail);
+        }
+      }
+      prev = { x, z };
+    }
+  }
+  function flowerBed(g, x, z, rot, r) {
+    const grp = new THREE.Group(); grp.position.set(x, SURF, z); grp.rotation.y = rot;
+    grp.add(box(1.6, 0.16, 0.8, M('#7b5a3a'), 0, 0.08, 0));
+    grp.add(box(1.4, 0.06, 0.6, M('#4a3a2a'), 0, 0.17, 0));
+    const cols = ['#ff6f91', '#ffd84a', '#ffffff', '#b58cff', '#ff9a5a'];
+    for (let k = 0; k < 10; k++) {
+      const f = sph(0.1, M(cols[k % 5]), -0.6 + (k % 5) * 0.3, 0.32 + r1(r) * 0.08, -0.15 + Math.floor(k / 5) * 0.3, 6, 5); grp.add(f);
+      grp.add(cyl(0.015, 0.015, 0.16, 4, M('#3f8f4a'), f.position.x, 0.22, f.position.z));
+    }
+    g.add(grp);
+  }
+  const r1 = r => r();
+  function bench(g, x, z, rot) {
+    const grp = new THREE.Group(); grp.position.set(x, SURF, z); grp.rotation.y = rot;
+    const w = M('#b9854f');
+    grp.add(box(0.95, 0.08, 0.34, w, 0, 0.36, 0)); grp.add(box(0.95, 0.3, 0.06, w, 0, 0.58, -0.15));
+    grp.add(box(0.07, 0.34, 0.3, M('#5a5a66'), -0.4, 0.17, 0)); grp.add(box(0.07, 0.34, 0.3, M('#5a5a66'), 0.4, 0.17, 0));
+    g.add(grp);
+  }
+  function crates(g, x, z) {
+    const w = M('#c99a5b');
+    g.add(box(0.5, 0.5, 0.5, w, x, SURF + 0.25, z)); g.add(box(0.4, 0.4, 0.4, M('#b9854f'), x + 0.45, SURF + 0.2, z + 0.1));
+    const c = box(0.34, 0.34, 0.34, w, x + 0.05, SURF + 0.67, z); c.rotation.y = 0.5; g.add(c);
+  }
+  function signpost(g, x, z, rot, col) {
+    const grp = new THREE.Group(); grp.position.set(x, SURF, z); grp.rotation.y = rot;
+    grp.add(cyl(0.05, 0.05, 1.1, 6, M('#7b5a3a'), 0, 0.55, 0));
+    grp.add(box(0.8, 0.34, 0.06, M(col), 0, 0.95, 0.04));
+    g.add(grp);
+  }
+  function well(g, x, z) {
+    g.add(cyl(0.48, 0.5, 0.45, 12, M('#9a9ea8'), x, SURF + 0.22, z));
+    g.add(cyl(0.36, 0.36, 0.05, 12, M('#2b86b0'), x, SURF + 0.44, z, false));
+    g.add(box(0.06, 0.9, 0.06, M('#7b5a3a'), x - 0.45, SURF + 0.7, z)); g.add(box(0.06, 0.9, 0.06, M('#7b5a3a'), x + 0.45, SURF + 0.7, z));
+    const roof = cone(0.75, 0.4, 4, M('#b5503c'), x, SURF + 1.35, z); roof.rotation.y = Math.PI / 4; g.add(roof);
+  }
+  function lamp(g, x, z, withLight) {
+    g.add(cyl(0.05, 0.07, 1.8, 6, M('#3a3a46'), x, SURF + 0.9, z));
+    g.add(sph(0.18, glowMat('#fff2b0', 2.2), x, SURF + 1.9, z, 8, 6));
+    if (withLight) { const pl = new THREE.PointLight('#ffe9a8', 0, 14, 2); pl.position.set(x, SURF + 2.2, z); g.add(pl); pointLights.push(pl); }
+  }
+  function edgeStuff(g, R, r) {
+    for (let k = 0; k < 34; k++) {
+      const a = r() * 6.28, d = R * (0.86 + r() * 0.1);
+      const t = cone(0.07 + r() * 0.05, 0.3 + r() * 0.25, 4, M(r() > 0.5 ? '#3f8f4a' : '#58a85a'), Math.cos(a) * d, SURF + 0.15, Math.sin(a) * d); t.rotation.z = (r() - 0.5) * 0.4; g.add(t);
+    }
+    for (let k = 0; k < 10; k++) {
+      const a = r() * 6.28, d = R * (0.88 + r() * 0.08), s = ico(0.12 + r() * 0.16, M(r() > 0.5 ? '#9a9ea8' : '#7b7f8a'), Math.cos(a) * d, SURF + 0.08, Math.sin(a) * d); s.rotation.set(r(), r(), r()); g.add(s);
+    }
+  }
+  function tree(g, x, z, s) {
+    g.add(cyl(0.08 * s, 0.12 * s, 0.8 * s, 6, M('#7b5a3a'), x, SURF + 0.4 * s, z));
+    g.add(ico(0.5 * s, M('#3f8f4a'), x, SURF + 1.0 * s, z)); g.add(ico(0.36 * s, M('#58a85a'), x + 0.1 * s, SURF + 1.4 * s, z));
+  }
+
+  /* ---------- 點綴 ---------- */
+  function windmill(g, x, z) {
+    const grp = new THREE.Group(); grp.position.set(x, SURF, z);
+    grp.add(cone(0.7, 2.6, 8, M('#e9dcc3'), 0, 1.3, 0)); grp.add(cone(0.85, 0.7, 8, M('#b5503c'), 0, 2.8, 0));
+    const rot = new THREE.Group(); rot.position.set(0, 2.5, 0.65);
+    for (let k = 0; k < 4; k++) { const bl = box(0.22, 1.6, 0.05, M('#ffffff'), 0, 0.85, 0); const pv = new THREE.Group(); pv.rotation.z = k * Math.PI / 2; pv.add(bl); rot.add(pv); }
+    rot.add(sph(0.12, M('#5a5a66'), 0, 0, 0.05));
+    grp.add(rot); g.add(grp);
+    anims.push((t, dt) => { rot.rotation.z += dt * 1.2 * motion; });
+  }
+  function bunting(g, x1, z1, x2, z2) {
+    g.add(cyl(0.05, 0.05, 2.6, 6, M('#7b5a3a'), x1, SURF + 1.3, z1)); g.add(cyl(0.05, 0.05, 2.6, 6, M('#7b5a3a'), x2, SURF + 1.3, z2));
+    const cols = ['#ff6f91', '#ffd84a', '#4aa3df', '#6cc46c', '#b58cff'];
+    for (let k = 1; k <= 9; k++) {
+      const t = k / 10, x = lerp(x1, x2, t), z = lerp(z1, z2, t), y = SURF + 2.5 - Math.sin(t * Math.PI) * 0.5;
+      const f = cone(0.14, 0.34, 3, M(cols[k % 5], { side: THREE.DoubleSide }), x, y - 0.15, z); f.rotation.x = Math.PI; g.add(f);
+    }
+  }
+  function fountain(g, x, z) {
+    g.add(cyl(1.1, 1.2, 0.35, 16, M('#c9c2b4'), x, SURF + 0.17, z)); g.add(cyl(0.95, 0.95, 0.06, 16, M('#4fb4d8', { transparent: true, opacity: 0.85 }), x, SURF + 0.36, z, false));
+    g.add(cyl(0.12, 0.2, 0.9, 8, M('#b3ab9c'), x, SURF + 0.7, z)); g.add(cyl(0.5, 0.2, 0.15, 12, M('#c9c2b4'), x, SURF + 1.2, z));
+    const drops = [];
+    for (let k = 0; k < 8; k++) { const d = sph(0.06, M('#bfe9ff'), x, SURF + 1.3, z, 5, 4); d.castShadow = false; g.add(d); drops.push({ d, ph: k / 8, a: k * 0.785 }); }
+    anims.push((t) => { drops.forEach(o => { const p = ((t * 0.7 * (motion ? 1 : 0)) + o.ph) % 1; o.d.position.set(x + Math.cos(o.a) * p * 0.8, SURF + 1.3 + Math.sin(p * Math.PI) * 0.7 - p * 0.2, z + Math.sin(o.a) * p * 0.8); }); });
+  }
+  function treehouse(g, x, z) {
+    g.add(cyl(0.3, 0.42, 2.6, 8, M('#6b4a2f'), x, SURF + 1.3, z));
+    g.add(ico(1.5, M('#3f8f4a'), x, SURF + 3.3, z)); g.add(ico(1.0, M('#58a85a'), x + 0.7, SURF + 3.8, z + 0.3));
+    g.add(cyl(1.05, 1.05, 0.12, 10, M('#a87b4f'), x, SURF + 1.9, z));
+    g.add(box(0.9, 0.7, 0.9, M('#d9b98a'), x + 0.1, SURF + 2.3, z + 0.1));
+    const rf = cone(0.85, 0.5, 4, M('#b5503c'), x + 0.1, SURF + 2.9, z + 0.1); rf.rotation.y = Math.PI / 4; g.add(rf);
+    g.add(box(0.25, 0.25, 0.05, glowMat('#ffe9a8', 2), x + 0.1, SURF + 2.3, z + 0.58));
+  }
+  function hotspring(g, x, z) {
+    g.add(cyl(1.25, 1.35, 0.3, 14, M('#8a8f99'), x, SURF + 0.15, z));
+    g.add(cyl(1.05, 1.05, 0.1, 14, M('#6fd0d8', { transparent: true, opacity: 0.9 }), x, SURF + 0.3, z, false));
+    for (let k = 0; k < 7; k++) { const a = k * 0.9; g.add(ico(0.22, M('#7b7f8a'), x + Math.cos(a) * 1.3, SURF + 0.25, z + Math.sin(a) * 1.3)); }
+    const puffs = [];
+    for (let k = 0; k < 5; k++) { const p = sph(0.2, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.5 }), x, SURF + 0.5, z, 6, 5); p.castShadow = false; g.add(p); puffs.push({ p, ph: k / 5 }); }
+    anims.push((t) => { puffs.forEach(o => { const q = ((t * 0.35 * (motion ? 1 : 0)) + o.ph) % 1; o.p.position.set(x + Math.sin(q * 6 + o.ph * 9) * 0.25, SURF + 0.5 + q * 1.6, z); o.p.scale.setScalar(0.6 + q); o.p.material.opacity = 0.5 * (1 - q); }); });
+  }
+  function flowerField(g, x, z, r) {
+    const cols = ['#ff6f91', '#ffd84a', '#ffffff', '#b58cff', '#ff9a5a', '#7ad0ff'];
+    for (let k = 0; k < 38; k++) {
+      const a = r() * 6.28, d = Math.sqrt(r()) * 1.5;
+      const fx = x + Math.cos(a) * d, fz = z + Math.sin(a) * d;
+      g.add(cyl(0.012, 0.012, 0.2, 4, M('#3f8f4a'), fx, SURF + 0.1, fz, false));
+      g.add(sph(0.075, M(cols[k % 6]), fx, SURF + 0.22, fz, 6, 5));
+    }
+  }
+
+  /* ---------- 地標 ---------- */
+  function landTrunk(g) {   // 4-1 樹幹橫切面塔
+    const grp = new THREE.Group(); grp.position.y = SURF;
+    grp.add(cyl(1.5, 1.7, 3.2, 20, M('#8a5a33'), 0, 1.6, 0));
+    const rings = ['#e8c48a', '#c99a5b', '#e0b878', '#b9854f'];
+    rings.forEach((c, k) => grp.add(cyl(1.4 - k * 0.3, 1.4 - k * 0.3, 0.05 + k * 0.01, 22, M(c), 0, 3.22 + k * 0.012, 0, false)));
+    const cols = [['#4aa3df', -1], ['#f0a030', 1], ['#6cc46c', 0]];
+    cols.forEach(([c, s], k) => {
+      const a = k * 2.094 + 0.5;
+      const p = cyl(0.16, 0.16, 4.2, 10, glowMat(c, 1.2), Math.cos(a) * 2.1, 2.1, Math.sin(a) * 2.1);
+      grp.add(p);
+      grp.add(sph(0.3, glowMat(c, 1.6), Math.cos(a) * 2.1, 4.35, Math.sin(a) * 2.1, 10, 8));
+    });
+    anims.push((t) => { grp.children[0].rotation.y = 0; });
+    return grp;
+  }
+  function landWater(g) {   // 4-2 水塔與蒸散噴泉
+    const grp = new THREE.Group(); grp.position.y = SURF;
+    [[-0.7, -0.7], [0.7, -0.7], [-0.7, 0.7], [0.7, 0.7]].forEach(([x, z]) => grp.add(cyl(0.09, 0.09, 2.6, 6, M('#7b5a3a'), x, 1.3, z)));
+    grp.add(cyl(1.15, 1.15, 1.5, 18, M('#4aa3df'), 0, 3.35, 0)); grp.add(cone(1.3, 0.7, 18, M('#2f6f9a'), 0, 4.45, 0));
+    grp.add(cyl(1.18, 1.18, 0.08, 18, M('#d9e7f0'), 0, 3.0, 0));
+    // 旁邊的小樹與往上的水滴
+    const tx = 2.3;
+    grp.add(cyl(0.12, 0.16, 1.6, 6, M('#6b4a2f'), tx, 0.8, 0)); grp.add(ico(0.9, M('#3f8f4a'), tx, 2.0, 0)); grp.add(ico(0.6, M('#58a85a'), tx + 0.3, 2.5, 0.2));
+    const drops = [];
+    for (let k = 0; k < 10; k++) { const d = sph(0.07, M('#7fd0ff'), tx, 0.2, 0, 6, 5); d.castShadow = false; grp.add(d); drops.push({ d, ph: k / 10 }); }
+    anims.push((t) => { drops.forEach(o => { const p = ((t * 0.28 * (motion ? 1 : 0)) + o.ph) % 1; o.d.position.set(tx + Math.sin(p * 20 + o.ph * 8) * 0.12, 0.2 + p * 2.6, 0); o.d.visible = true; }); });
+    return grp;
+  }
+  function landHeart(g) {   // 4-3 跳動的心臟
+    const grp = new THREE.Group(); grp.position.y = SURF;
+    grp.add(cyl(1.3, 1.5, 0.5, 14, M('#b3ab9c'), 0, 0.25, 0));
+    const h = new THREE.Group(); h.position.y = 2.2;
+    const red = M('#d64545'), red2 = M('#b93636');
+    const l = sph(0.85, red, -0.5, 0.35, 0, 14, 10), r = sph(0.85, red, 0.5, 0.35, 0, 14, 10);
+    const tip = cone(1.2, 1.5, 10, red2, 0, -0.65, 0); tip.rotation.x = Math.PI;
+    h.add(l, r, tip);
+    h.add(cyl(0.2, 0.2, 1.0, 8, M('#d64545'), -0.35, 1.2, 0)); h.add(cyl(0.2, 0.2, 1.0, 8, M('#3d6fd1'), 0.45, 1.2, 0.1));
+    h.add(cyl(0.12, 0.12, 0.8, 8, M('#3d6fd1'), -1.2, 0.8, 0.1));
+    grp.add(h);
+    anims.push((t) => { const b = 1 + (motion ? Math.max(0, Math.sin(t * 4.2)) ** 3 * 0.12 : 0); h.scale.set(b, b, b); });
+    return grp;
+  }
+  function landLoop(g) {    // 4-4 雙循環環形跑道
+    const grp = new THREE.Group(); grp.position.y = SURF + 1.9;
+    const track = new THREE.Group();
+    const a = mesh(new THREE.TorusGeometry(1.8, 0.22, 8, 30, Math.PI), M('#d64545'), 0, 0, 0); a.rotation.z = 0;
+    const b = mesh(new THREE.TorusGeometry(1.8, 0.22, 8, 30, Math.PI), M('#3d6fd1'), 0, 0, 0); b.rotation.z = Math.PI;
+    track.add(a, b);
+    const inner = mesh(new THREE.TorusGeometry(0.9, 0.12, 8, 24), M('#b58cff'), 2.7, 0, 0); track.add(inner);
+    track.rotation.x = 0.3;
+    grp.add(track);
+    grp.add(cyl(0.15, 0.2, 1.9, 8, M('#7b7f8a'), 0, -0.95, 0));
+    const cells = [];
+    for (let k = 0; k < 8; k++) { const c = sph(0.17, M(k % 2 ? '#ff5a5a' : '#6f9bff'), 0, 0, 0, 8, 6); c.scale.set(1, 0.6, 1); track.add(c); cells.push({ c, ph: k / 8 }); }
+    anims.push((t) => { cells.forEach(o => { const p = (t * 0.12 * motion + o.ph) % 1; const ang = p * Math.PI * 2; o.c.position.set(Math.cos(ang) * 1.8, Math.sin(ang) * 1.8, 0); }); });
+    return grp;
+  }
+  function landHQ(g) {      // 挑戰總部：涼亭 + 魔法師阿豪
+    const grp = new THREE.Group(); grp.position.y = SURF;
+    grp.add(cyl(2.6, 2.8, 0.3, 6, M('#c9c2b4'), 0, 0.15, 0));
+    for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3 + Math.PI / 6; grp.add(cyl(0.14, 0.16, 2.8, 8, M('#e9dcc3'), Math.cos(a) * 2.3, 1.7, Math.sin(a) * 2.3)); }
+    const roof = cone(3.3, 1.6, 6, M('#b5503c'), 0, 3.9, 0); roof.rotation.y = Math.PI / 6; grp.add(roof);
+    grp.add(cyl(0.05, 0.05, 1.8, 6, M('#5a5a66'), 0, 5.4, 0));
+    const flag = box(0.9, 0.5, 0.04, M('#d9792f'), 0.5, 5.9, 0); grp.add(flag);
+    anims.push((t) => { flag.rotation.y = Math.sin(t * 3) * 0.25 * motion; });
+    grp.add(sph(0.45, glowMat('#9fe0ff', 1.5), 0, 1.3, 0, 12, 10));      // 水晶
+    return grp;
+  }
+
+  /* ---------- 居民 ---------- */
+  const peopleGroups = [];
+  function person(body, hatCol, role) {
+    const g = new THREE.Group();
+    const bodyM = M(body);
+    g.add(cyl(0.2, 0.3, 0.75, 8, bodyM, 0, 0.45, 0));
+    g.add(sph(0.23, M('#f4c58f'), 0, 1.04, 0, 10, 8));
+    g.add(sph(0.03, M('#222'), -0.08, 1.07, 0.2, 4, 4)); g.add(sph(0.03, M('#222'), 0.08, 1.07, 0.2, 4, 4));
+    if (hatCol) { g.add(cone(0.3, 0.55, 8, M(hatCol), 0, 1.5, 0)); g.add(cyl(0.34, 0.34, 0.05, 10, M(hatCol), 0, 1.24, 0)); }
+    else g.add(sph(0.25, M('#5a3a22'), 0, 1.12, -0.04, 8, 6));
+    const armL = new THREE.Group(), armR = new THREE.Group();
+    armL.position.set(-0.3, 0.8, 0); armR.position.set(0.3, 0.8, 0);
+    armL.add(cyl(0.06, 0.06, 0.5, 6, bodyM, 0, -0.22, 0)); armR.add(cyl(0.06, 0.06, 0.5, 6, bodyM, 0, -0.22, 0));
+    g.add(armL, armR);
+    if (role === 'post') g.add(box(0.36, 0.3, 0.22, M('#c99a5b'), 0, 0.55, -0.32));
+    g.userData.arms = { armL, armR };
+    return g;
+  }
+  function stall(g, x, z, rot) {
+    const grp = new THREE.Group(); grp.position.set(x, SURF, z); grp.rotation.y = rot;
+    grp.add(box(1.3, 0.7, 0.6, M('#a87b4f'), 0, 0.35, 0));
+    [-0.6, 0.6].forEach(px => grp.add(box(0.06, 1.4, 0.06, M('#7b5a3a'), px, 0.7, -0.25)));
+    const aw = box(1.5, 0.08, 0.9, M('#ff6f91'), 0, 1.42, -0.05); aw.rotation.x = -0.18; grp.add(aw);
+    grp.add(sph(0.12, glowMat('#fff2b0', 2), 0, 1.25, 0.2, 8, 6));
+    for (let k = 0; k < 4; k++) grp.add(sph(0.1, M(['#ff6f91', '#ffd84a', '#6cc46c', '#7ad0ff'][k]), -0.4 + k * 0.27, 0.78, 0.05, 6, 5));
+    g.add(grp);
+  }
+
+  /* ---------- 組裝群島 ---------- */
+  const worldNodes = {};    // id → { group, pos, bob, anchor }
+  const islandRoot = new THREE.Group(); scene.add(islandRoot);
+  const pickIslands = [];
+  const walkers = [];       // 會走路的居民
+  const animalAgents = [];
+
+  const PLACE = [
+    { id: 'center', R: 7.2, pos: [0, 0, 0], seed: 11 },
+    { id: 'island-01', R: 5.3, pos: [-18.5, 1.4, -7.5], seed: 21 },
+    { id: 'island-02', R: 5.3, pos: [15.5, -0.6, -12.5], seed: 22 },
+    { id: 'island-03', R: 5.3, pos: [16, 1.1, 12.5], seed: 23 },
+    { id: 'island-04', R: 5.3, pos: [-15.5, -0.9, 13.5], seed: 24 }
+  ];
+  const LAND = { 'island-01': landTrunk, 'island-02': landWater, 'island-03': landHeart, 'island-04': landLoop, center: landHQ };
+  const PEOPLE_COL = [['#e07a5f', null, 'res'], ['#3d9970', '#d9792f', 'merchant']];
+
+  PLACE.forEach((P, idx) => {
+    const { g, r } = buildIsland(P.R, P.seed);
+    const facing = Math.atan2(-P.pos[2], -P.pos[0]);     // 朝向群島中心（橋的方向）
+    path(g, P.R, facing);
+    edgeStuff(g, P.R, r);
+    const land = LAND[P.id](g);
+    g.add(land);
+    // 3 號以上細節：圍籬、花圃、小道具、路燈
+    const back = facing + Math.PI;
+    fence(g, P.R, back - 1.0, back + 1.0);
+    flowerBed(g, Math.cos(facing + 1.3) * P.R * 0.74, Math.sin(facing + 1.3) * P.R * 0.74, -(facing + 1.3) + Math.PI / 2, r);
+    bench(g, Math.cos(facing - 1.2) * P.R * 0.7, Math.sin(facing - 1.2) * P.R * 0.7, -(facing - 1.2));
+    crates(g, Math.cos(back + 1.7) * P.R * 0.66, Math.sin(back + 1.7) * P.R * 0.66);
+    signpost(g, Math.cos(facing) * P.R * 0.78, Math.sin(facing) * P.R * 0.78 + 0.5, -facing, P.id === 'center' ? '#d9792f' : (C.islands.find(i => i.id === P.id) || {}).color || '#2f7a6b');
+    well(g, Math.cos(back - 0.5) * P.R * 0.62, Math.sin(back - 0.5) * P.R * 0.62);
+    lamp(g, Math.cos(facing + 0.5) * P.R * 0.7, Math.sin(facing + 0.5) * P.R * 0.7, true);
+    lamp(g, Math.cos(facing - 0.5) * P.R * 0.7, Math.sin(facing - 0.5) * P.R * 0.7, false);
+    tree(g, Math.cos(back + 0.9) * P.R * 0.74, Math.sin(back + 0.9) * P.R * 0.74, 1.1);
+    tree(g, Math.cos(back - 1.5) * P.R * 0.78, Math.sin(back - 1.5) * P.R * 0.78, 0.9);
+    // 島型點綴
+    if (P.id === 'center') { fountain(g, Math.cos(facing + 2.2) * P.R * 0.6, Math.sin(facing + 2.2) * P.R * 0.6); bunting(g, Math.cos(facing + 0.9) * P.R * 0.82, Math.sin(facing + 0.9) * P.R * 0.82, Math.cos(facing - 0.9) * P.R * 0.82, Math.sin(facing - 0.9) * P.R * 0.82); }
+    if (P.id === 'island-01') { treehouse(g, Math.cos(back + 0.2) * P.R * 0.7, Math.sin(back + 0.2) * P.R * 0.7); flowerField(g, Math.cos(facing + 0.5) * P.R * 0.35, Math.sin(facing + 0.5) * P.R * 0.35, r); }
+    if (P.id === 'island-02') windmill(g, Math.cos(back - 0.1) * P.R * 0.68, Math.sin(back - 0.1) * P.R * 0.68);
+    if (P.id === 'island-03') hotspring(g, Math.cos(back + 0.2) * P.R * 0.65, Math.sin(back + 0.2) * P.R * 0.65);
+    if (P.id === 'island-04') flowerField(g, Math.cos(back) * P.R * 0.62, Math.sin(back) * P.R * 0.62, r);
+    // 居民（含市集商人、送貨員）
+    const resList = P.id === 'center' ? C.center.residents : (C.islands.find(i => i.id === P.id) || {}).residents || [];
+    resList.forEach((res, k) => {
+      const spec = P.id === 'center' ? (k === 0 ? ['#6a4fc4', '#7a3fb8', 'wizard'] : ['#3d7dd6', '#d64545', 'post']) : (k === 0 ? PEOPLE_COL[0] : PEOPLE_COL[1]);
+      const p = person(spec[0], spec[1], spec[2]);
+      Object.assign(p.userData, { res, islandId: P.id, kind: spec[2] });
+      const rad = P.R * (k === 0 ? 0.56 : 0.7), dirn = k === 0 ? 1 : -1, ph = r() * 6.28;
+      if (spec[2] === 'wizard') { p.position.set(Math.cos(facing) * P.R * 0.5, SURF, Math.sin(facing) * P.R * 0.5); p.rotation.y = Math.atan2(-Math.cos(facing), -Math.sin(facing)); p.scale.setScalar(1.25); walkers.push({ p, still: true, home: p.position.clone(), talk: 0, hop: true }); }
+      else walkers.push({ p, rad, dirn, ph, spd: 0.22 + r() * 0.08, talk: 0 });
+      if (spec[2] === 'merchant') stall(g, Math.cos(facing - 2.2) * P.R * 0.66, Math.sin(facing - 2.2) * P.R * 0.66, -(facing - 2.2) + Math.PI);
+      g.add(p); peopleGroups.push(p);
+    });
+    // 位置、標記
+    g.position.set(P.pos[0], P.pos[1], P.pos[2]);
+    g.userData.islandId = P.id;
+    islandRoot.add(g);
+    pickIslands.push(g);
+    worldNodes[P.id] = { group: g, R: P.R, baseY: P.pos[1], bobPh: idx * 1.3, facing };
+  });
+
+  /* ---------- 橋 ---------- */
+  function bridge(a, b) {
+    const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b);
+    const grp = new THREE.Group();
+    const mid = va.clone().add(vb).multiplyScalar(0.5);
+    const len = va.distanceTo(vb);
+    grp.position.copy(mid); grp.lookAt(vb);
+    const wood = M('#b9854f'), wood2 = M('#9a6e3f');
+    const slats = Math.floor(len / 0.55);
+    for (let k = 0; k < slats; k++) grp.add(box(1.5, 0.1, 0.42, k % 2 ? wood : wood2, 0, 0, -len / 2 + (k + 0.5) * (len / slats)));
+    [-0.78, 0.78].forEach(x => {
+      grp.add(box(0.06, 0.06, len, M('#7b5a3a'), x, 0.55, 0));
+      for (let k = 0; k <= 5; k++) grp.add(box(0.07, 0.55, 0.07, M('#7b5a3a'), x, 0.28, -len / 2 + k * len / 5));
+    });
+    grp.add(sph(0.14, glowMat('#fff2b0', 2), -0.78, 0.7, -len / 2, 8, 6));
+    grp.add(sph(0.14, glowMat('#fff2b0', 2), 0.78, 0.7, len / 2, 8, 6));
+    scene.add(grp);
+  }
+  PLACE.slice(1).forEach(P => {
+    const dir = new THREE.Vector3(P.pos[0], 0, P.pos[2]).normalize();
+    const a = [dir.x * 7.0, SURF + 0.1, dir.z * 7.0];
+    const b = [P.pos[0] - dir.x * 5.0, P.pos[1] + SURF + 0.1, P.pos[2] - dir.z * 5.0];
+    bridge(a, b);
+  });
+
+  /* ---------- 動物 ---------- */
+  (C.look && C.look.animals || []).forEach(() => { /* 保留 */ });
+  const ANIMALS = (C.animals || []);
+  const hosts = ['island-03', 'island-04', 'island-01', 'island-02', 'center'];
+  ANIMALS.forEach((an, k) => {
+    const host = worldNodes[hosts[k % 5]], r = rng(100 + k);
+    const sp = emojiSprite(an.icon, an.where === 'sea' ? 4.2 : (an.where === 'air' ? 0.85 : 0.8));
+    if (an.where === 'sea') { scene.add(sp); animalAgents.push({ sp, kind: 'sea', rad: 24 + r() * 10, ph: r() * 6.28, spd: 0.05 + r() * 0.03 }); }
+    else if (an.id === 'seagull') { scene.add(sp); animalAgents.push({ sp, kind: 'gull', cx: host.group.position.x, cz: host.group.position.z, rad: host.R * 1.6, ph: r() * 6.28, spd: 0.25 }); }
+    else { host.group.add(sp); animalAgents.push({ sp, kind: an.where, R: host.R, ph: r() * 6.28, spd: 0.25 + r() * 0.2, a0: r() * 6.28, ar: 0.6 + r() * 0.8, cx: (r() - 0.5) * host.R * 0.8, cz: (r() - 0.5) * host.R * 0.8 }); }
+    if (an.where === 'air' && an.id !== 'seagull') { /* 蝴蝶多放一隻 */
+      const sp2 = emojiSprite(an.icon, 0.8); host.group.add(sp2); animalAgents.push({ sp: sp2, kind: 'air', R: host.R, ph: r() * 6.28, spd: 0.4, a0: r() * 6.28, ar: 1, cx: 0, cz: 0 });
+    }
+  });
+
+  /* ---------- 天空與海：雲、鳥、帆船、鯨魚 ---------- */
+  const cloudMat = new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true, roughness: 1, transparent: true, opacity: 0.92 });
+  const clouds = [];
+  const cr = rng(7);
+  for (let k = 0; k < 11; k++) {
+    const g = new THREE.Group();
+    const n = 3 + Math.floor(cr() * 3);
+    for (let j = 0; j < n; j++) { const s = new THREE.Mesh(new THREE.IcosahedronGeometry(1.4 + cr() * 1.2, 0), cloudMat); s.position.set(j * 1.8 - n, cr() * 0.6, cr() * 1.2); s.scale.y = 0.6; g.add(s); }
+    g.position.set(-90 + cr() * 180, 15 + cr() * 12, -70 + cr() * 100);
+    scene.add(g); clouds.push({ g, v: 0.8 + cr() * 1.2 });
+  }
+  const birds = [];
+  for (let k = 0; k < 7; k++) {
+    const g = new THREE.Group();
+    const wl = box(0.7, 0.04, 0.22, M('#f2f2f2'), -0.35, 0, 0), wr = box(0.7, 0.04, 0.22, M('#f2f2f2'), 0.35, 0, 0);
+    const pl = new THREE.Group(), pr = new THREE.Group(); pl.add(wl); pr.add(wr); g.add(pl, pr, sph(0.12, M('#f2f2f2'), 0, 0, 0.05, 6, 5));
+    scene.add(g); birds.push({ g, pl, pr, rad: 16 + (k % 4) * 6, y: 11 + (k % 3) * 2.5, ph: k * 0.9, spd: 0.18 + (k % 3) * 0.05, dir: k % 2 ? 1 : -1 });
+  }
+  const boats = [];
+  for (let k = 0; k < 3; k++) {
+    const g = new THREE.Group();
+    g.add(box(2.6, 0.5, 1.0, M('#8a5a33'), 0, 0.1, 0)); g.add(box(0.1, 2.4, 0.1, M('#5a3a22'), 0, 1.4, 0));
+    const sail = cone(1.0, 2.2, 3, M('#ffffff', { side: THREE.DoubleSide }), 0.1, 1.5, 0); sail.scale.z = 0.12; g.add(sail);
+    scene.add(g); boats.push({ g, rad: 30 + k * 9, ph: k * 2.1, spd: 0.045 - k * 0.008 });
+  }
+
+  /* ---------- 螢火蟲 ---------- */
+  const FF = 140;
+  const ffGeo = new THREE.BufferGeometry();
+  const ffPos = new Float32Array(FF * 3), ffSeed = [];
+  for (let k = 0; k < FF; k++) {
+    const P = PLACE[k % PLACE.length], a = Math.random() * 6.28, d = Math.random() * P.R;
+    ffSeed.push({ x: P.pos[0] + Math.cos(a) * d, y: P.pos[1] + 1 + Math.random() * 3, z: P.pos[2] + Math.sin(a) * d, ph: Math.random() * 6.28 });
+  }
+  ffGeo.setAttribute('position', new THREE.BufferAttribute(ffPos, 3));
+  const ffMat = new THREE.PointsMaterial({ color: '#fff08a', size: 0.22, transparent: true, opacity: 0, depthWrite: false });
+  const fireflies = new THREE.Points(ffGeo, ffMat); fireflies.frustumCulled = false;
+  scene.add(fireflies);
+
+  /* ---------- 島名標籤（HTML 疊在畫面上） ---------- */
+  const labelHost = document.getElementById('labels');
+  const labels = {};
+  function makeLabel(id) {
+    const el = document.createElement('div');
+    el.className = 'lbl' + (id === 'center' ? ' center' : '');
+    const isl = C.islands.find(i => i.id === id);
+    if (isl) el.style.setProperty('--c', isl.color);
+    el.tabIndex = -1;
+    el.addEventListener('click', () => hooks.onPickIsland(id));
+    labelHost.appendChild(el);
+    labels[id] = { el, w: 120, h: 38 };
+  }
+  PLACE.forEach(P => makeLabel(P.id));
+  function refreshLabels() {
+    PLACE.forEach(P => {
+      const info = hooks.labelInfo(P.id), L = labels[P.id];
+      const narrow = innerWidth <= 700;
+      L.el.innerHTML = `${narrow && info.short ? info.short : info.title}<small>${info.sub}</small>`;
+      L.w = L.el.offsetWidth || 120; L.h = L.el.offsetHeight || 38;
+    });
+  }
+  const tv = new THREE.Vector3();
+  function placeLabels() {
+    const w = container.clientWidth, h = container.clientHeight, items = [];
+    PLACE.forEach(P => {
+      const n = worldNodes[P.id], L = labels[P.id];
+      tv.set(n.group.position.x, n.group.position.y + (P.id === 'center' ? 8.2 : 6.6), n.group.position.z).project(camera);
+      if (tv.z > 1 || tv.z < -1) { L.el.style.visibility = 'hidden'; return; }
+      L.el.style.visibility = 'visible';
+      items.push({ L, x: (tv.x * 0.5 + 0.5) * w, y: (-tv.y * 0.5 + 0.5) * h, z: tv.z });
+    });
+    // 避免互相重疊：由上往下排，重疊就往下推
+    items.sort((a, b) => a.y - b.y);
+    for (let i = 0; i < items.length; i++) for (let j = 0; j < i; j++) {
+      const A = items[j], B = items[i];
+      if (Math.abs(A.x - B.x) < (A.L.w + B.L.w) / 2 + 4 && Math.abs(A.y - B.y) < (A.L.h + B.L.h) / 2 + 2) B.y = A.y + (A.L.h + B.L.h) / 2 + 4;
+    }
+    items.forEach(o => { o.L.el.style.transform = `translate(${Math.round(o.x - o.L.w / 2)}px, ${Math.round(o.y - o.L.h)}px)`; o.L.el.style.zIndex = String(Math.round((1 - o.z) * 1000)); });
+  }
+
+  /* ---------- 日夜 ---------- */
+  let curHour = 12, curN = 0;
+  const cSky = new THREE.Color(), cTmp = new THREE.Color();
+  let bgHex = '#16222e';
+  function setHour(h) {
+    curHour = h;
+    const n = nightFactor(h), w = warmFactor(h);
+    curN = n;
+    sun.intensity = lerp(1.25, 0.32, n);
+    cTmp.set('#ffffff'); sun.color.copy(cTmp).lerp(new THREE.Color('#ff9a5a'), w).lerp(new THREE.Color('#8fa8ff'), n);
+    hemi.intensity = lerp(0.85, 0.38, n);
+    hemi.color.set('#bfe3ff').lerp(new THREE.Color('#ffc99a'), w * 0.6).lerp(new THREE.Color('#5a6aa8'), n);
+    const ang = clamp((h - 6) / 12, 0, 1) * Math.PI;
+    const sp = new THREE.Vector3(Math.cos(ang) * -48, Math.sin(ang) * 40 + 8, 18);
+    const hn = h < 6 ? h + 24 : h;
+    const ang2 = clamp((hn - 18) / 12, 0, 1) * Math.PI;
+    const mp = new THREE.Vector3(Math.cos(ang2) * -48, Math.sin(ang2) * 40 + 8, 18);
+    if (n > 0.5) sun.position.copy(mp); else sun.position.copy(sp);
+    sunBall.position.copy(sp).multiplyScalar(2.2); moonBall.position.copy(mp).multiplyScalar(2.2);
+    sunBall.visible = n < 0.8 && h >= 5.5 && h <= 19; moonBall.visible = n > 0.3;
+    cloudMat.color.set('#ffffff').lerp(new THREE.Color('#ffc9a0'), w * 0.6).lerp(new THREE.Color('#6a7694'), n);
+    sea.material.color.set('#2b86b0').lerp(new THREE.Color('#e08a6a'), w * 0.25).lerp(new THREE.Color('#12324a'), n);
+    glowMats.forEach(o => { o.m.emissiveIntensity = o.max * n; });
+    pointLights.forEach(p => { p.intensity = 1.6 * n; });
+    ffMat.opacity = clamp((n - 0.4) * 1.6, 0, 0.95);
+  }
+  function setBackground(hex) {
+    bgHex = hex;
+    scene.background.set(hex); scene.fog.color.set(hex);
+  }
+
+  /* ---------- 相機：總覽、飛近、開場運鏡 ---------- */
+  let camAnim = null, cinema = null;
+  function overview() {
+    const aspect = container.clientWidth / Math.max(1, container.clientHeight);
+    const D = Math.max(50, 27 / (0.466 * aspect));
+    controls.maxDistance = Math.max(90, D * 1.3);
+    return { pos: new THREE.Vector3(0, D * 0.5, D * 0.86), target: new THREE.Vector3(0, 1, 0) };
+  }
+  function startAnim(toPos, toTarget, dur, arc, done) {
+    controls.enabled = false;
+    camAnim = { t: 0, dur: motion ? dur : 0.01, fp: camera.position.clone(), ft: controls.target.clone(), tp: toPos, tt: toTarget, arc: motion ? arc : 0, done };
+  }
+  function stepAnim(dt) {
+    const a = camAnim; a.t += dt;
+    const k = clamp(a.t / a.dur, 0, 1), e = k * k * (3 - 2 * k);
+    camera.position.lerpVectors(a.fp, a.tp, e); camera.position.y += Math.sin(Math.PI * e) * a.arc;
+    controls.target.lerpVectors(a.ft, a.tt, e);
+    camera.lookAt(controls.target);
+    if (k >= 1) { camAnim = null; controls.enabled = true; controls.update(); if (a.done) a.done(); }
+  }
+  function focus(id) {
+    const n = worldNodes[id]; if (!n) return;
+    const p = n.group.position;
+    const dir = new THREE.Vector3(p.x, 0, p.z); if (dir.lengthSq() < 0.01) dir.set(0, 0, 1); dir.normalize();
+    const dist = id === 'center' ? 19 : 14.5, up = id === 'center' ? 10 : 8;
+    const toPos = new THREE.Vector3(p.x + dir.x * dist, p.y + up, p.z + dir.z * dist);
+    const toTarget = new THREE.Vector3(p.x, p.y + 1.6, p.z);
+    if (innerWidth <= 700) toTarget.y -= 4.2;                       // 手機：底部抽屜會擋住下半部，把島頂到上方
+    else toTarget.add(new THREE.Vector3(dir.z, 0, -dir.x).multiplyScalar(3.4));   // 桌機：面板在右邊，把島推到左邊
+    startAnim(toPos, toTarget, 2.0, 7);
+  }
+  function home() { const o = overview(); startAnim(o.pos, o.target, 1.6, 4); }
+
+  function startCinema(onEnd) {
+    controls.enabled = false;
+    cinema = { t: 0, dur: motion ? 5.4 : 0.01, onEnd };
+  }
+  function stepCinema(dt) {
+    const c = cinema; c.t += dt;
+    const k = clamp(c.t / c.dur, 0, 1), e = k * k * (3 - 2 * k);
+    const o = overview();
+    const finalR = Math.hypot(o.pos.x, o.pos.z), finalH = o.pos.y;
+    const dive = k < 0.62 ? lerp(1.9, 0.6, k / 0.62) : lerp(0.6, 1, (k - 0.62) / 0.38);   // 俯衝拉近再拉遠
+    const R = finalR * dive;
+    const H = lerp(finalH * 2.2, finalH * 0.9, e) * (k > 0.62 ? 1 : 1);
+    const th = -Math.PI * (1 - e);                                                         // 環繞群島半圈
+    camera.position.set(Math.sin(th) * R, H, Math.cos(th) * R);
+    controls.target.set(0, 1 + (1 - e) * 4, 0);
+    camera.lookAt(controls.target);
+    if (k >= 1) { cinema = null; camera.position.copy(o.pos); controls.target.copy(o.target); controls.enabled = true; controls.update(); if (c.onEnd) c.onEnd(); }
+  }
+  function skipCinema() { if (cinema) cinema.t = cinema.dur; }
+  function skipAnim() { if (camAnim) camAnim.t = camAnim.dur; }
+
+  /* ---------- 點擊：居民優先，其次島 ---------- */
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+  let down = null, talking = null;
+  renderer.domElement.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; if (camAnim) skipAnim(); });
+  renderer.domElement.addEventListener('pointerup', e => {
+    if (!down) return;
+    const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
+    if (moved > 7 || dt > 600 || cinema) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    ptr.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    let hit = ray.intersectObjects(peopleGroups, true)[0];
+    if (hit) {
+      let o = hit.object; while (o && !(o.userData && o.userData.res)) o = o.parent;
+      if (o) { talkTo(o); return; }
+    }
+    hit = ray.intersectObjects(pickIslands, true)[0];
+    if (hit) {
+      let o = hit.object; while (o && !(o.userData && o.userData.islandId)) o = o.parent;
+      if (o) hooks.onPickIsland(o.userData.islandId);
+    }
+  });
+  function talkTo(p) {
+    const w = walkers.find(x => x.p === p); if (!w) return;
+    if (talking) talking.talk = 0;
+    talking = w; w.talk = 1;
+    const wp = new THREE.Vector3(); p.getWorldPosition(wp); wp.y += 2.0;
+    wp.project(camera);
+    const rect = renderer.domElement.getBoundingClientRect();
+    hooks.onPickResident(p.userData.res, p.userData.islandId, rect.left + (wp.x * 0.5 + 0.5) * rect.width, rect.top + (-wp.y * 0.5 + 0.5) * rect.height);
+  }
+  function endTalk() { if (talking) { talking.talk = 0; talking = null; } }
+
+  /* ---------- 主迴圈 ---------- */
+  function resize() {
+    const w = container.clientWidth, h = container.clientHeight;
+    renderer.setSize(w, h, false);
+    renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
+    camera.aspect = w / Math.max(1, h); camera.updateProjectionMatrix();
+    refreshLabels();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  setBackground(bgHex);
+  { const o = overview(); camera.position.set(o.pos.x * 1.6, o.pos.y * 1.6, -o.pos.z * 1.6); controls.target.copy(o.target); camera.lookAt(controls.target); }
+
+  const wv = new THREE.Vector3();
+  let last = performance.now(), time = 0;
+  let paused = false;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (paused) return;            // 跑酷或全螢幕清單開著時，不畫 3D，把效能留給前景
+    time += dt;
+    const tm = time * (motion ? 1 : 0);
+    if (cinema) stepCinema(dt); else if (camAnim) stepAnim(dt); else controls.update();
+
+    // 島的上下浮動
+    Object.values(worldNodes).forEach(n => { n.group.position.y = n.baseY + Math.sin(tm * 0.7 + n.bobPh) * 0.28; });
+    animateSea(time);
+    anims.forEach(f => f(time, dt));
+
+    // 居民
+    walkers.forEach(w => {
+      const { armL, armR } = w.p.userData.arms;
+      if (w.still) {
+        const bob = w.talk ? 0 : Math.abs(Math.sin(tm * 2)) * 0.12;
+        w.p.position.y = SURF + bob;
+        armR.rotation.z = w.talk ? 2.6 + Math.sin(time * 10) * 0.4 : Math.sin(tm * 2) * 0.2;
+        return;
+      }
+      if (!w.talk) {
+        w.ph += w.spd * w.dirn * dt * motion;
+        const x = Math.cos(w.ph) * w.rad, z = Math.sin(w.ph) * w.rad;
+        const dx = -Math.sin(w.ph) * w.dirn, dz = Math.cos(w.ph) * w.dirn;
+        w.p.position.set(x, SURF, z); w.p.rotation.y = Math.atan2(dx, dz);
+        armL.rotation.x = Math.sin(tm * 5) * 0.6; armR.rotation.x = -Math.sin(tm * 5) * 0.6; armR.rotation.z = 0;
+      } else {
+        armL.rotation.x = 0; armR.rotation.x = 0; armR.rotation.z = 2.6 + Math.sin(time * 10) * 0.4;
+        const cp = camera.position, gp = w.p.parent.position;
+        w.p.rotation.y = Math.atan2(cp.x - gp.x - w.p.position.x, cp.z - gp.z - w.p.position.z);
+      }
+    });
+    if (talking) {
+      talking.p.getWorldPosition(wv); wv.y += 2.0; wv.project(camera);
+      const rect = renderer.domElement.getBoundingClientRect();
+      if (hooks.onBubbleMove) hooks.onBubbleMove(rect.left + (wv.x * 0.5 + 0.5) * rect.width, rect.top + (-wv.y * 0.5 + 0.5) * rect.height);
+    }
+
+    // 動物
+    animalAgents.forEach(a => {
+      const t = tm * a.spd + a.ph;
+      if (a.kind === 'land') { a.sp.position.set(a.cx + Math.cos(t * 1.3 + a.a0) * a.ar, SURF + 0.4 + Math.abs(Math.sin(t * 6)) * 0.08, a.cz + Math.sin(t * 1.3 + a.a0) * a.ar); }
+      else if (a.kind === 'shore') { const ang = a.a0 + Math.sin(t) * 0.5; a.sp.position.set(Math.cos(ang) * a.R * 0.84, SURF + 0.4, Math.sin(ang) * a.R * 0.84); }
+      else if (a.kind === 'air') { a.sp.position.set(a.cx + Math.cos(t * 1.7 + a.a0) * a.R * 0.5, 3.2 + Math.sin(t * 3) * 0.6, a.cz + Math.sin(t * 1.4 + a.a0) * a.R * 0.5); }
+      else if (a.kind === 'gull') { a.sp.position.set(a.cx + Math.cos(t) * a.rad, 8 + Math.sin(t * 2) * 0.8, a.cz + Math.sin(t) * a.rad); }
+      else if (a.kind === 'sea') { a.sp.position.set(Math.cos(t) * a.rad, SEA + 0.4 + Math.sin(t * 8) * 0.25, Math.sin(t) * a.rad); }
+    });
+
+    // 天空與海
+    clouds.forEach(c => { c.g.position.x += c.v * dt * motion; if (c.g.position.x > 100) c.g.position.x = -100; });
+    birds.forEach(b => { const t = tm * b.spd * b.dir + b.ph; b.g.position.set(Math.cos(t) * b.rad, b.y + Math.sin(t * 3) * 0.5, Math.sin(t) * b.rad); b.g.rotation.y = -t + (b.dir > 0 ? 0 : Math.PI); const f = Math.sin(time * 9 * (motion ? 1 : 0) + b.ph) * 0.6; b.pl.rotation.z = f; b.pr.rotation.z = -f; });
+    boats.forEach(b => { const t = tm * b.spd + b.ph; b.g.position.set(Math.cos(t) * b.rad, SEA + 0.35 + Math.sin(tm * 1.5 + b.ph) * 0.2, Math.sin(t) * b.rad); b.g.rotation.y = -t; b.g.rotation.z = Math.sin(tm * 1.3 + b.ph) * 0.05; });
+    if (ffMat.opacity > 0.01) {
+      const arr = ffGeo.attributes.position.array;
+      for (let k = 0; k < FF; k++) { const s = ffSeed[k]; arr[k * 3] = s.x + Math.sin(tm * 0.6 + s.ph) * 0.8; arr[k * 3 + 1] = s.y + Math.sin(tm * 0.9 + s.ph * 2) * 0.5; arr[k * 3 + 2] = s.z + Math.cos(tm * 0.5 + s.ph) * 0.8; }
+      ffGeo.attributes.position.needsUpdate = true;
+    }
+
+    renderer.render(scene, camera);
+    placeLabels();
+  }
+  requestAnimationFrame(frame);
+
+  refreshLabels();
+  return {
+    focus, home, setHour, setBackground, refreshLabels, endTalk,
+    setPaused(b) { paused = !!b; labelHost.style.visibility = paused ? 'hidden' : ''; if (!paused) last = performance.now(); },
+    setReduced(b) { motion = b ? 0 : 1; },
+    startCinema, skipCinema, skipAnim,
+    get busy() { return !!(cinema || camAnim); },
+    get cinemaActive() { return !!cinema; }
+  };
+}
+
+return {createWorld};
+})();
+
+__m.main = (() => {
+const { state, save, $, toast, prefersReduced, recordResult } = __m.store;
+const { initUI, openPanel, closePanel, openList, tick, applyTheme, labelInfo, showBubble, placeBubble, hideBubble } = __m.ui;
+const { openRunner } = __m.runner;
+const { createWorld } = __m.world;
+// 啟動與串接：載入內容 → 介面 → 3D 群島（失敗就改用文字清單）→ 時間／運鏡／跑酷
+
+let C = null, world = null, runnerCtl = null, curBg = '#16222e';
+const dbg = window.__isle = { ready: false, mode: 'boot' };
+
+/* ---------- 時間（白天／黃昏／夜晚／循環／即時） ---------- */
+const T0 = performance.now();
+function hourNow() {
+  const m = state.timeMode;
+  if (m === 'day') return 12;
+  if (m === 'dusk') return 18;
+  if (m === 'night') return 23;
+  if (m === 'realtime') { const d = new Date(); return d.getHours() + d.getMinutes() / 60; }
+  return (9 + (performance.now() - T0) / 1000 / 6) % 24;   // 循環：144 秒走完一天
+}
+function todOf(h) {
+  if (h >= 7 && h < 17) return 'day';
+  if ((h >= 17 && h < 19.5) || (h >= 4.5 && h < 7)) return 'dusk';
+  return 'night';
+}
+function clockTick() {
+  const h = hourNow();
+  tick(h, todOf(h));
+  if (world) world.setHour(h);
+}
+
+/* ---------- 提供給介面用的動作 ---------- */
+const api = {
+  home() { if (world) world.home(); },
+  focus(id) { if (world) world.focus(id); openPanel(id); },
+  startRunner,
+  setTimeMode() { clockTick(); },
+  setBackground(hex) { curBg = hex; if (world) world.setBackground(hex); },
+  setReduced(b) { if (world) world.setReduced(b); },
+  endTalk() { if (world) world.endTalk(); },
+  setPaused(b) { if (world) world.setPaused(b); }
+};
+
+function startRunner(island, level) {
+  hideBubble();
+  closePanel();
+  if (world) world.setPaused(true);          // 跑酷時暫停 3D 群島，避免卡頓
+  runnerCtl = openRunner($('#runner'), island, level, {
+    onCleanup: () => { if (world) world.setPaused(false); },
+    levels: C.levels,
+    onFinish: res => recordResult(island, level, res),
+    onRestart: (isl, lv) => startRunner(isl, lv),
+    onClose: () => { runnerCtl = null; if (world) world.focus(island.id); openPanel(island.id); }
+  });
+}
+
+/* ---------- 3D 世界的回呼 ---------- */
+const hooks = {
+  labelInfo,
+  onPickIsland(id) {
+    if (world && world.cinemaActive) { world.skipCinema(); return; }
+    hideBubble();
+    openPanel(id);
+    world.focus(id);
+  },
+  onPickResident(res, islandId, x, y) { showBubble(res, islandId, x, y); },
+  onBubbleMove(x, y) { placeBubble(x, y); }
+};
+
+function withTimeout(p, ms) {
+  return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('載入逾時')), ms))]);
+}
+
+async function boot() {
+  C = JSON.parse(document.getElementById('content-json').textContent);
+  C.extraLabel = '判斷規則';
+  document.title = `${C.site.title}｜${C.site.tagline}`;
+  initUI(C, api);
+  clockTick();
+  setInterval(clockTick, 250);
+
+  try {
+    world = await withTimeout(createWorld($('#stage'), C, hooks), 15000);
+    dbg.mode = '3d';
+  } catch (err) {
+    console.warn('3D 無法使用，改用文字清單：', err && err.message);
+    world = null;
+    dbg.mode = 'list';
+    document.body.classList.add('nogl');
+    const n = $('#fallback-note');
+    n.hidden = false;
+    n.textContent = '3D 畫面目前無法使用（瀏覽器不支援 WebGL，或網路無法載入 3D 元件），已改成文字清單，所有內容與跑酷都可以使用。';
+    openList();
+  }
+
+  if (world) {
+    world.setReduced(prefersReduced());
+    world.setBackground(curBg);
+    world.setHour(hourNow());
+    $('#b-home').addEventListener('click', () => { hideBubble(); });
+    if (!prefersReduced()) {
+      const intro = $('#intro');
+      intro.hidden = false;
+      const end = () => { intro.hidden = true; };
+      world.startCinema(end);
+      const skip = () => { world.skipCinema(); };
+      $('#intro-skip').addEventListener('click', skip);
+      $('#stage').addEventListener('pointerdown', skip);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && world.cinemaActive) skip(); });
+    }
+  }
+  dbg.C = C; dbg.world = world; dbg.state = state; dbg.save = save; dbg.ready = true;
+}
+
+boot().catch(err => {
+  console.error(err);
+  toast('載入失敗，請重新整理');
+});
+
+return {};
+})();
+
+</script>
+<a id="ahao-back" href="../../index.html#ch-7-1-4" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

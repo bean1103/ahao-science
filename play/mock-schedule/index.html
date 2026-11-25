@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>豪強No.1模擬考時程 - 阿豪自然</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Noto Sans TC', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .aspect-container {
+            width: 100vw;
+            height: 56.25vw;
+            max-height: 100vh;
+            max-width: 177.78vh;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+        }
+
+        .neon-text-yellow {
+            color: #fffb00;
+            text-shadow: 0 0 10px rgba(255, 251, 0, 0.6);
+        }
+
+        .neon-text-cyan {
+            color: #00ffff;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        .active-exam {
+            background: rgba(0, 255, 255, 0.12) !important;
+            border-left: 12px solid #00ffff;
+        }
+
+        .day-tab {
+            padding: 6px 20px;
+            cursor: pointer;
+            border: 1px solid #333;
+            background: #111;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .day-tab.active {
+            background: #fffb00;
+            color: #000;
+            border-color: #fffb00;
+        }
+
+        .subject-select {
+            background: transparent;
+            color: white;
+            border: none;
+            font-weight: 900;
+            font-size: 2.8rem;
+            width: 100%;
+            cursor: pointer;
+            appearance: none;
+            text-align: center;
+        }
+
+        .subject-select:focus { outline: none; color: #fffb00; }
+        .subject-select option { background: #111; color: white; }
+
+        .btn-adjust {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .btn-adjust:hover { background: #333; color: #fff; }
+
+        .bottom-border-gradient {
+            height: 8px;
+            background: repeating-linear-gradient(45deg, #ff00ff, #ff00ff 20px, #00ff00 20px, #00ff00 40px, #00ffff 40px, #00ffff 60px);
+        }
+
+        [contenteditable]:focus { outline: 2px solid #00ffff; background: rgba(0, 255, 255, 0.1); }
+        
+        .sync-indicator {
+            font-size: 10px;
+            color: #444;
+            position: fixed;
+            bottom: 5px;
+            left: 5px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="aspect-container">
+        <!-- 上方區塊 (18%) -->
+        <div class="flex h-[18%] border-b border-gray-800 bg-zinc-950/80">
+            <div class="w-1/3 p-4 flex flex-col justify-center border-r border-gray-800">
+                <div class="flex items-center space-x-1 mb-1">
+                    <div id="tab-day1" onclick="switchDay('day1')" class="day-tab active rounded-l-lg">第一天</div>
+                    <div id="tab-day2" onclick="switchDay('day2')" class="day-tab rounded-r-lg">第二天</div>
+                </div>
+                <h1 class="text-xl neon-text-yellow font-black tracking-widest">模擬考試時程</h1>
+            </div>
+
+            <div class="w-2/3 flex items-center px-6 relative">
+                <div class="flex flex-col">
+                    <span class="text-cyan-500 text-[10px] font-black tracking-widest mb-1 uppercase">CURRENT TIME / 現在時間</span>
+                    <div id="clock" class="text-6xl font-black tabular-nums leading-none text-white">00:00:00</div>
+                </div>
+                <div class="ml-auto flex flex-col items-end">
+                    <p id="main-status-text" class="text-gray-400 text-xs font-bold mb-1 text-right">時鐘載入中</p>
+                    <div class="flex space-x-1">
+                        <button onclick="adjustTime(60)" class="btn-adjust">＋分</button>
+                        <button onclick="adjustTime(-60)" class="btn-adjust">－分</button>
+                        <button onclick="adjustTime(1)" class="btn-adjust">＋秒</button>
+                        <button onclick="resetTime()" class="btn-adjust text-red-500">重置</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中間區塊 (64%) -->
+        <div class="flex h-[64%] border-b-4 border-green-500">
+            <div id="schedule-container" class="w-[65%] bg-black flex flex-col"></div>
+            <div class="w-[35%] p-6 flex flex-col relative bg-zinc-950 border-l border-gray-900">
+                <div class="flex justify-between mb-2">
+                    <span class="text-gray-600 font-bold text-[10px] tracking-widest">狀態</span>
+                    <button onclick="toggleFullScreen()" class="text-gray-800 hover:text-cyan-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2"></path></svg>
+                    </button>
+                </div>
+                <div class="flex-1 flex flex-col items-center justify-center border border-zinc-800 rounded-2xl bg-black p-4">
+                    <h2 id="status-title" class="text-4xl font-black text-center leading-tight tracking-widest">時鐘啟動中</h2>
+                </div>
+                <div class="absolute bottom-0 left-0 w-full bottom-border-gradient"></div>
+            </div>
+        </div>
+
+        <!-- 下方區塊 (18%) -->
+        <div class="h-[18%] grid grid-cols-4 bg-black">
+            <div class="border-r border-zinc-900 flex flex-col items-center justify-center">
+                <span class="text-cyan-400 text-[10px] font-black mb-1">應到</span>
+                <div id="stat-expected" contenteditable="true" onblur="window.saveToCloud()" class="text-4xl font-bold tabular-nums">0</div>
+            </div>
+            <div class="border-r border-zinc-900 flex flex-col items-center justify-center">
+                <span class="text-green-500 text-[10px] font-black mb-1">實到</span>
+                <div id="stat-actual" contenteditable="true" onblur="window.saveToCloud()" class="text-4xl font-bold tabular-nums">0</div>
+            </div>
+            <div class="border-r border-zinc-900 flex flex-col items-center justify-center px-4">
+                <span class="text-pink-500 text-[10px] font-black mb-1">未到名單</span>
+                <div id="stat-absentee" contenteditable="true" onblur="window.saveToCloud()" class="text-lg text-pink-400 font-bold text-center">點擊輸入</div>
+            </div>
+            <div class="flex flex-col items-center justify-center px-4">
+                <span class="text-yellow-500 text-[10px] font-black mb-1 text-center">多元教室</span>
+                <div id="stat-multipurpose" contenteditable="true" onblur="window.saveToCloud()" class="text-lg text-yellow-600 font-bold text-center">點擊輸入</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="user-id-display" class="sync-indicator">連線中...</div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- 核心變數初始化 ---
+        let firebaseApp, auth, db, appId, currentUser = null;
+        const subjects = ["國文", "英文", "數學", "社會", "自然", "寫作", "英聽(閱)", "英聽(聽)", "休息", "自訂"];
+        let currentDay = 'day1', timeOffset = 0;
+        
+        let schedules = {
+            day1: [
+                { start: "08:30", end: "09:40", subject: "自然" },
+                { start: "09:50", end: "11:00", subject: "社會" },
+                { start: "11:15", end: "12:15", subject: "數學" },
+                { start: "13:45", end: "14:55", subject: "國文" }
+            ],
+            day2: [
+                { start: "08:30", end: "09:30", subject: "英文" },
+                { start: "09:40", end: "10:30", subject: "寫作" },
+                { start: "10:45", end: "11:35", subject: "英聽(閱)" },
+                { start: "11:50", end: "12:15", subject: "英聽(聽)" }
+            ]
+        };
+
+        // --- 立即執行的時鐘功能 ---
+        function updateClock() {
+            const now = new Date();
+            if (timeOffset !== 0) now.setSeconds(now.getSeconds() + timeOffset);
+            
+            // 使用更穩定且相容的格式化
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeStr = `${hours}:${minutes}:${seconds}`;
+            
+            const clockEl = document.getElementById('clock');
+            if (clockEl) clockEl.textContent = timeStr;
+            checkStatus(now);
+        }
+
+        // --- Firebase 初始化 ---
+        async function startFirebase() {
+            try {
+                const config = JSON.parse(__firebase_config);
+                firebaseApp = initializeApp(config);
+                auth = getAuth(firebaseApp);
+                db = getFirestore(firebaseApp);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'exam-timer-v1';
+                
+                onAuthStateChanged(auth, setupSync);
+                
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.warn("雲端同步模式未啟動或環境變數缺失，將使用本地模式。");
+                document.getElementById('user-id-display').textContent = "本地模式 (無同步)";
+            }
+        }
+
+        function setupSync(user) {
+            if (!user) return;
+            currentUser = user;
+            document.getElementById('user-id-display').textContent = `Sync ID: ${user.uid}`;
+
+            const sharedDoc = doc(db, 'artifacts', appId, 'public', 'data', 'exam_settings', 'state');
+
+            onSnapshot(sharedDoc, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    if (data.schedules) schedules = data.schedules;
+                    updateAttendanceUI(data);
+                    renderSchedule();
+                } else {
+                    saveToCloud();
+                }
+            }, (error) => {
+                console.error("Firebase Sync Error:", error);
+            });
+        }
+
+        async function saveToCloud() {
+            if (!currentUser || !db) return;
+            const sharedDoc = doc(db, 'artifacts', appId, 'public', 'data', 'exam_settings', 'state');
+            
+            const dataToSave = {
+                schedules: schedules,
+                expected: document.getElementById('stat-expected').innerText,
+                actual: document.getElementById('stat-actual').innerText,
+                absentee: document.getElementById('stat-absentee').innerText,
+                multipurpose: document.getElementById('stat-multipurpose').innerText,
+                lastUpdated: new Date().getTime()
+            };
+
+            try {
+                await setDoc(sharedDoc, dataToSave, { merge: true });
+            } catch (e) {
+                console.error("Save failed:", e);
+            }
+        }
+
+        function updateAttendanceUI(data) {
+            const fields = {
+                'stat-expected': data.expected || '0',
+                'stat-actual': data.actual || '0',
+                'stat-absentee': data.absentee || '點擊輸入',
+                'stat-multipurpose': data.multipurpose || '點擊輸入'
+            };
+
+            for (let id in fields) {
+                const el = document.getElementById(id);
+                if (el && document.activeElement !== el) {
+                    el.innerText = fields[id];
+                }
+            }
+        }
+
+        // --- 全域導出功能 ---
+        window.adjustTime = (sec) => { timeOffset += sec; updateClock(); };
+        window.resetTime = () => { timeOffset = 0; updateClock(); };
+        window.switchDay = (day) => { 
+            currentDay = day; 
+            document.getElementById('tab-day1').classList.toggle('active', day === 'day1'); 
+            document.getElementById('tab-day2').classList.toggle('active', day === 'day2'); 
+            renderSchedule(); 
+        };
+        window.toggleFullScreen = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
+        window.saveToCloud = saveToCloud;
+        window.updateExamData = (index, field, val) => {
+            schedules[currentDay][index][field] = val;
+            saveToCloud();
+        };
+        
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            if (!container) return;
+            container.innerHTML = schedules[currentDay].map((exam, i) => `
+                <div id="exam-${i}" class="flex-1 flex items-center border-b border-zinc-900 overflow-hidden">
+                    <div class="w-[45%] flex items-center justify-center neon-text-cyan text-[2.5rem] font-black tabular-nums">
+                        <span contenteditable="true" onblur="window.updateExamData(${i}, 'start', this.innerText)">${exam.start}</span>
+                        <span class="mx-2 text-zinc-800 font-normal">~</span>
+                        <span contenteditable="true" onblur="window.updateExamData(${i}, 'end', this.innerText)">${exam.end}</span>
+                    </div>
+                    <div class="flex-1 px-4">
+                        <select class="subject-select" onchange="window.updateExamData(${i}, 'subject', this.value)">
+                            ${subjects.map(s => `<option value="${s}" ${exam.subject === s ? 'selected' : ''}>${s}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function checkStatus(now) {
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const cur = `${hours}:${minutes}`;
+            
+            let active = null, next = null;
+            schedules[currentDay].forEach((e, i) => {
+                const el = document.getElementById(`exam-${i}`);
+                if (!el) return;
+                if (cur >= e.start && cur < e.end) { el.classList.add('active-exam'); active = e; }
+                else el.classList.remove('active-exam');
+                if (!next && e.start > cur) next = e;
+            });
+            const st = document.getElementById('status-title'), ms = document.getElementById('main-status-text');
+            if (active) { 
+                st.innerHTML = `${active.subject}<br><span class="text-cyan-400 text-2xl">考試中</span>`; 
+                ms.textContent = `進行中：${active.subject}`; 
+                ms.className = "text-cyan-400 font-bold animate-pulse text-right"; 
+            }
+            else if (next) { 
+                st.innerHTML = `下節預告<br><span class="text-pink-400 text-2xl">${next.subject}</span>`; 
+                ms.textContent = `待考：${next.subject} (${next.start})`; 
+                ms.className = "text-pink-500 text-right"; 
+            }
+            else { 
+                st.innerHTML = `考試結束<br><span class="text-green-500 text-2xl">辛苦了</span>`; 
+                ms.textContent = "今日考試結束"; 
+                ms.className = "text-green-500 text-right"; 
+            }
+        }
+
+        // --- 啟動程序 ---
+        // 1. 立即啟動本地時鐘與渲染
+        renderSchedule();
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // 2. 異步啟動 Firebase 同步
+        startFirebase();
+    </script>
+<a id="ahao-back" href="../../index.html#tools" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>

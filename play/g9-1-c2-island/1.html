@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阿豪老師的九年級自然C2：力與運動定律</title>
+  
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 載入 Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    body { margin: 0; overflow: hidden; background-color: #88d3ce; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; touch-action: none; }
+    #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+    
+    /* 接近參考圖的圓角白底標籤 */
+    .island-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.95);
+      color: #333;
+      padding: 6px 14px;
+      border-radius: 20px; /* 膠囊圓角 */
+      font-weight: bold;
+      font-size: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      z-index: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .island-label:hover, .island-label:active {
+      transform: translate(-50%, -50%) scale(1.05);
+      background-color: #f3f4f6;
+    }
+    /* 中央島專屬橘色邊框 */
+    .center-label {
+      border: 2px solid #c26a27;
+      font-size: 16px;
+      padding: 8px 18px;
+    }
+
+    /* 右側資訊面板 (保持原生隱藏顯示，確保不被 iframe 阻擋) */
+    #content-panel {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      max-width: 420px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.98);
+      z-index: 9999;
+      border-left: 4px solid #2f7a6b;
+      box-shadow: -5px 0 25px rgba(0,0,0,0.3);
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+    .mascot { animation: float 3s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+  
+  <div style="position: absolute; top: 15px; left: 15px; z-index: 100;">
+    <h1 class="text-xl md:text-2xl font-bold text-[#2f7a6b] bg-white/90 px-4 py-2 rounded-lg border border-gray-200 shadow">九年級自然 C2：力與運動</h1>
+  </div>
+  
+  <div style="position: absolute; top: 15px; right: 15px; z-index: 100;">
+    <button onclick="resetCamera()" class="bg-[#d9792f] text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 active:scale-95">回到全景 🌍</button>
+  </div>
+
+  <div style="position: absolute; bottom: 20px; left: 20px; z-index: 100; display: flex; align-items: flex-end;">
+    <div class="mascot bg-white rounded-full border-4 border-[#2f7a6b] flex items-center justify-center shadow-xl text-5xl" style="width: 80px; height: 80px; min-width: 80px;">🧙‍♂️</div>
+    <div class="bg-white p-3 rounded-xl rounded-bl-none shadow-lg ml-4 border-2 border-gray-300" style="max-width: 250px;">
+      <p id="mascot-dialog" class="text-gray-800 font-bold text-sm m-0">點擊島嶼上的標籤，解鎖觀念筆記與 Wordwall 任務！</p>
+    </div>
+  </div>
+
+  <div id="content-panel">
+    <button onclick="closePanel()" style="position: absolute; top: 15px; right: 20px; font-size: 36px; color: #999; background: none; border: none; cursor: pointer; line-height: 1;">&times;</button>
+    <div id="panel-content" style="margin-top: 40px;"></div>
+  </div>
+
+  <script>
+    // 視覺色彩設定
+    const COLOR_WATER = 0x88d3ce;
+    const COLOR_SAND = 0xffe89e;
+    const COLOR_GRASS = 0x55e077;
+    const COLOR_WOOD = 0xc68a3f;
+    const COLOR_ROOF = 0xe65c00;
+    const COLOR_WALL = 0xffffff;
+    const COLOR_LEAVES = 0x22c55e;
+
+    // 半徑與座標計算 (五邊形環繞)
+    const R = 24; 
+    const angles = [0, 72, 144, 216, 288].map(deg => deg * Math.PI / 180);
+
+    const islandData = [
+      {
+        id: "center", name: "C2 力與運動", type: "總複習島", pos: [0, 0, 0], scale: 1.6,
+        intro: "古典力學的終極試煉！這裡匯聚了第二章所有的知識精華！",
+        points: ["統整牛頓三大運動定律。", "圓周運動與萬有引力。", "力矩與靜力平衡。"],
+        bonusLinks: []
+      },
+      {
+        id: "island1", name: "01 2-1 慣性定律", type: "第一運動定律", pos: [Math.sin(angles[0])*R, 0, Math.cos(angles[0])*R], scale: 1,
+        intro: "滑溜溜的冰原上，物體一旦動起來就停不下來！這就是「慣性」。",
+        points: [
+          "慣性：物體不受外力時，保持原運動狀態的趨勢。",
+          "定律內容：靜止的物體維持靜止，運動中的物體必沿直線作等速度運動。",
+          "質量越大的物體，慣性越大，越不易改變運動狀態。"
+        ],
+        bonusLinks: [
+          { name: "空中危機 - 辨別牛頓定律", url: "https://wordwall.net/resource/55619542" },
+          { name: "生活中的牛頓運動定律", url: "https://wordwall.net/resource/35979346" }
+        ]
+      },
+      {
+        id: "island2", name: "02 2-2 運動定律", type: "第二運動定律", pos: [Math.sin(angles[1])*R, 0, Math.cos(angles[1])*R], scale: 1,
+        intro: "越大的力，能帶來多大的速度改變？",
+        points: [
+          "牛頓第二運動定律：F = ma (外力 ＝ 質量 × 加速度)。",
+          "當物體受到外力作用時，會沿著力的作用方向產生加速度。"
+        ],
+        bonusLinks: [
+          { name: "九上理化 2-2 第二運動定律", url: "https://wordwall.net/resource/100940694" }
+        ]
+      },
+      {
+        id: "island3", name: "03 2-3 作用力與反作用力", type: "第三運動定律", pos: [Math.sin(angles[2])*R, 0, Math.cos(angles[2])*R], scale: 1,
+        intro: "每個動作，都有反作用！",
+        points: [
+          "牛頓第三運動定律：當物體受外力作用，必定產生反作用力於施力物體上。",
+          "特性：兩力同時發生同時消失、大小相等、方向相反。",
+          "與力平衡的差異：作用力與反作用力作用在「不同的物體」上，絕對無法抵消！"
+        ],
+        bonusLinks: [
+          { name: "牛頓第三定律定義與運用", url: "https://wordwall.net/resource/118033429" }
+        ]
+      },
+      {
+        id: "island4", name: "04 2-4 圓周運動與萬有引力", type: "圓周運動", pos: [Math.sin(angles[3])*R, 0, Math.cos(angles[3])*R], scale: 1,
+        intro: "探尋讓行星穩定運轉的神祕力量。",
+        points: [
+          "圓周運動：運動方向隨時在改變，所以是一種「加速度運動」。",
+          "向心力：指向圓心，與切線方向垂直，因此向心力「不作功」。"
+        ],
+        bonusLinks: [
+          { name: "2-4 圓周運動與萬有引力", url: "https://wordwall.net/resource/31594120" }
+        ]
+      },
+      {
+        id: "island5", name: "05 2-5 力矩與槓桿原理", type: "力矩與靜力平衡", pos: [Math.sin(angles[4])*R, 0, Math.cos(angles[4])*R], scale: 1,
+        intro: "給我一個支點，我就能舉起地球！",
+        points: [
+          "力矩：描述力使物體轉動難易程度的物理量。公式：力矩 ＝ 力 × 力臂。",
+          "靜力平衡：合力＝0 且 合力矩＝0，物體將不移動也不轉動。"
+        ],
+        bonusLinks: [
+          { name: "力矩與轉動平衡基礎", url: "https://wordwall.net/resource/58964248" }
+        ]
+      }
+    ];
+
+    // 為中央島隨機挑選任務
+    const islandMap = {};
+    const groupMap = {};
+    let allLinks = [];
+    islandData.slice(1).forEach(island => {
+      allLinks.push(...island.bonusLinks);
+      islandMap[island.id] = island;
+    });
+    islandData[0].bonusLinks = allLinks.sort(() => 0.5 - Math.random()).slice(0, 3);
+    islandMap[islandData[0].id] = islandData[0];
+
+    // === Three.js 核心設定 ===
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(COLOR_WATER);
+    scene.fog = new THREE.FogExp2(COLOR_WATER, 0.012);
+
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 40, 50);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.maxPolarAngle = Math.PI / 2.2; 
+    controls.minDistance = 20;
+    controls.maxDistance = 100;
+
+    // 光源
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(30, 60, 20);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
+    scene.add(hemiLight);
+
+    // 水面
+    const waterGeo = new THREE.PlaneGeometry(500, 500);
+    const waterMat = new THREE.MeshPhongMaterial({ color: COLOR_WATER, flatShading: true });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = -2;
+    water.receiveShadow = true;
+    scene.add(water);
+
+    // 小物件生成函數 (Low-Poly 風格)
+    function createTree() {
+      const tree = new THREE.Group();
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 1.5, 5), new THREE.MeshPhongMaterial({color: 0x8B4513, flatShading: true}));
+      trunk.position.y = 0.75;
+      trunk.castShadow = true;
+      const leaves = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2, 0), new THREE.MeshPhongMaterial({color: COLOR_LEAVES, flatShading: true}));
+      leaves.position.y = 2;
+      leaves.castShadow = true;
+      tree.add(trunk);
+      tree.add(leaves);
+      const scale = 0.6 + Math.random() * 0.6;
+      tree.scale.set(scale, scale, scale);
+      return tree;
+    }
+
+    function createHouse() {
+      const house = new THREE.Group();
+      const base = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2, 2.5), new THREE.MeshPhongMaterial({color: COLOR_WALL, flatShading: true}));
+      base.position.y = 1;
+      base.castShadow = true;
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.5, 4), new THREE.MeshPhongMaterial({color: COLOR_ROOF, flatShading: true}));
+      roof.position.y = 2.75;
+      roof.rotation.y = Math.PI / 4;
+      roof.castShadow = true;
+      house.add(base);
+      house.add(roof);
+      const scale = 0.7 + Math.random() * 0.4;
+      house.scale.set(scale, scale, scale);
+      return house;
+    }
+
+    // 建立島嶼與木橋
+    const islands = [];
+    const islandRadiusBase = 6;
+    
+    islandData.forEach((data, index) => {
+      const group = new THREE.Group();
+      group.position.set(...data.pos);
+      group.userData = data;
+      groupMap[data.id] = group;
+
+      const r = islandRadiusBase * data.scale;
+      
+      // 六角形沙灘底座
+      const baseGeo = new THREE.CylinderGeometry(r, r + 1.5, 3, 6);
+      const baseMat = new THREE.MeshPhongMaterial({ color: COLOR_SAND, flatShading: true });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.y = 0;
+      base.receiveShadow = true;
+      base.castShadow = true;
+      group.add(base);
+
+      // 六角形草地頂部
+      const topGeo = new THREE.CylinderGeometry(r-0.2, r, 1.5, 6);
+      const topMat = new THREE.MeshPhongMaterial({ color: COLOR_GRASS, flatShading: true });
+      const top = new THREE.Mesh(topGeo, topMat);
+      top.position.y = 2;
+      top.receiveShadow = true;
+      top.castShadow = true;
+      group.add(top);
+
+      // 隨機放置樹木與房子
+      const propCount = data.id === "center" ? 4 : 2;
+      for(let i=0; i<propCount; i++) {
+        const prop = Math.random() > 0.3 ? createTree() : createHouse();
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * (r - 2);
+        prop.position.set(Math.sin(angle) * dist, 2.7, Math.cos(angle) * dist);
+        prop.rotation.y = Math.random() * Math.PI;
+        group.add(prop);
+      }
+
+      // 木橋 (連接到中央島)
+      if (data.id !== "center") {
+        const distToCenter = Math.hypot(data.pos[0], data.pos[2]);
+        const bridgeLength = distToCenter - (islandRadiusBase * 1.5) - (islandRadiusBase * 1);
+        const bridgeGeo = new THREE.BoxGeometry(2, 0.5, bridgeLength);
+        const bridgeMat = new THREE.MeshPhongMaterial({ color: COLOR_WOOD, flatShading: true });
+        const bridge = new THREE.Mesh(bridgeGeo, bridgeMat);
+        
+        // 橋的位置放在島嶼與中心的連線中點
+        const bridgeX = data.pos[0] / 2;
+        const bridgeZ = data.pos[2] / 2;
+        bridge.position.set(bridgeX, 1.5, bridgeZ);
+        bridge.lookAt(0, 1.5, 0); // 朝向中心
+        bridge.receiveShadow = true;
+        bridge.castShadow = true;
+        scene.add(bridge);
+      }
+
+      scene.add(group);
+      islands.push(group);
+
+      // === 建立 HTML 圓角標籤 ===
+      const label = document.createElement('button');
+      label.className = 'island-label';
+      if(data.id === "center") label.classList.add("center-label");
+      label.innerText = data.name;
+      
+      label.onclick = function(e) {
+        e.preventDefault();
+        window.triggerIsland(data.id);
+      };
+      
+      document.body.appendChild(label);
+      group.userData.htmlLabel = label;
+    });
+
+    // 簡單的飛鳥
+    const birds = [];
+    const birdGeo = new THREE.ConeGeometry(0.5, 1.5, 3);
+    const birdMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    for(let i=0; i<8; i++) {
+      const bird = new THREE.Mesh(birdGeo, birdMat);
+      bird.position.set((Math.random()-0.5)*80, 15 + Math.random()*15, (Math.random()-0.5)*80);
+      bird.rotation.x = Math.PI / 2;
+      bird.userData = { speed: 0.05 + Math.random()*0.05, angle: Math.random()*Math.PI*2, radius: 10 + Math.random()*20, cx: bird.position.x, cz: bird.position.z };
+      scene.add(bird);
+      birds.push(bird);
+    }
+
+    const projVector = new THREE.Vector3();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // 鳥的飛行
+      birds.forEach(bird => {
+        bird.userData.angle += bird.userData.speed * 0.2;
+        bird.position.x = bird.userData.cx + Math.cos(bird.userData.angle) * bird.userData.radius;
+        bird.position.z = bird.userData.cz + Math.sin(bird.userData.angle) * bird.userData.radius;
+        bird.rotation.y = -bird.userData.angle;
+      });
+
+      // 標籤投影
+      islands.forEach(island => {
+        projVector.copy(island.position);
+        projVector.y += (8 * island.userData.scale); // 標籤高度
+        projVector.project(camera);
+        
+        const x = (projVector.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (projVector.y * -0.5 + 0.5) * window.innerHeight;
+        
+        if (projVector.z > 1) {
+          island.userData.htmlLabel.style.display = 'none';
+        } else {
+          island.userData.htmlLabel.style.display = 'block';
+          island.userData.htmlLabel.style.left = `${x}px`;
+          island.userData.htmlLabel.style.top = `${y}px`;
+        }
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // 3D 點擊防護
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let startX = 0, startY = 0;
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      startX = e.clientX; startY = e.clientY;
+    });
+
+    renderer.domElement.addEventListener('pointerup', (e) => {
+      if (Math.hypot(e.clientX - startX, e.clientY - startY) > 5) return; 
+
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      
+      if (intersects.length > 0) {
+        let object = intersects[0].object;
+        while (object.parent && object.parent.type !== 'Scene') {
+          if (object.parent.userData && object.parent.userData.id) {
+            window.triggerIsland(object.parent.userData.id);
+            return;
+          }
+          object = object.parent;
+        }
+      }
+    });
+
+    // 全局觸發
+    window.triggerIsland = function(id) {
+      const data = islandMap[id];
+      const group = groupMap[id];
+      if (data && group) {
+        const targetPos = new THREE.Vector3(group.position.x, group.position.y + 15, group.position.z + 30);
+        camera.position.lerp(targetPos, 1); 
+        controls.target.copy(group.position);
+        
+        const panel = document.getElementById('content-panel');
+        const content = document.getElementById('panel-content');
+        document.getElementById('mascot-dialog').innerHTML = `<p class="text-[#2f7a6b] font-bold text-sm m-0">這裡是「${data.name}」！請看右側面板喔！</p>`;
+
+        let pointsHtml = data.points.map(p => `<li class="mb-3 text-gray-700 font-bold tracking-wide">${p}</li>`).join('');
+        
+        let bonusHtml = '';
+        if (data.bonusLinks && data.bonusLinks.length > 0) {
+          const linkItems = data.bonusLinks.map(link => 
+            `<a href="${link.url}" target="_blank" class="block w-full text-center mt-3 px-4 py-3 bg-[#d9792f] text-white rounded-lg no-underline text-lg font-black shadow-md hover:bg-orange-600 transition">🎮 ${link.name}</a>`
+          ).join('');
+          bonusHtml = `<div class="mt-8 pt-6 border-t-2 border-dashed border-[#2f7a6b]/30">
+                         <h3 class="text-[#2f7a6b] font-black text-xl mb-4">🎁 學思達任務：</h3>
+                         ${linkItems}
+                       </div>`;
+        }
+
+        content.innerHTML = `
+          <span class="text-sm font-bold text-white bg-[#2f7a6b] px-3 py-1 rounded-full">${data.type}</span>
+          <h2 class="text-3xl font-black text-gray-900 mt-4 mb-4">${data.name}</h2>
+          <p class="text-[#2f7a6b] font-bold mb-6 bg-[#2f7a6b]/10 p-4 rounded-xl border border-[#2f7a6b]/20">${data.intro}</p>
+          <h3 class="text-xl font-black text-[#d9792f] border-b-4 border-[#d9792f] pb-1 mb-5 inline-block">重點筆記 📝</h3>
+          <ul class="list-disc pl-6 font-medium space-y-2 text-lg">${pointsHtml}</ul>
+          ${bonusHtml}
+        `;
+        panel.style.display = 'block';
+      }
+    };
+
+    window.resetCamera = function() {
+      camera.position.set(0, 40, 50);
+      controls.target.set(0, 0, 0);
+    };
+
+    window.closePanel = function() {
+      document.getElementById('content-panel').style.display = 'none';
+      resetCamera();
+      document.getElementById('mascot-dialog').innerHTML = `<p class="text-gray-800 font-bold text-sm m-0">點擊漂浮的「標籤」，解鎖觀念與隱藏任務！</p>`;
+    };
+  </script>
+<a id="ahao-back" href="./index.html#" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){history.back();return false}" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#1b1f4a;color:#ffd84d;border:2px solid #ffd84d;border-radius:999px;padding:8px 14px;font:700 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.4)">← 阿豪自然</a><style>.sync-indicator{display:none!important}</style></body>
+</html>
