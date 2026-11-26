@@ -1,96 +1,186 @@
-<!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>計時器 · 阿豪自然</title>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂計時器 · 阿豪自然</title>
 <link rel="icon" href="../../assets/chars/point.webp">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
-:root{--bg:#191919;--panel:#252525;--line:#2f2f2f;--ink:rgba(255,255,255,.9);--muted:#9b9b9b;--accent:#4dab9a;--warn:#ffd84a;--end:#e16259}
-*{box-sizing:border-box}html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
-  display:flex;flex-direction:column;min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));-webkit-user-select:none;user-select:none}
-button{font:inherit;color:inherit;cursor:pointer;border:0}
-.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.top a{color:var(--warn);text-decoration:none;font-weight:700;font-size:15px}
-.top button{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px}
-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,3vh,28px)}
-.ring{position:relative;width:min(84vw,62vh,560px);aspect-ratio:1}
-.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.ring circle{fill:none;stroke-width:6}
-.ring .bg{stroke:var(--line)}
-.ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .25s linear,stroke .3s}
-.time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.digits{font-variant-numeric:tabular-nums;font-weight:700;font-size:min(20vw,15vh,140px);line-height:1;letter-spacing:.02em}
-.label{color:var(--muted);font-size:clamp(14px,2.2vh,20px)}
-.mascot{position:absolute;right:-4%;bottom:-2%;width:28%;height:auto;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));transition:transform .3s}
-body.warn .fg{stroke:var(--warn)} body.warn .digits{color:var(--warn)}
-body.done .fg{stroke:var(--end)} body.done .digits{color:var(--end)}
-@media (prefers-reduced-motion:no-preference){body.done .digits{animation:blink 1s steps(2) infinite}@keyframes blink{50%{opacity:.25}}}
-.presets{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
-.presets button{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:17px;min-width:64px}
-.presets button:active{background:#2f2f2f}
-.adj{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.adj button{background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:15px;color:var(--muted)}
-.ctrl{display:flex;gap:12px;justify-content:center}
-.ctrl button{border-radius:14px;padding:16px 28px;font-size:22px;font-weight:700;min-width:130px}
-#go{background:#fff;color:#191919}
-#reset{background:var(--panel);border:1px solid var(--line)}
-body.full .top,body.full .presets,body.full .adj{display:none}
-</style></head>
+  :root {
+    --bg: #1a1b26; --card: #24283b; --text: #c0caf5; --muted: #787c99;
+    --border: #414868; --blue: #7aa2f7; --green: #00f260; --yellow: #f6d365; --red: #ff757f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px; gap: 16px;
+  }
+  body.done { animation: flash 0.8s ease-in-out infinite alternate; }
+  @keyframes flash { from { background: var(--bg); } to { background: #4a1d24; } }
+  h3 { margin: 0; font-size: 1.3rem; color: #fff; }
+  .display {
+    font-family: 'Arial Black', 'Segoe UI', sans-serif; font-weight: 900;
+    font-size: clamp(4rem, 22vw, 11rem); line-height: 1; letter-spacing: 0.02em;
+    color: var(--green); font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 25px rgba(0, 242, 96, 0.35);
+  }
+  .display.warn { color: var(--yellow); text-shadow: 0 0 25px rgba(246, 211, 101, 0.35); }
+  .display.end { color: var(--red); text-shadow: 0 0 25px rgba(255, 117, 127, 0.5); }
+  .bar { width: min(100%, 640px); height: 10px; background: var(--card); border-radius: 5px; overflow: hidden; }
+  .bar > div { height: 100%; width: 100%; background: var(--green); transition: width 0.25s linear; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+  button {
+    font: inherit; font-weight: 700; cursor: pointer; border-radius: 10px; padding: 10px 18px;
+    border: 2px solid var(--border); background: var(--card); color: var(--text);
+  }
+  button:hover { border-color: var(--blue); }
+  button.main { background: var(--blue); color: #1a1b26; border-color: var(--blue); min-width: 110px; font-size: 1.1rem; }
+  .preset { padding: 8px 14px; }
+  .custom { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+  .custom input {
+    width: 64px; padding: 8px; text-align: center; font: inherit; font-weight: 700; font-size: 1.1rem;
+    background: #16161e; color: #fff; border: 1px solid var(--border); border-radius: 8px;
+  }
+  .hint { font-size: 0.85rem; color: var(--muted); }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+</style>
+</head>
 <body>
-<div class="top"><a href="../../index.html#tools">‹ 阿豪自然</a>
-  <div style="display:flex;gap:6px"><button id="snd" aria-pressed="true">🔔 響鈴</button><button id="fs">⛶ 全螢幕</button></div></div>
-<main>
-  <div class="ring">
-    <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="bg" cx="60" cy="60" r="54"/><circle class="fg" id="arc" cx="60" cy="60" r="54"/></svg>
-    <div class="time"><div class="digits" id="d" role="timer" aria-live="off">05:00</div><div class="label" id="lb">按「開始」</div></div>
-    <img class="mascot" src="../../assets/chars/point.webp" alt="" id="m">
+<a href="../../index.html#tools" style="position:fixed;left:12px;top:12px;color:#f6d365;text-decoration:none;font-weight:700;font-size:15px">‹ 阿豪自然</a>
+  <h3>⏱️ 課堂計時器</h3>
+  <div class="display" id="display" aria-live="polite">05:00</div>
+  <div class="bar"><div id="bar"></div></div>
+
+  <div class="row">
+    <button class="main" id="startBtn" type="button">開始</button>
+    <button id="resetBtn" type="button">重設</button>
+    <button id="soundBtn" type="button" aria-pressed="true">音效：開</button>
   </div>
-  <div class="presets" id="pre"></div>
-  <div class="adj"><button data-a="-60">−1 分</button><button data-a="-10">−10 秒</button><button data-a="10">+10 秒</button><button data-a="60">+1 分</button></div>
-  <div class="ctrl"><button id="go">開始</button><button id="reset">重設</button></div>
-</main>
+
+  <div class="row" id="presets">
+    <button class="preset" type="button" data-sec="30">30 秒</button>
+    <button class="preset" type="button" data-sec="60">1 分</button>
+    <button class="preset" type="button" data-sec="180">3 分</button>
+    <button class="preset" type="button" data-sec="300">5 分</button>
+    <button class="preset" type="button" data-sec="600">10 分</button>
+    <button class="preset" type="button" data-sec="900">15 分</button>
+  </div>
+
+  <div class="row custom">
+    <label>自訂</label>
+    <input id="min" type="number" min="0" max="99" value="5" aria-label="分鐘"> 分
+    <input id="sec" type="number" min="0" max="59" value="0" aria-label="秒"> 秒
+    <button id="setBtn" type="button">設定</button>
+  </div>
+  <div class="hint">剩最後 10 秒會變黃色，時間到會響鈴並閃爍。按「重設」可停止。</div>
+
 <script>
-const P=[[30,"30 秒"],[60,"1 分"],[120,"2 分"],[180,"3 分"],[300,"5 分"],[600,"10 分"],[900,"15 分"]];
-const $=id=>document.getElementById(id), C=2*Math.PI*54, arc=$("arc");
-arc.style.strokeDasharray=C;
-let total=300, left=300, end=0, run=false, tick=null, sound=true, wake=null, ac=null;
-try{const s=JSON.parse(localStorage.getItem("ahao-timer")||"{}");if(s.total)total=left=s.total;if(s.sound===false)sound=false}catch(e){}
-const save=()=>{try{localStorage.setItem("ahao-timer",JSON.stringify({total,sound}))}catch(e){}};
-const fmt=s=>{s=Math.max(0,Math.ceil(s));const m=Math.floor(s/60);return String(m).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
-function draw(){
-  $("d").textContent=fmt(left);
-  arc.style.strokeDashoffset=C*(1-(total?Math.max(0,left)/total:0));
-  document.body.classList.toggle("warn",run&&left<=Math.min(10,total*.2)&&left>0);
-  document.body.classList.toggle("done",left<=0&&total>0&&!run&&end===-1);
-  $("go").textContent=run?"暫停":(left<total&&left>0?"繼續":"開始");
-  $("lb").textContent=left<=0&&end===-1?"時間到！":run?"計時中":"按「開始」";
-  $("m").src="../../assets/chars/"+(left<=0&&end===-1?"cheer":run?"present":"point")+".webp";
-  $("snd").textContent=sound?"🔔 響鈴":"🔕 靜音";$("snd").setAttribute("aria-pressed",sound);
-}
-function beep(){if(!sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime;
-  for(let i=0;i<3;i++){const o=ac.createOscillator(),g=ac.createGain();o.type="sine";o.frequency.value=880;o.connect(g);g.connect(ac.destination);
-    const s=t+i*0.45;g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.5,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+0.35);o.start(s);o.stop(s+0.4)}}catch(e){}
-  try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}
-async function lock(on){try{if(on&&"wakeLock" in navigator){wake=await navigator.wakeLock.request("screen")}else if(!on&&wake){await wake.release();wake=null}}catch(e){}}
-function loop(){left=(end-Date.now())/1000;if(left<=0){left=0;run=false;end=-1;clearInterval(tick);beep();lock(false);document.body.classList.remove("full")}draw()}
-function start(){if(left<=0)left=total;if(!total)return;
-  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume()}catch(e){} // unlock audio on iOS tap
-  run=true;end=Date.now()+left*1000;clearInterval(tick);tick=setInterval(loop,200);lock(true);draw()}
-function pause(){run=false;clearInterval(tick);left=Math.max(0,(end-Date.now())/1000);end=0;lock(false);draw()}
-function set(s){run=false;clearInterval(tick);end=0;total=left=Math.max(0,Math.min(5999,s));save();lock(false);draw()}
-$("pre").innerHTML=P.map(([s,l])=>`<button data-s="${s}">${l}</button>`).join("");
-$("pre").addEventListener("click",e=>{const b=e.target.closest("button");if(b)set(+b.dataset.s)});
-document.querySelector(".adj").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const a=+b.dataset.a;
-  if(run){end+=a*1000;total=Math.max(1,total+a);loop()}else set((left>0?left:total)+a)});
-$("go").addEventListener("click",()=>run?pause():start());
-$("reset").addEventListener("click",()=>set(total));
-$("snd").addEventListener("click",()=>{sound=!sound;save();draw()});
-$("fs").addEventListener("click",()=>{const d=document.documentElement;
-  if(d.requestFullscreen&&!document.fullscreenElement){d.requestFullscreen().catch(()=>{})}else if(document.fullscreenElement){document.exitFullscreen()}
-  else document.body.classList.toggle("full")}); // iPhone Safari: hide controls instead
-document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();run?pause():start()}});
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&run)lock(true)});
-draw();
+(function () {
+  var display = document.getElementById('display');
+  var bar = document.getElementById('bar');
+  var startBtn = document.getElementById('startBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var soundBtn = document.getElementById('soundBtn');
+  var minIn = document.getElementById('min');
+  var secIn = document.getElementById('sec');
+
+  var total = 300;        // 設定的秒數
+  var endAt = 0;          // 計時中：結束的時間點 (ms)
+  var left = 300 * 1000;  // 暫停時剩下的毫秒
+  var running = false, timer = null, ringTimer = null, soundOn = true, ctx = null;
+
+  function audio() {
+    if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
+    return ctx;
+  }
+  function beep(freq, delay, dur, vol) {
+    if (!soundOn) return;
+    var c = audio(); if (!c) return;
+    var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + delay;
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function ring() { beep(880, 0, 0.25, 0.5); beep(880, 0.3, 0.25, 0.5); beep(1175, 0.6, 0.5, 0.5); }
+
+  function fmt(ms) {
+    var s = Math.ceil(ms / 1000), m = Math.floor(s / 60);
+    s = s % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function render(ms) {
+    display.textContent = fmt(ms);
+    var sLeft = Math.ceil(ms / 1000);
+    display.className = 'display' + (ms <= 0 ? ' end' : (sLeft <= 10 ? ' warn' : ''));
+    var pct = total > 0 ? Math.max(0, Math.min(100, ms / (total * 1000) * 100)) : 0;
+    bar.style.width = pct + '%';
+    bar.style.background = ms <= 0 ? 'var(--red)' : (sLeft <= 10 ? 'var(--yellow)' : 'var(--green)');
+  }
+  var lastSec = null;
+  function tick() {
+    var ms = endAt - Date.now();
+    if (ms <= 0) { finish(); return; }
+    var s = Math.ceil(ms / 1000);
+    if (s !== lastSec && s <= 3) beep(660, 0, 0.12, 0.3);  // 最後 3 秒提示音
+    lastSec = s;
+    render(ms);
+  }
+  function finish() {
+    clearInterval(timer); timer = null; running = false; left = 0;
+    render(0); startBtn.textContent = '開始';
+    document.body.classList.add('done');
+    ring(); clearInterval(ringTimer);
+    var n = 0; ringTimer = setInterval(function () { if (++n >= 4) { clearInterval(ringTimer); } else ring(); }, 1500);
+  }
+  function stopAlarm() { clearInterval(ringTimer); document.body.classList.remove('done'); }
+  function start() {
+    if (left <= 0) left = total * 1000;
+    if (left <= 0) return;
+    stopAlarm(); audio();
+    endAt = Date.now() + left; running = true; lastSec = null;
+    startBtn.textContent = '暫停';
+    clearInterval(timer); timer = setInterval(tick, 200); tick();
+  }
+  function pause() {
+    left = Math.max(0, endAt - Date.now()); running = false;
+    clearInterval(timer); timer = null; startBtn.textContent = '繼續';
+  }
+  function setTime(sec) {
+    sec = Math.max(0, Math.min(99 * 60 + 59, Math.floor(sec)));
+    clearInterval(timer); timer = null; running = false; stopAlarm();
+    total = sec; left = sec * 1000;
+    minIn.value = Math.floor(sec / 60); secIn.value = sec % 60;
+    startBtn.textContent = '開始'; render(left);
+  }
+
+  startBtn.addEventListener('click', function () { running ? pause() : start(); });
+  resetBtn.addEventListener('click', function () { setTime(total); });
+  soundBtn.addEventListener('click', function () {
+    soundOn = !soundOn;
+    soundBtn.textContent = soundOn ? '音效：開' : '音效：關';
+    soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+  });
+  [].forEach.call(document.querySelectorAll('.preset'), function (b) {
+    b.addEventListener('click', function () { setTime(Number(b.getAttribute('data-sec'))); });
+  });
+  document.getElementById('setBtn').addEventListener('click', function () {
+    setTime((parseInt(minIn.value, 10) || 0) * 60 + (parseInt(secIn.value, 10) || 0));
+  });
+  [minIn, secIn].forEach(function (i) {
+    i.addEventListener('keydown', function (e) { if (e.key === 'Enter') document.getElementById('setBtn').click(); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') { e.preventDefault(); startBtn.click(); }
+  });
+  render(left);
+})();
 </script>
-</body></html>
+</body>
+</html>
