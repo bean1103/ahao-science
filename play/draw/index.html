@@ -88,6 +88,13 @@ const C=()=>S.classes[S.cur]||S.classes[0];
 const name=(c,i)=>(c.names[i-1]||"").trim();
 let spinning=false,ac=null,last=[];
 function tone(f,d,t0=0,v=.25){if(!S.sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime+t0,o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type="triangle";o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.02)}catch(e){}}
+// dice-roll sound, synthesized in the browser (no audio files): a rattle while spinning, then the dice settle
+function clack(d,v,f){if(!S.sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();
+  const len=Math.floor(ac.sampleRate*.045),buf=ac.createBuffer(1,len,ac.sampleRate),a=buf.getChannelData(0);for(let i=0;i<len;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+  const src=ac.createBufferSource();src.buffer=buf;const q=ac.createBiquadFilter();q.type="bandpass";q.frequency.value=f;q.Q.value=1.4;
+  const g=ac.createGain();g.gain.value=v;src.connect(q);q.connect(g);g.connect(ac.destination);src.start(ac.currentTime+d)}catch(e){}}
+const dtick=()=>{if(Math.random()<.3)return;clack(0,.35+Math.random()*.45,1400+Math.random()*2600)};
+const dland=()=>{clack(0,.95,900);clack(.11,.7,1700);clack(.21,.4,2600)};
 function pool(c){const all=[...Array(+c.count||0)].map((_,i)=>i+1).filter(x=>!c.off.includes(x));const left=S.norep?all.filter(x=>!c.used.includes(x)):all;return {all,left}}
 function render(){
   const c=C();
@@ -109,8 +116,8 @@ function draw(){
   try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume()}catch(e){}
   spinning=true;$("m").src="../../assets/chars/think.webp";let t=0,steps=18;
   const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;if(reduce)steps=1;
-  (function step(){t++;if(t<steps){show(pick.map(()=>all[Math.floor(Math.random()*all.length)]),false);tone(500+t*25,.05);setTimeout(step,30+t*t*.6)}
-    else{show(pick,true);last=pick;tone(784,.18);tone(1047,.3,.12);if(S.norep)c.used.push(...pick);save();spinning=false;$("m").src="../../assets/chars/cheer.webp";render()}})();
+  (function step(){t++;if(t<steps){show(pick.map(()=>all[Math.floor(Math.random()*all.length)]),false);dtick();setTimeout(step,30+t*t*.6)}
+    else{show(pick,true);last=pick;dland();if(S.norep)c.used.push(...pick);save();spinning=false;$("m").src="../../assets/chars/cheer.webp";render()}})();
 }
 $("go").onclick=draw;
 document.addEventListener("keydown",e=>{if(e.code==="Space"&&!/INPUT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();draw()}});
@@ -119,7 +126,7 @@ $("seats").onclick=e=>{const b=e.target.closest(".seat");if(!b)return;const c=C(
 $("minus").onclick=()=>{S.n=Math.max(1,S.n-1);save();render()};$("plus").onclick=()=>{S.n=Math.min(8,S.n+1);save();render()};
 $("norep").onchange=e=>{S.norep=e.target.checked;save();render()};
 $("reset").onclick=()=>{const c=C();c.used=[];last=[];$("m").src="../../assets/chars/point.webp";save();render()};
-$("snd").onclick=()=>{S.sound=!S.sound;save();render()};
+$("snd").onclick=()=>{S.sound=!S.sound;save();render();dland()};
 $("save").onclick=()=>{const c=C();c.name=$("cname").value.trim()||c.name;c.count=Math.max(1,Math.min(60,+$("ccount").value||c.count));
   c.names=$("cnames").value.split(/\r?\n/).map(s=>s.replace(/^\s*\d+[\s.、:：-]+/,"").trim());while(c.names.length&&!c.names[c.names.length-1])c.names.pop();
   if(c.names.length>c.count)c.count=c.names.length;c.used=c.used.filter(x=>x<=c.count);c.off=c.off.filter(x=>x<=c.count);save();last=[];render();$("saved").textContent="已儲存在這台裝置 ✓";setTimeout(()=>$("saved").textContent="",2500)};
