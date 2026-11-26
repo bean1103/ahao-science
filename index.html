@@ -291,8 +291,12 @@ const YT=q=>"https://www.youtube.com/channel/UCJtQ4k093PWRBCbzpuM9fVQ/search?que
 const DATA=[
  {g:"7",label:"七年級",sems:[
   {s:"1",label:"七上",ch:[
+   {c:"1",n:"生命世界與科學方法",sec:["1-1 生命的起源與特徵","1-2 探究自然的方法","1-3 實驗器材的使用"]},
+   {c:"2",n:"生物體的構造",sec:["2-1 細胞的發現","2-2 細胞的構造","2-3 物質進出細胞的方式","2-4 生物體的組成層次"]},
    {c:"3",n:"生物體的營養",sec:["3-3 光合作用","3 消化介紹"],isl:"島嶼課程複習/g7_1_c3"},
-   {c:"4",n:"生物體的運輸作用",sec:["4-2 心臟","4-3 血液成分","4-4 人體的循環系統","4 維管束傳輸","4 人體的終極防禦"],isl:"島嶼課程複習/g7_1_c4"}]}]},
+   {c:"4",n:"生物體的運輸作用",sec:["4-2 心臟","4-3 血液成分","4-4 人體的循環系統","4 維管束傳輸","4 人體的終極防禦"],isl:"島嶼課程複習/g7_1_c4"},
+   {c:"5",n:"生物體的協調作用",sec:["5-1 刺激與反應","5-2 神經系統","5-3 內分泌系統","5-4 動物的行為","5-5 植物對環境的感應"]},
+   {c:"6",n:"生物體的恆定性",sec:["6-1 恆定性與體溫調節","6-2 呼吸與氣體的恆定","6-3 排泄與水分的恆定","6-4 血糖的恆定"]}]}]},
  {g:"8",label:"八年級",sems:[
   {s:"1",label:"八上",ch:[
    {c:"1",n:"基本測量",sec:["1-1 長度、質量與時間","1-2 測量與估計","1-3 體積與密度"]},
@@ -333,7 +337,7 @@ let VIDEOS=[];
 const WATCH=id=>"https://www.youtube.com/watch?v="+id;
 const KORD={"講解":0,"重點整理":1,"解題":2,"短影音":3};
 const vidsOf=c=>VIDEOS.filter(v=>v.chapter===c.id).sort((a,b)=>(KORD[a.kind]-KORD[b.kind])||((a.section??99)-(b.section??99))||(b.date||"").localeCompare(a.date||""));
-const ICON={"7-1-3":"🌿","7-1-4":"🫀","8-1-1":"📏","8-1-2":"🧪","8-1-3":"🔊","8-1-4":"🔦","8-1-5":"🔥","8-1-6":"⚛️","8-2-1":"⚗️","8-2-2":"🔩","8-2-3":"🍋","8-2-4":"⏱️","8-2-5":"🧼","8-2-6":"🎈","9-1-1":"🏃","9-1-2":"🍎","9-1-3":"⚡","9-1-4":"🔋","9-1-5":"🪨","9-1-6":"🌋","9-1-7":"🪐","9-2-1":"💡","9-2-2":"🧲","9-2-3":"⛅","9-2-4":"🌏"};
+const ICON={"7-1-1":"🔬","7-1-2":"🦠","7-1-5":"🧠","7-1-6":"🌡️","7-1-3":"🌿","7-1-4":"🫀","8-1-1":"📏","8-1-2":"🧪","8-1-3":"🔊","8-1-4":"🔦","8-1-5":"🔥","8-1-6":"⚛️","8-2-1":"⚗️","8-2-2":"🔩","8-2-3":"🍋","8-2-4":"⏱️","8-2-5":"🧼","8-2-6":"🎈","9-1-1":"🏃","9-1-2":"🍎","9-1-3":"⚡","9-1-4":"🔋","9-1-5":"🪨","9-1-6":"🌋","9-1-7":"🪐","9-2-1":"💡","9-2-2":"🧲","9-2-3":"⛅","9-2-4":"🌏"};
 const flat=[];DATA.forEach(G=>G.sems.forEach(S=>S.ch.forEach(C=>flat.push({...C,g:G.g,s:S.s,sl:S.label,id:`${G.g}-${S.s}-${C.c}`}))));
 const byId=id=>flat.find(x=>x.id===id);
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
@@ -491,13 +495,13 @@ async function loadSettings(){
 const done=(cid,vid)=>(prog[cid]?.q||[]).includes(vid);
 function rangeVids(e){const c=byId(e.id);return vidsOf(c).filter(v=>!e.secs||v.section==null||e.secs.has(v.section))}
 function nowBlock(){
-  const P=CFG.progress[grade]||{};const wk=parseRange(P.week)[0];const c=wk&&byId(wk.id);
+  const P=CFG.progress[grade]||{};const wks=parseRange(P.week);
   const rng=parseRange(P.range);const rv=rng.flatMap(e=>rangeVids(e).map(v=>[e.id,v]));const rdone=rv.filter(([cid,v])=>done(cid,v.id)).length;
-  let card;
-  if(c){const vs=vidsOf(c).filter(v=>!wk.secs||v.section==null||wk.secs.has(v.section));const nx=vs.find(v=>!done(c.id,v.id));
-    card=`<div class="nowcard">${mascot("point")}<div style="min-width:0;flex:1"><span class="k">${GN[grade]} · 這週上到</span><b>${c.sl} Ch.${c.c} ${esc(c.n)}${wk.secs?`<span class="sub"> · ${[...wk.secs].map(x=>c.c+"-"+x).join("、")}</span>`:""}</b>${P.note?`<p>${esc(P.note)}</p>`:""}
-      <div class="nowbtns"><a class="btn" href="#ch-${c.id}">去這一章</a>${nx?`<a class="btn ghost" href="${WATCH(nx.id)}" target="_blank" rel="noopener">▶ 下一支：${esc(nx.title.slice(0,18))}</a>`:""}</div></div></div>`}
-  else card=`<div class="empty">${GN[grade]}這週的進度還沒更新，先從下面的冒險地圖挑一章吧！</div>`;
+  let card="";
+  wks.forEach((wk,j)=>{const c=byId(wk.id);const vs=vidsOf(c).filter(v=>!wk.secs||v.section==null||wk.secs.has(v.section));const nx=vs.find(v=>!done(c.id,v.id));
+    card+=`<div class="nowcard">${j?"":mascot("point")}<div style="min-width:0;flex:1"><span class="k">${GN[grade]} · 這週上到</span><b>${c.sl} Ch.${c.c} ${esc(c.n)}${wk.secs?`<span class="sub"> · ${[...wk.secs].map(x=>c.c+"-"+x).join("、")}</span>`:""}</b>${P.note&&!j?`<p>${esc(P.note)}</p>`:""}
+      <div class="nowbtns"><a class="btn" href="#ch-${c.id}">去這一章</a>${nx?`<a class="btn ghost" href="${WATCH(nx.id)}" target="_blank" rel="noopener">▶ 下一支：${esc(nx.title.slice(0,18))}</a>`:vs.length?"":`<span class="sub" style="align-self:center">影片整理中</span>`}</div></div></div>`});
+  if(!card) card=`<div class="empty">${GN[grade]}這週的進度還沒更新，先從下面的冒險地圖挑一章吧！</div>`;
   const ex=P.exam&&rng.length?`<a class="rangecard" href="#range-${grade}"><span style="font-size:24px">📝</span><b>${esc(P.exam)} 範圍<small>${rng.length} 章 · ${rv.length} 支影片 · 已看 ${rdone}</small></b><span>›</span></a>`:"";
   return `<section class="block" id="now"><div class="block-head"><h2>這週<mark class="hl orange">上到哪</mark></h2></div>
     <div class="tabs" role="tablist">${DATA.map(x=>`<button role="tab" data-g="${x.g}" data-stay="1" aria-selected="${x.g===grade}">${x.label}</button>`).join("")}</div>

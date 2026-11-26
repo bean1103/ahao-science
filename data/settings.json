@@ -1,9 +1,30 @@
 {
- "sheet": {"progress": "", "tips": ""},
+ "sheet": {
+  "progress": "",
+  "tips": ""
+ },
  "progress": [
-  {"grade": "7", "week": "", "note": "", "exam": "", "range": ""},
-  {"grade": "8", "week": "", "note": "", "exam": "", "range": ""},
-  {"grade": "9", "week": "", "note": "", "exam": "", "range": ""}
+  {
+   "grade": "7",
+   "week": "七上Ch5",
+   "note": "",
+   "exam": "",
+   "range": ""
+  },
+  {
+   "grade": "8",
+   "week": "八上Ch5",
+   "note": "",
+   "exam": "",
+   "range": ""
+  },
+  {
+   "grade": "9",
+   "week": "九上Ch4、九上Ch7",
+   "note": "",
+   "exam": "",
+   "range": ""
+  }
  ],
  "tips": {},
  "ask": ""
