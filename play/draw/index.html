@@ -149,6 +149,12 @@ $("bulkgo").onclick=()=>{const list=parseBulk($("bulk").value);if(!list.length){
 $("bulkcopy").onclick=()=>{const t=dumpAll();const fb=()=>{$("bulk").value=t;$("bulk").select();bmsg("請手動複製上面的文字")};
   try{navigator.clipboard.writeText(t).then(()=>bmsg("已複製 ✓"),fb)}catch(e){fb()}};
 render();
+// one-tap import: opening ".../draw/#roster=<base64url of the roster text>" loads the names into this device only.
+// The part after # is never sent to the web server, and it is removed from the address bar right after loading.
+(function(){const m=location.hash.match(/^#roster=([A-Za-z0-9_-]+)$/);if(!m)return;
+  try{const bin=atob(m[1].replace(/-/g,"+").replace(/_/g,"/"));const list=parseBulk(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
+    if(!list.length)return;applyBulk(list);history.replaceState(null,"",location.pathname+location.search);
+    $("hint").textContent="✓ 已匯入 "+list.length+" 個班級的名單";setTimeout(render,3500)}catch(e){}})();
 </script>
 <script src="../float.js"></script>
 <script src="../pip.js"></script>
