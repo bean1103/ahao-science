@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>阿豪小工具</title>
+<link rel="icon" href="../../assets/chars/point.webp">
+<style>
+:root{--bg:#1a1b26;--card:#24283b;--text:#c0caf5;--muted:#787c99;--border:#414868;--blue:#7aa2f7;--green:#00f260;--yellow:#f6d365;--red:#ff757f;--pink:#4e2c3c}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft JhengHei","PingFang TC",sans-serif;display:flex;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none}
+button,select{font:inherit;color:inherit;cursor:pointer}
+.tabs{display:flex;gap:4px;padding:6px 6px 0}
+.tabs button{flex:1;border:0;background:transparent;border-radius:8px 8px 0 0;padding:6px;font-weight:700;font-size:14px;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--card);color:#fff}
+.pane{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:var(--card);margin:0 6px 6px;border-radius:0 0 10px 10px;padding:8px;min-height:0}
+.pane.on{display:flex}
+.row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
+.b{border:2px solid var(--border);background:var(--bg);border-radius:8px;padding:4px 10px;font-weight:700;font-size:min(14px,4.2vw)}
+.b.main{background:var(--blue);border-color:var(--blue);color:#1a1b26;padding:6px 16px;font-size:min(17px,5vw)}
+/* timer */
+.digits{font-family:"Arial Black","Segoe UI",sans-serif;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;font-size:min(30vw,42vh);color:var(--green);text-shadow:0 0 18px rgba(0,242,96,.35)}
+.digits.warn{color:var(--yellow)}.digits.end{color:var(--red)}
+body.done #tp{animation:flash .8s ease-in-out infinite alternate}@keyframes flash{to{background:#4a1d24}}
+.bar{width:100%;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;width:100%;background:var(--green);transition:width .25s linear}
+/* draw */
+.res{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:100%}
+.card{background:var(--bg);border-radius:10px;padding:6px 12px;text-align:center;min-width:28vw}
+.card b{display:block;font-size:min(16vw,26vh);line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+.card span{display:block;font-size:min(8vw,11vh);font-weight:700;margin-top:2px;white-space:nowrap}
+.res.many .card b{font-size:min(10vw,16vh)}.res.many .card span{font-size:min(5vw,7vh)}
+.card.hit{background:var(--pink)}
+.card.spin b,.card.spin span{color:var(--muted)}
+select{background:var(--bg);border:2px solid var(--border);border-radius:8px;padding:3px 6px;font-weight:700}
+.hint{font-size:12px;color:var(--muted)}
+</style></head><body>
+<div class="tabs" role="tablist"><button role="tab" data-t="timer">⏱️ 計時</button><button role="tab" data-t="draw">🎲 抽籤</button></div>
+<section class="pane" id="tp">
+  <div class="digits" id="d" role="timer">05:00</div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="row" id="pre"><button class="b" data-s="60">1分</button><button class="b" data-s="180">3分</button><button class="b" data-s="300">5分</button><button class="b" data-s="600">10分</button><button class="b" data-a="30">+30秒</button></div>
+  <div class="row"><button class="b main" id="go">開始</button><button class="b" id="rs">重設</button><button class="b" id="snd" title="音效">🔔</button></div>
+</section>
+<section class="pane" id="dp">
+  <div class="res" id="res"></div>
+  <div class="row"><select id="cls" aria-label="班級"></select><button class="b" id="minus" aria-label="少抽一位">−</button><b id="n" class="hint" style="font-size:14px;color:#fff">1</b><button class="b" id="plus" aria-label="多抽一位">＋</button><button class="b main" id="dgo">抽！</button></div>
+  <div class="hint" id="dh"></div>
+</section>
+<script>
+const $=id=>document.getElementById(id);let ac=null;
+let sound=true;try{sound=JSON.parse(localStorage.getItem("ahao-timer")||"{}").sound!==false}catch(e){}
+function au(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume()}catch(e){}return ac}
+function beep(f,d,dur,v){if(!sound)return;const c=au();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+d;o.type="sine";o.frequency.value=f;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.05)}
+// tabs
+const tab=t=>{document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));$("tp").classList.toggle("on",t==="timer");$("dp").classList.toggle("on",t==="draw");try{localStorage.setItem("ahao-float-tab",t)}catch(e){}};
+document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("button");if(b)tab(b.dataset.t)};
+let t0=new URLSearchParams(location.search).get("tab");try{t0=t0||localStorage.getItem("ahao-float-tab")}catch(e){}tab(t0==="draw"?"draw":"timer");
+// ---- timer
+let total=300,left=300000,endAt=0,run=false,tk=null,rt=null,lastS=null;
+const fmt=ms=>{let s=Math.ceil(ms/1000);const m=Math.floor(s/60);s%=60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")};
+function rT(ms){$("d").textContent=fmt(ms);const s=Math.ceil(ms/1000);$("d").className="digits"+(ms<=0?" end":s<=10?" warn":"");
+  $("bar").style.width=(total?Math.max(0,Math.min(100,ms/(total*10))):0)+"%";$("bar").style.background=ms<=0?"var(--red)":s<=10?"var(--yellow)":"var(--green)";
+  $("go").textContent=run?"暫停":(ms>0&&ms<total*1000?"繼續":"開始");$("snd").textContent=sound?"🔔":"🔕"}
+function ring(){beep(880,0,.25,.5);beep(880,.3,.25,.5);beep(1175,.6,.5,.5)}
+function stopA(){clearInterval(rt);document.body.classList.remove("done")}
+function tick(){const ms=endAt-Date.now();if(ms<=0){clearInterval(tk);run=false;left=0;rT(0);document.body.classList.add("done");ring();let n=0;clearInterval(rt);rt=setInterval(()=>{if(++n>=3)clearInterval(rt);else ring()},1500);return}
+  const s=Math.ceil(ms/1000);if(s!==lastS&&s<=3)beep(660,0,.12,.3);lastS=s;rT(ms)}
+function start(){if(left<=0)left=total*1000;if(left<=0)return;stopA();au();endAt=Date.now()+left;run=true;lastS=null;clearInterval(tk);tk=setInterval(tick,200);tick()}
+function pause(){left=Math.max(0,endAt-Date.now());run=false;clearInterval(tk);rT(left)}
+function setT(s){s=Math.max(0,Math.min(5999,s));clearInterval(tk);run=false;stopA();total=s;left=s*1000;rT(left)}
+$("go").onclick=()=>run?pause():start();$("rs").onclick=()=>setT(total);
+$("snd").onclick=()=>{sound=!sound;try{const o=JSON.parse(localStorage.getItem("ahao-timer")||"{}");o.sound=sound;localStorage.setItem("ahao-timer",JSON.stringify(o))}catch(e){}rT(run?endAt-Date.now():left)};
+$("pre").onclick=e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.s)setT(+b.dataset.s);else{const a=+b.dataset.a;if(run){endAt+=a*1000;total+=a}else{left+=a*1000;total=Math.max(total,Math.ceil(left/1000))}rT(run?endAt-Date.now():left)}};
+rT(left);
+// ---- draw (shares the class list and names with play/draw)
+const KEY="ahao-draw";let S;
+function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!S)S={cur:0,norep:true,n:1,classes:["902","907","908","豪幸運七"].map(n=>({name:n,count:30,names:[],off:[],used:[]}))}}
+const saveS=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const C=()=>S.classes[S.cur]||S.classes[0];const nm=(c,i)=>((c.names||[])[i-1]||"").trim();const esc=s=>s.replace(/[<&]/g,m=>m=="<"?"&lt;":"&amp;");
+function pool(c){const all=[...Array(+c.count||0)].map((_,i)=>i+1).filter(x=>!(c.off||[]).includes(x));return {all,left:S.norep?all.filter(x=>!(c.used||[]).includes(x)):all}}
+let spin=false,shown=[];
+function rD(){const c=C();$("cls").innerHTML=S.classes.map((x,i)=>`<option value="${i}" ${i===S.cur?"selected":""}>${esc(x.name)}</option>`).join("");$("n").textContent=S.n;
+  const p=pool(c);$("dh").textContent=S.norep?`還沒抽到 ${p.left.length} / ${p.all.length}`:`共 ${p.all.length} 位`;
+  if(!shown.length)$("res").innerHTML=`<div class="card"><b>?</b></div>`}
+function show(a,fin){const c=C();$("res").className="res"+(a.length>2?" many":"");$("res").innerHTML=a.map(x=>`<div class="card ${fin?"hit":"spin"}"><b>${x}</b>${nm(c,x)?`<span>${esc(nm(c,x))}</span>`:""}</div>`).join("")}
+function draw(){if(spin)return;load();const c=C();c.used=c.used||[];let {all,left}=pool(c);if(!all.length)return;if(S.norep&&left.length<S.n){c.used=[];left=all}
+  const L=[...left],pick=[],k=Math.min(S.n,L.length);for(let i=0;i<k;i++)pick.push(L.splice(Math.floor(Math.random()*L.length),1)[0]);
+  au();spin=true;let t=0;(function st(){t++;if(t<16){show(pick.map(()=>all[Math.floor(Math.random()*all.length)]),false);beep(500+t*25,0,.05,.2);setTimeout(st,30+t*t*.6)}
+   else{show(pick,true);shown=pick;beep(784,0,.18,.3);beep(1047,.12,.3,.3);if(S.norep)c.used.push(...pick);saveS();spin=false;rD()}})()}
+$("dgo").onclick=draw;$("cls").onchange=e=>{load();S.cur=+e.target.value;shown=[];saveS();rD()};
+$("minus").onclick=()=>{load();S.n=Math.max(1,S.n-1);saveS();rD()};$("plus").onclick=()=>{load();S.n=Math.min(6,S.n+1);saveS();rD()};
+window.addEventListener("storage",e=>{if(e.key===KEY){load();rD()}});
+load();rD();
+document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();$("tp").classList.contains("on")?(run?pause():start()):draw()}});
+</script></body></html>

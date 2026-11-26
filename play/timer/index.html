@@ -1,186 +1,126 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>課堂計時器 · 阿豪自然</title>
-<link rel="icon" href="../../assets/chars/point.webp">
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="漂浮時鐘">
+<title>課堂漂浮時鐘 · 阿豪自然</title>
+<link rel="icon" href="../../assets/chars/point.webp">
+<link rel="apple-touch-icon" href="../../assets/chars/point.webp">
 <style>
-  :root {
-    --bg: #1a1b26; --card: #24283b; --text: #c0caf5; --muted: #787c99;
-    --border: #414868; --blue: #7aa2f7; --green: #00f260; --yellow: #f6d365; --red: #ff757f;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 16px; gap: 16px;
-  }
-  body.done { animation: flash 0.8s ease-in-out infinite alternate; }
-  @keyframes flash { from { background: var(--bg); } to { background: #4a1d24; } }
-  h3 { margin: 0; font-size: 1.3rem; color: #fff; }
-  .display {
-    font-family: 'Arial Black', 'Segoe UI', sans-serif; font-weight: 900;
-    font-size: clamp(4rem, 22vw, 11rem); line-height: 1; letter-spacing: 0.02em;
-    color: var(--green); font-variant-numeric: tabular-nums;
-    text-shadow: 0 0 25px rgba(0, 242, 96, 0.35);
-  }
-  .display.warn { color: var(--yellow); text-shadow: 0 0 25px rgba(246, 211, 101, 0.35); }
-  .display.end { color: var(--red); text-shadow: 0 0 25px rgba(255, 117, 127, 0.5); }
-  .bar { width: min(100%, 640px); height: 10px; background: var(--card); border-radius: 5px; overflow: hidden; }
-  .bar > div { height: 100%; width: 100%; background: var(--green); transition: width 0.25s linear; }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
-  button {
-    font: inherit; font-weight: 700; cursor: pointer; border-radius: 10px; padding: 10px 18px;
-    border: 2px solid var(--border); background: var(--card); color: var(--text);
-  }
-  button:hover { border-color: var(--blue); }
-  button.main { background: var(--blue); color: #1a1b26; border-color: var(--blue); min-width: 110px; font-size: 1.1rem; }
-  .preset { padding: 8px 14px; }
-  .custom { display: flex; align-items: center; gap: 6px; color: var(--muted); }
-  .custom input {
-    width: 64px; padding: 8px; text-align: center; font: inherit; font-weight: 700; font-size: 1.1rem;
-    background: #16161e; color: #fff; border: 1px solid var(--border); border-radius: 8px;
-  }
-  .hint { font-size: 0.85rem; color: var(--muted); }
-  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-</style>
-</head>
-<body>
-<a href="../../index.html#tools" style="position:fixed;left:12px;top:12px;color:#f6d365;text-decoration:none;font-weight:700;font-size:15px">‹ 阿豪自然</a>
-  <h3>⏱️ 課堂計時器</h3>
-  <div class="display" id="display" aria-live="polite">05:00</div>
-  <div class="bar"><div id="bar"></div></div>
-
-  <div class="row">
-    <button class="main" id="startBtn" type="button">開始</button>
-    <button id="resetBtn" type="button">重設</button>
-    <button id="soundBtn" type="button" aria-pressed="true">音效：開</button>
-  </div>
-
-  <div class="row" id="presets">
-    <button class="preset" type="button" data-sec="30">30 秒</button>
-    <button class="preset" type="button" data-sec="60">1 分</button>
-    <button class="preset" type="button" data-sec="180">3 分</button>
-    <button class="preset" type="button" data-sec="300">5 分</button>
-    <button class="preset" type="button" data-sec="600">10 分</button>
-    <button class="preset" type="button" data-sec="900">15 分</button>
-  </div>
-
-  <div class="row custom">
-    <label>自訂</label>
-    <input id="min" type="number" min="0" max="99" value="5" aria-label="分鐘"> 分
-    <input id="sec" type="number" min="0" max="59" value="0" aria-label="秒"> 秒
-    <button id="setBtn" type="button">設定</button>
-  </div>
-  <div class="hint">剩最後 10 秒會變黃色，時間到會響鈴並閃爍。按「重設」可停止。</div>
-
+:root{--bg:#121212;--card:#1e1e1e;--card2:#262626;--line:#2c2c2c;--ink:#f2f2f2;--muted:#8d8d8d;--y:#f5d63d;--y2:#3a3416;--red:#ff6b6b}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;min-height:100dvh;
+  padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;gap:8px}
+.top h1{flex:1;margin:0;font-size:clamp(18px,3.4vw,26px);color:var(--y);font-weight:900;letter-spacing:.04em}
+.top a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:700;margin-right:6px}
+.ic{width:52px;height:52px;border-radius:14px;background:var(--card);font-size:22px;display:grid;place-items:center}
+.ic[aria-pressed="true"].pin{background:var(--y);color:#121212}
+.ic[aria-pressed="false"].mute{opacity:.5}
+.face{background:var(--card);border-radius:20px;padding:clamp(16px,4vw,32px) 12px;text-align:center;position:relative;cursor:pointer}
+.digits{font-family:"Arial Black","SF Pro Display","Segoe UI",sans-serif;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;font-size:clamp(84px,24vw,220px);color:var(--y)}
+.state{color:var(--muted);font-size:15px;margin-top:6px;min-height:1.4em}
+.face.warn .digits{color:#ffb020}.face.end .digits{color:var(--red)}
+@media (prefers-reduced-motion:no-preference){.face.end{animation:fl .8s ease-in-out infinite alternate}@keyframes fl{to{background:#3a1717}}}
+.bar{height:8px;border-radius:4px;background:var(--card2);overflow:hidden;margin:16px auto 0;max-width:680px}.bar i{display:block;height:100%;background:var(--y);width:100%;transition:width .25s linear}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.quick button{background:var(--y);color:#121212;border-radius:16px;padding:18px 0;font-size:clamp(20px,4vw,28px);font-weight:900}
+.custom{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;background:var(--card);border-radius:16px;padding:12px}
+.stp{display:flex;align-items:center;gap:8px}
+.stp button{width:52px;height:52px;border-radius:12px;background:var(--card2);font-size:28px;font-weight:900;color:var(--y)}
+.stp b{min-width:3.2em;text-align:center;font-size:24px;font-variant-numeric:tabular-nums}
+.custom .go{background:var(--y2);color:var(--y);border-radius:12px;padding:14px 20px;font-weight:900;font-size:18px}
+.ctl{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.ctl button{background:var(--card);border-radius:16px;padding:18px 0;font-size:clamp(18px,3.6vw,26px);font-weight:900;color:var(--y)}
+.pipbar{background:var(--card);border-radius:16px;padding:12px 16px;font-size:14px;color:var(--muted);line-height:1.6;text-align:center}
+.pipbar b{color:var(--ink)}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+.help.on{display:flex}
+.help>div{background:#232323;border-radius:20px;padding:22px;max-width:620px;line-height:1.9;font-size:16px}
+.help h2{margin:0 0 6px;color:var(--y);font-size:20px}
+.help em{font-style:normal;color:var(--y);font-weight:700}
+.help button{width:100%;margin-top:14px;background:var(--y);color:#121212;border-radius:14px;padding:14px;font-size:20px;font-weight:900}
+</style></head>
+<body><div class="wrap">
+<div class="top"><a href="../../index.html#tools">‹</a><h1>⏱ 課堂漂浮時鐘</h1>
+  <button class="ic mute" id="mute" aria-pressed="true" title="響鈴開關">🔔</button>
+  <button class="ic" id="test" title="試聽">🔊</button>
+  <button class="ic pin" id="pin" aria-pressed="true" title="浮動小視窗">📌</button>
+  <button class="ic" id="q" title="使用方式">?</button></div>
+<div class="face" id="face" title="點一下暫停／繼續"><div class="digits" id="d">03:00</div><div class="state" id="st">點下面的時間就開始</div><div class="bar"><i id="bar"></i></div></div>
+<div class="quick" id="quick"><button data-s="30">30秒</button><button data-s="60">1分</button><button data-s="120">2分</button><button data-s="180">3分</button></div>
+<div class="custom">
+  <div class="stp"><button data-k="m" data-a="-1" aria-label="少 1 分">−</button><b id="cm">5 分</b><button data-k="m" data-a="1" aria-label="多 1 分">＋</button></div>
+  <div class="stp"><button data-k="s" data-a="-5" aria-label="少 5 秒">−</button><b id="cs">0 秒</b><button data-k="s" data-a="5" aria-label="多 5 秒">＋</button></div>
+  <button class="go" id="cgo">自訂開始</button>
+</div>
+<div class="ctl"><button id="pp">⏸ 暫停</button><button id="plus30">＋30秒</button><button id="rs">↺ 重設</button></div>
+<div class="pipbar" id="pipinfo">📌 亮著時，開始計時會自動跳出<b>浮動小視窗</b>，可以浮在 GoodNotes、投影片上面。</div>
+</div>
+<div class="help" id="help"><div>
+  <h2>使用方式</h2>
+  ① 點 <em>30秒／1分／2分／3分</em> 或自訂倒數，會<em>立刻開始</em>，並自動變成浮動小視窗（右上 📌 亮著時）。<br>
+  ② 切到 GoodNotes 或投影片，小視窗會浮在最上層：<em>雙指捏合放大縮小</em>、拖曳移動、推到邊緣收起。<br>
+  ③ 小視窗上的 ▶／⏸ 可暫停或繼續；回到本頁點時鐘畫面也能暫停。<br>
+  ④ 自訂：按 −／＋ 調整，分鐘每次 1 分、秒每次 5 秒，<em>按住不放會連續跳</em>。<br>
+  ⑤ 最後 5 秒每秒「嗶」，時間到響提示音。🔔 切換靜音，🔊 試聽。<br>
+  💡 用 Safari 打開後按「分享 → 加入主畫面」，以後一點就開。電腦上用 Chrome、Edge 或 Safari 也可以浮在 PowerPoint 上。
+  <button id="ok">知道了</button></div></div>
+<script src="../pip.js"></script>
 <script>
-(function () {
-  var display = document.getElementById('display');
-  var bar = document.getElementById('bar');
-  var startBtn = document.getElementById('startBtn');
-  var resetBtn = document.getElementById('resetBtn');
-  var soundBtn = document.getElementById('soundBtn');
-  var minIn = document.getElementById('min');
-  var secIn = document.getElementById('sec');
-
-  var total = 300;        // 設定的秒數
-  var endAt = 0;          // 計時中：結束的時間點 (ms)
-  var left = 300 * 1000;  // 暫停時剩下的毫秒
-  var running = false, timer = null, ringTimer = null, soundOn = true, ctx = null;
-
-  function audio() {
-    if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
-    if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
-    return ctx;
-  }
-  function beep(freq, delay, dur, vol) {
-    if (!soundOn) return;
-    var c = audio(); if (!c) return;
-    var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + delay;
-    o.type = 'sine'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
-  }
-  function ring() { beep(880, 0, 0.25, 0.5); beep(880, 0.3, 0.25, 0.5); beep(1175, 0.6, 0.5, 0.5); }
-
-  function fmt(ms) {
-    var s = Math.ceil(ms / 1000), m = Math.floor(s / 60);
-    s = s % 60;
-    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-  }
-  function render(ms) {
-    display.textContent = fmt(ms);
-    var sLeft = Math.ceil(ms / 1000);
-    display.className = 'display' + (ms <= 0 ? ' end' : (sLeft <= 10 ? ' warn' : ''));
-    var pct = total > 0 ? Math.max(0, Math.min(100, ms / (total * 1000) * 100)) : 0;
-    bar.style.width = pct + '%';
-    bar.style.background = ms <= 0 ? 'var(--red)' : (sLeft <= 10 ? 'var(--yellow)' : 'var(--green)');
-  }
-  var lastSec = null;
-  function tick() {
-    var ms = endAt - Date.now();
-    if (ms <= 0) { finish(); return; }
-    var s = Math.ceil(ms / 1000);
-    if (s !== lastSec && s <= 3) beep(660, 0, 0.12, 0.3);  // 最後 3 秒提示音
-    lastSec = s;
-    render(ms);
-  }
-  function finish() {
-    clearInterval(timer); timer = null; running = false; left = 0;
-    render(0); startBtn.textContent = '開始';
-    document.body.classList.add('done');
-    ring(); clearInterval(ringTimer);
-    var n = 0; ringTimer = setInterval(function () { if (++n >= 4) { clearInterval(ringTimer); } else ring(); }, 1500);
-  }
-  function stopAlarm() { clearInterval(ringTimer); document.body.classList.remove('done'); }
-  function start() {
-    if (left <= 0) left = total * 1000;
-    if (left <= 0) return;
-    stopAlarm(); audio();
-    endAt = Date.now() + left; running = true; lastSec = null;
-    startBtn.textContent = '暫停';
-    clearInterval(timer); timer = setInterval(tick, 200); tick();
-  }
-  function pause() {
-    left = Math.max(0, endAt - Date.now()); running = false;
-    clearInterval(timer); timer = null; startBtn.textContent = '繼續';
-  }
-  function setTime(sec) {
-    sec = Math.max(0, Math.min(99 * 60 + 59, Math.floor(sec)));
-    clearInterval(timer); timer = null; running = false; stopAlarm();
-    total = sec; left = sec * 1000;
-    minIn.value = Math.floor(sec / 60); secIn.value = sec % 60;
-    startBtn.textContent = '開始'; render(left);
-  }
-
-  startBtn.addEventListener('click', function () { running ? pause() : start(); });
-  resetBtn.addEventListener('click', function () { setTime(total); });
-  soundBtn.addEventListener('click', function () {
-    soundOn = !soundOn;
-    soundBtn.textContent = soundOn ? '音效：開' : '音效：關';
-    soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-  });
-  [].forEach.call(document.querySelectorAll('.preset'), function (b) {
-    b.addEventListener('click', function () { setTime(Number(b.getAttribute('data-sec'))); });
-  });
-  document.getElementById('setBtn').addEventListener('click', function () {
-    setTime((parseInt(minIn.value, 10) || 0) * 60 + (parseInt(secIn.value, 10) || 0));
-  });
-  [minIn, secIn].forEach(function (i) {
-    i.addEventListener('keydown', function (e) { if (e.key === 'Enter') document.getElementById('setBtn').click(); });
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') { e.preventDefault(); startBtn.click(); }
-  });
-  render(left);
-})();
+const $=id=>document.getElementById(id);
+let total=180,endAt=0,left=180000,run=false,tk=null,rt=null,lastS=null,sound=true,pinOn=true,cm=5,cs=0,ac=null;
+try{const o=JSON.parse(localStorage.getItem("ahao-clock")||"{}");if(o.sound===false)sound=false;if(o.pin===false)pinOn=false;if(o.cm!=null){cm=o.cm;cs=o.cs||0}}catch(e){}
+const save=()=>{try{localStorage.setItem("ahao-clock",JSON.stringify({sound,pin:pinOn,cm,cs}))}catch(e){}};
+function au(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume()}catch(e){}return ac}
+function beep(f,d,dur,v,force){if(!sound&&!force)return;const c=au();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+d;o.type="sine";o.frequency.value=f;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.05)}
+const ring=f=>{beep(880,0,.25,.6,f);beep(880,.3,.25,.6,f);beep(1175,.6,.6,.6,f)};
+const ms=()=>run?Math.max(0,endAt-Date.now()):left;
+const fmt=m=>{let s=Math.ceil(m/1000);const mm=Math.floor(s/60);s%=60;return String(mm).padStart(2,"0")+":"+String(s).padStart(2,"0")};
+function stateText(){const m=ms();return m<=0&&total>0&&lastS===0?"時間到！":run?"計時中":(m>0&&m<total*1000?"已暫停":"點下面的時間就開始")}
+function render(){const m=ms(),s=Math.ceil(m/1000);$("d").textContent=fmt(m);
+  $("face").className="face"+(m<=0&&lastS===0?" end":run&&s<=5?" warn":"");
+  $("bar").style.width=(total?Math.min(100,m/(total*10)):0)+"%";$("st").textContent=stateText();
+  $("pp").textContent=run?"⏸ 暫停":"▶ 繼續";
+  $("mute").setAttribute("aria-pressed",sound);$("mute").textContent=sound?"🔔":"🔕";$("pin").setAttribute("aria-pressed",pinOn);
+  $("cm").textContent=cm+" 分";$("cs").textContent=cs+" 秒";}
+// floating window picture
+const pip=window.AhaoPip?AhaoPip((g,w,h)=>{const m=ms(),s=Math.ceil(m/1000),end=m<=0&&lastS===0;
+  g.fillStyle=end&&(Date.now()/500|0)%2?"#3a1717":"#121212";g.fillRect(0,0,w,h);
+  g.fillStyle=end?"#ff6b6b":run&&s<=5?"#ffb020":"#f5d63d";g.textAlign="center";g.textBaseline="middle";
+  g.font="900 190px 'Arial Black','SF Pro Display',sans-serif";g.fillText(fmt(m),w/2,h/2-18);
+  g.fillStyle="#2c2c2c";g.fillRect(40,h-46,w-80,12);g.fillStyle=g.fillStyle=end?"#ff6b6b":"#f5d63d";g.fillRect(40,h-46,(w-80)*(total?Math.min(1,m/(total*1000)):0),12);
+  g.fillStyle="#8d8d8d";g.font="700 26px 'PingFang TC','Microsoft JhengHei',sans-serif";g.fillText(end?"時間到！":run?"":"已暫停",w/2,h-80);
+},{onPlayPause:()=>toggle()}):null;
+if(!pip||!pip.supported){$("pipinfo").innerHTML="這個瀏覽器不支援浮動小視窗。iPad 請用 <b>Safari</b>，電腦請用 <b>Chrome、Edge 或 Safari</b>。";}
+function popOut(){if(pinOn&&pip&&pip.supported&&!pip.isOpen())pip.open().catch(()=>{})}
+function tick(){const m=endAt-Date.now();if(m<=0){clearInterval(tk);run=false;left=0;lastS=0;render();ring();let n=0;clearInterval(rt);rt=setInterval(()=>{if(++n>=3)clearInterval(rt);else ring()},1500);return}
+  const s=Math.ceil(m/1000);if(s!==lastS&&s<=5)beep(660,0,.12,.4);lastS=s;render()}
+function stopRing(){clearInterval(rt)}
+function start(sec){au();stopRing();if(sec!=null){total=sec;left=sec*1000}if(left<=0)left=total*1000;if(left<=0)return;
+  endAt=Date.now()+left;run=true;lastS=null;clearInterval(tk);tk=setInterval(tick,200);popOut();tick()}
+function pause(){left=Math.max(0,endAt-Date.now());run=false;clearInterval(tk);render()}
+function toggle(){if(run)pause();else if(left>0)start();else start(total)}
+$("quick").onclick=e=>{const b=e.target.closest("button");if(b)start(+b.dataset.s)};
+$("cgo").onclick=()=>{const s=cm*60+cs;if(s>0)start(s)};
+$("face").onclick=toggle;$("pp").onclick=toggle;
+$("plus30").onclick=()=>{if(run){endAt+=30000;total+=30}else{left+=30000;total=Math.max(total,Math.ceil(left/1000));lastS=null}stopRing();render()};
+$("rs").onclick=()=>{clearInterval(tk);stopRing();run=false;left=total*1000;lastS=null;render()};
+$("mute").onclick=()=>{sound=!sound;save();render()};
+$("test").onclick=()=>ring(true);
+$("pin").onclick=()=>{pinOn=!pinOn;save();render();if(pinOn&&run)popOut();if(!pinOn&&pip)pip.close()};
+$("q").onclick=()=>$("help").classList.add("on");$("ok").onclick=()=>$("help").classList.remove("on");
+// hold-to-repeat for − / ＋
+document.querySelectorAll(".stp button").forEach(b=>{let t1,t2;const step=()=>{const a=+b.dataset.a;if(b.dataset.k==="m")cm=Math.max(0,Math.min(99,cm+a));else{cs+=a;if(cs>=60){cs=0;cm=Math.min(99,cm+1)}else if(cs<0){if(cm>0){cm--;cs=55}else cs=0}}save();render()};
+  const stop=()=>{clearTimeout(t1);clearInterval(t2)};
+  b.addEventListener("pointerdown",e=>{e.preventDefault();step();t1=setTimeout(()=>t2=setInterval(step,90),420)});
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop));
+  b.addEventListener("click",e=>e.preventDefault());});
+document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();toggle()}});
+try{if(!localStorage.getItem("ahao-clock-seen")){$("help").classList.add("on");localStorage.setItem("ahao-clock-seen","1")}}catch(e){}
+render();
 </script>
-</body>
-</html>
+</body></html>

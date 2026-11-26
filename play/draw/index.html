@@ -53,7 +53,7 @@ summary{cursor:pointer;font-weight:700}
 .note{font-size:13px;color:var(--muted);line-height:1.6}
 </style></head>
 <body><div class="wrap">
-<div class="top"><a href="../../index.html#tools">‹ 阿豪自然</a><button class="pill" id="snd">🔔 音效</button></div>
+<div class="top"><a href="../../index.html#tools">‹ 阿豪自然</a><div style="display:flex;gap:6px"><button class="pill" id="pinb">📌 浮動小視窗</button><button class="pill" id="snd">🔔 音效</button></div></div>
 <div class="classes" id="cls" role="group" aria-label="班級"></div>
 <div class="stage" aria-live="polite"><img src="../../assets/chars/point.webp" alt="" id="m"><div class="res" id="res"></div><div class="hint" id="hint"></div></div>
 <div class="ctrl">
@@ -123,5 +123,22 @@ $("addc").onclick=()=>{S.classes.push({name:"新班級",count:30,names:[],off:[]
 $("delc").onclick=()=>{if(S.classes.length<2)return;const b=$("delc");if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="再按一次確定刪除";setTimeout(()=>{b.dataset.sure="";b.textContent="刪除這個班級"},3000);return}
   S.classes.splice(S.cur,1);S.cur=0;b.dataset.sure="";b.textContent="刪除這個班級";save();render()};
 render();
+</script>
+<script src="../float.js"></script>
+<script src="../pip.js"></script>
+<script>
+// floating window: on computer Chrome/Edge an interactive mini window (draw from it); elsewhere (iPad Safari) a
+// floating picture that shows who was drawn — draw on this page, or press ▶/⏸ in the mini window to draw again.
+const dpip=window.AhaoPip?AhaoPip((g,w,h)=>{const c=C();g.fillStyle="#191919";g.fillRect(0,0,w,h);g.textAlign="center";g.textBaseline="middle";
+  g.fillStyle="#9b9b9b";g.font="700 26px 'PingFang TC','Microsoft JhengHei',sans-serif";g.fillText(c.name+(spinning?"　抽籤中…":""),w/2,34);
+  const a=last.length?last:[];if(!a.length){g.fillStyle="#fff";g.font="900 150px 'Arial Black',sans-serif";g.fillText("?",w/2,h/2+16);return}
+  const n=a.length,cols=Math.min(n,3),rows=Math.ceil(n/cols),cw=(w-40)/cols,ch=(h-70)/rows;
+  a.forEach((x,i)=>{const cx=20+cw*(i%cols)+cw/2,cy=64+ch*Math.floor(i/cols)+ch/2,nm=name(c,x);
+    g.fillStyle="#4e2c3c";g.beginPath();g.roundRect?g.roundRect(cx-cw/2+6,cy-ch/2+6,cw-12,ch-12,16):g.rect(cx-cw/2+6,cy-ch/2+6,cw-12,ch-12);g.fill();
+    const big=Math.min(ch*(nm?.5:.7),cw*.5);g.fillStyle="#fff";g.font=`900 ${big}px 'Arial Black',sans-serif`;g.fillText(x,cx,cy-(nm?ch*.14:0));
+    if(nm){g.font=`700 ${Math.min(ch*.24,cw/(nm.length+1))}px 'PingFang TC','Microsoft JhengHei',sans-serif`;g.fillText(nm,cx,cy+ch*.26)}})
+},{onPlayPause:()=>draw()}):null;
+$("pinb").onclick=()=>{if("documentPictureInPicture" in window)return ahaoFloat("draw");
+  if(dpip&&dpip.supported)dpip.open().catch(()=>{});else alertLite("這個瀏覽器不支援浮動小視窗。iPad 請用 Safari，電腦請用 Chrome 或 Edge。")};
 </script>
 </body></html>

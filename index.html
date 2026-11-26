@@ -440,8 +440,9 @@ function home(){
     <div class="links">
       <a class="lk" href="play/exam-schedule/">🗓️ 考試時程<small>本學期段考日期與範圍</small></a>
       <a class="lk" href="play/mock-schedule/">🗓️ 模擬考時程<small>九年級模擬考日期</small></a>
-      <a class="lk" href="play/timer/">⏱️ 計時器<small>上課倒數、小組討論計時</small></a>
+      <a class="lk" href="play/timer/">⏱️ 課堂漂浮時鐘<small>倒數計時，可浮在 GoodNotes、投影片上</small></a>
       <a class="lk" href="play/draw/">🎲 抽籤<small>依座號抽學生，可一次抽好幾位</small></a>
+      <a class="lk" href="play/float/" onclick="event.preventDefault();ahaoFloat('timer')">📌 懸浮小工具<small>計時＋抽籤浮在投影片上（電腦版 Chrome／Edge）</small></a>
     </div>
   </section>
   ${parentsBlock()}`;
@@ -594,5 +595,6 @@ applyLayout();stars();
 Promise.all([fetch("data/videos.json").then(r=>r.json()).then(v=>{VIDEOS=v}).catch(()=>{}),loadSettings().catch(()=>{})]).finally(()=>render());
 </script>
 
+<script src="play/float.js"></script>
 </body>
 </html>
