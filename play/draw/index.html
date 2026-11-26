@@ -71,6 +71,10 @@ summary{cursor:pointer;font-weight:700}
     <div class="row"><label>班級名稱 <input id="cname" style="width:8em"></label><label>人數 <input id="ccount" type="number" min="1" max="60" style="width:5em"></label></div>
     <label>學生名字（選填，一行一位，照座號順序）<textarea id="cnames" placeholder="1 號的名字&#10;2 號的名字&#10;…"></textarea></label>
     <p class="note">🔒 名字只存在這台裝置的瀏覽器裡，不會上傳到網站，學生用自己的手機打開看不到。換裝置要重新貼一次；清除 Safari 瀏覽紀錄也會被清掉。iPhone／iPad 的 Safari 若超過 7 天沒打開這頁，名字可能會被自動清掉，建議用 Safari「分享 → 加入主畫面」打開，或把名單另外存一份方便再貼。</p>
+    <div class="row" style="margin-top:6px"><b>📥 一次匯入全部班級名單</b></div>
+    <label>貼上名單，或選擇名單檔。班級名稱單獨一行，下面每行寫「座號 姓名」<textarea id="bulk" placeholder="902&#10;1 王小明&#10;2 李小美&#10;907&#10;1 …"></textarea></label>
+    <div class="row"><input type="file" id="bulkfile" accept=".txt,text/plain" style="width:auto"><button class="btn2" id="bulkgo">匯入</button><button class="btn2" id="bulkcopy">複製目前全部名單（備份用）</button><span class="hint" id="bulkmsg"></span></div>
+    <p class="note">班級名稱要和上面的班級按鈕一樣，找不到就會新增一個班級。名單裡沒有的座號（例如缺 8 號、14 號）會自動標成請假不抽。匯入的名字一樣只存在這台裝置。</p>
     <div class="row"><button class="btn2" id="save">儲存</button><button class="btn2" id="addc">＋ 新增班級</button><button class="btn2" id="delc">刪除這個班級</button><span class="hint" id="saved"></span></div>
   </div>
 </details>
@@ -122,6 +126,28 @@ $("save").onclick=()=>{const c=C();c.name=$("cname").value.trim()||c.name;c.coun
 $("addc").onclick=()=>{S.classes.push({name:"新班級",count:30,names:[],off:[],used:[]});S.cur=S.classes.length-1;save();render();$("cname").focus()};
 $("delc").onclick=()=>{if(S.classes.length<2)return;const b=$("delc");if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="再按一次確定刪除";setTimeout(()=>{b.dataset.sure="";b.textContent="刪除這個班級"},3000);return}
   S.classes.splice(S.cur,1);S.cur=0;b.dataset.sure="";b.textContent="刪除這個班級";save();render()};
+// bulk import: a line without a seat number is a class name, lines like "12 王小明" are students of that class.
+// Seat numbers are kept as written, so a class that skips 8 and 14 keeps its real numbers and those two are never drawn.
+function parseBulk(txt){const out=[];let cur=null;
+  txt.replace(/^﻿/,"").split(/\r?\n/).forEach(raw=>{const line=raw.trim();if(!line)return;
+    const m=line.match(/^(\d{1,2})[\s.、:：,，-]+(.+)$/);
+    if(m&&cur){cur.map[+m[1]]=m[2].trim()}
+    else if(!m){cur={name:line.replace(/^[#＃\s]+/,"").replace(/[:：]\s*$/,"").trim(),map:{}};out.push(cur)}});
+  return out.filter(g=>Object.keys(g.map).length)}
+function applyBulk(list){let created=0;
+  list.forEach(g=>{const max=Math.min(60,Math.max(...Object.keys(g.map).map(Number)));
+    let c=S.classes.find(x=>x.name===g.name);if(!c){c={name:g.name,count:max,names:[],off:[],used:[]};S.classes.push(c);created++}
+    c.count=max;c.names=[...Array(max)].map((_,i)=>g.map[i+1]||"");
+    c.off=[...Array(max)].map((_,i)=>i+1).filter(i=>!g.map[i]);
+    c.used=(c.used||[]).filter(x=>x<=max&&!c.off.includes(x))});
+  save();last=[];render();return created}
+const dumpAll=()=>S.classes.map(c=>c.name+"\n"+(c.names||[]).map((n,i)=>n?`${i+1} ${n}`:"").filter(Boolean).join("\n")).join("\n");
+const bmsg=t=>{$("bulkmsg").textContent=t;setTimeout(()=>$("bulkmsg").textContent="",3500)};
+$("bulkfile").onchange=e=>{const f=e.target.files[0];if(f)f.text().then(t=>{$("bulk").value=t;bmsg("已讀入檔案，按「匯入」")})};
+$("bulkgo").onclick=()=>{const list=parseBulk($("bulk").value);if(!list.length){bmsg("沒有讀到名單，請確認格式");return}
+  const created=applyBulk(list);$("bulk").value="";bmsg(`已匯入 ${list.length} 個班級${created?`（新增 ${created} 個）`:""} ✓`)};
+$("bulkcopy").onclick=()=>{const t=dumpAll();const fb=()=>{$("bulk").value=t;$("bulk").select();bmsg("請手動複製上面的文字")};
+  try{navigator.clipboard.writeText(t).then(()=>bmsg("已複製 ✓"),fb)}catch(e){fb()}};
 render();
 </script>
 <script src="../float.js"></script>
