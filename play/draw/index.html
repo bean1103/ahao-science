@@ -51,6 +51,16 @@ summary{cursor:pointer;font-weight:700}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .btn2{background:var(--panel2);border-radius:8px;padding:8px 12px;font-size:14px}
 .note{font-size:13px;color:var(--muted);line-height:1.6}
+.gd{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.die{position:relative;width:120px;height:120px;background:var(--bg);border:2px solid var(--accent);border-radius:20px;box-shadow:inset 0 0 14px rgba(77,171,154,.25);transition:transform .1s,border-color .3s,box-shadow .3s}
+.die .dot{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);opacity:0;transition:opacity .1s,background .3s}
+.die .tl{top:25%;left:25%}.die .tr{top:25%;left:75%}.die .ml{top:50%;left:25%}.die .mc{top:50%;left:50%}.die .mr{top:50%;left:75%}.die .bl{top:75%;left:25%}.die .br{top:75%;left:75%}
+.face-1 .mc,.face-2 .tr,.face-2 .bl,.face-3 .tr,.face-3 .mc,.face-3 .bl,.face-4 .tl,.face-4 .tr,.face-4 .bl,.face-4 .br,.face-5 .tl,.face-5 .tr,.face-5 .mc,.face-5 .bl,.face-5 .br,.face-6 .tl,.face-6 .tr,.face-6 .ml,.face-6 .mr,.face-6 .bl,.face-6 .br{opacity:1!important}
+.die.hit{border-color:var(--gold);box-shadow:0 0 18px rgba(255,216,74,.35)}.die.hit .dot{background:var(--gold)}
+.gdinfo{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+.seg{display:flex;gap:8px}.seg button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 18px;font-size:16px}
+.seg button[aria-pressed="true"]{background:#fff;color:#191919;border-color:#fff}
+.gres{font-size:clamp(28px,6vw,44px);font-weight:700;min-height:1.3em;line-height:1.3}
 </style></head>
 <body><div class="wrap">
 <div class="top"><a href="../../index.html#tools">‹ 阿豪自然</a><div style="display:flex;gap:6px"><button class="pill" id="pinb">📌 浮動小視窗</button><button class="pill" id="snd">🔔 音效</button></div></div>
@@ -66,6 +76,17 @@ summary{cursor:pointer;font-weight:700}
 </div>
 <h2>座號 <span class="hint">（點一下＝請假不抽，再點一下恢復）</span></h2>
 <div class="seats" id="seats"></div>
+<h2>🎲 抽組別 <span class="hint">（擲骰決定第幾組，每一輪不重複）</span></h2>
+<div class="gd">
+  <div class="die face-4" id="die" role="img" aria-label="骰子"><i class="dot tl"></i><i class="dot tr"></i><i class="dot ml"></i><i class="dot mc"></i><i class="dot mr"></i><i class="dot bl"></i><i class="dot br"></i></div>
+  <div class="gdinfo">
+    <div class="seg" role="group" aria-label="分成幾組"><button id="g4" aria-pressed="true">4 組</button><button id="g6" aria-pressed="false">6 組</button></div>
+    <div class="gres" id="gres" aria-live="polite"></div>
+    <button class="go" id="roll">擲骰！</button>
+    <div class="hint" id="gdhint"></div>
+    <button class="btn2" id="gdreset">重新開始這一輪</button>
+  </div>
+</div>
 <details id="setbox"><summary>⚙️ 班級設定（人數、學生名字）</summary>
   <div class="set">
     <div class="row"><label>班級名稱 <input id="cname" style="width:8em"></label><label>人數 <input id="ccount" type="number" min="1" max="60" style="width:5em"></label></div>
@@ -104,6 +125,7 @@ function render(){
   const p=pool(c);$("hint").textContent=S.norep?`還沒抽到 ${p.left.length} / ${p.all.length} 位`:`共 ${p.all.length} 位可抽`;
   if(!last.length)$("res").innerHTML=`<div class="card"><b>?</b><span>${c.name}</span></div>`;
   $("cname").value=c.name;$("ccount").value=c.count;$("cnames").value=(c.names||[]).join("\n");
+  if(typeof renderGd==="function")renderGd();
 }
 function show(nums,final){const c=C();$("res").className="res"+(nums.length>2?" many":"");
   $("res").innerHTML=nums.map(x=>`<div class="card ${final?"hit":"spin"}"><b>${x}</b>${name(c,x)?`<span>${name(c,x).replace(/</g,"&lt;")}</span>`:""}</div>`).join("")}
@@ -121,7 +143,7 @@ function draw(){
 }
 $("go").onclick=draw;
 document.addEventListener("keydown",e=>{if(e.code==="Space"&&!/INPUT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();draw()}});
-$("cls").onclick=e=>{const b=e.target.closest("button");if(!b)return;S.cur=+b.dataset.i;last=[];save();render()};
+$("cls").onclick=e=>{const b=e.target.closest("button");if(!b)return;S.cur=+b.dataset.i;last=[];glast=0;save();render()};
 $("seats").onclick=e=>{const b=e.target.closest(".seat");if(!b)return;const c=C(),i=+b.dataset.s;c.off=c.off.includes(i)?c.off.filter(x=>x!==i):[...c.off,i];save();render()};
 $("minus").onclick=()=>{S.n=Math.max(1,S.n-1);save();render()};$("plus").onclick=()=>{S.n=Math.min(8,S.n+1);save();render()};
 $("norep").onchange=e=>{S.norep=e.target.checked;save();render()};
@@ -133,6 +155,26 @@ $("save").onclick=()=>{const c=C();c.name=$("cname").value.trim()||c.name;c.coun
 $("addc").onclick=()=>{S.classes.push({name:"新班級",count:30,names:[],off:[],used:[]});S.cur=S.classes.length-1;save();render();$("cname").focus()};
 $("delc").onclick=()=>{if(S.classes.length<2)return;const b=$("delc");if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="再按一次確定刪除";setTimeout(()=>{b.dataset.sure="";b.textContent="刪除這個班級"},3000);return}
   S.classes.splice(S.cur,1);S.cur=0;b.dataset.sure="";b.textContent="刪除這個班級";save();render()};
+// group dice: roll 1..4 or 1..6 to pick a group. Each class remembers which groups were already rolled, per group count.
+const rnd=n=>{try{const a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;let x;do{crypto.getRandomValues(a);x=a[0]}while(x>=lim);return x%n}catch(e){return Math.floor(Math.random()*n)}};
+const gdC=()=>{const c=C();c.gn=c.gn||(c.name==="908"?4:6);c.gused=c.gused||{4:[],6:[]};return c};
+let rolling=false,glast=0;
+function setDie(f,mode){const d=$("die");d.className="die face-"+f+(mode==="hit"?" hit":"");d.style.transform=mode==="hit"?"scale(1.1)":mode==="roll"?`scale(.92) rotate(${Math.floor(Math.random()*31)-15}deg)`:""}
+function renderGd(){const c=gdC();$("g4").setAttribute("aria-pressed",c.gn===4);$("g6").setAttribute("aria-pressed",c.gn===6);
+  const used=(c.gused[c.gn]||[]).length;$("gdhint").textContent=`這一輪還沒擲到 ${c.gn-used} / ${c.gn} 組`;
+  $("roll").disabled=rolling;if(!glast)$("gres").textContent="";if(!rolling)setDie(glast||c.gn,glast?"hit":"idle")}
+function roll(){if(rolling)return;const c=gdC(),N=c.gn,all=[...Array(N)].map((_,i)=>i+1);let used=c.gused[N]||(c.gused[N]=[]);
+  let left=all.filter(x=>!used.includes(x));
+  if(!left.length){const prev=used[used.length-1];used=c.gused[N]=[];left=all.filter(x=>x!==prev)}
+  const pick=left[rnd(left.length)];used.push(pick);save();     // recorded first, so reloading mid-roll still counts
+  rolling=true;glast=0;$("gres").textContent="";$("roll").disabled=true;
+  let t=0,steps=matchMedia("(prefers-reduced-motion: reduce)").matches?1:20;
+  (function step(){t++;if(t<steps){setDie(1+rnd(N),"roll");dtick();setTimeout(step,40+t*t*.6)}
+    else{rolling=false;glast=pick;setDie(pick,"hit");$("gres").textContent="第 "+pick+" 組";dland();renderGd()}})();}
+$("roll").onclick=roll;
+$("g4").onclick=()=>{if(rolling)return;gdC().gn=4;glast=0;save();renderGd()};
+$("g6").onclick=()=>{if(rolling)return;gdC().gn=6;glast=0;save();renderGd()};
+$("gdreset").onclick=()=>{if(rolling)return;const c=gdC();c.gused[c.gn]=[];glast=0;save();renderGd()};
 // bulk import: a line without a seat number is a class name, lines like "12 王小明" are students of that class.
 // Seat numbers are kept as written, so a class that skips 8 and 14 keeps its real numbers and those two are never drawn.
 function parseBulk(txt){const out=[];let cur=null;
