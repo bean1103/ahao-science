@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="icon" href="assets/chars/point.webp">
+<meta name="robots" content="noindex">
 <title>阿豪自然</title>
 <meta name="description" content="阿豪老師的國中自然冒險地圖：影片、互動遊戲、基會試煉、會考解析。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,6 +164,77 @@ section.block{margin-top:32px}
 .pager a:last-child{text-align:right}
 .pager small{display:block;color:var(--muted);font-size:12px}
 .foot{margin-top:40px;font-size:12px;color:var(--muted);text-align:center}
+
+/* ===== Notion-style theme (bean's Notion homepage): neutral dark, cover banner, clean cards, highlight tags ===== */
+:root{
+  --sky:#191919; --sky2:#191919; --panel:#252525; --panel2:#252525; --line:#2f2f2f;
+  --ink:rgba(255,255,255,.88); --muted:#9b9b9b; --glow:#ffd84a; --glow-ink:#2b2100; --sea:#4dab9a; --sea-ink:#0d2620; --rose:#e16259; --lock:#3a3a3a;
+  --display:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --hl-pink:#4e2c3c; --hl-green:#243d30; --hl-blue:#143a4e; --hl-yellow:#59563b; --hl-purple:#3c2d49; --hl-orange:#5c3b23;
+}
+body{background:var(--sky)}
+#stars{display:none}
+h1,h2,h3{font-weight:700;letter-spacing:.01em}
+h2{font-size:22px}
+.hl{color:inherit;border-radius:4px;padding:0 4px;margin:0 1px}
+.hl.pink{background:var(--hl-pink)}.hl.green{background:var(--hl-green)}.hl.blue{background:var(--hl-blue)}.hl.yellow{background:var(--hl-yellow)}.hl.purple{background:var(--hl-purple)}.hl.orange{background:var(--hl-orange)}
+.block-head{border-bottom:1px solid var(--line);padding-bottom:8px}
+.brand svg rect{fill:#e16259}.brand svg text{fill:#fff}
+.brand-name{font-weight:700}
+.switch{border:1px solid var(--line);border-radius:8px}
+.switch button[aria-pressed="true"]{background:#373737;color:#fff}
+
+/* cover */
+.cover{position:relative;margin:4px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;height:200px;overflow:hidden;
+  background:linear-gradient(90deg,#2c4636 0%,#2f4a3a 58%,#e9d8b4 58.2%,#f3e6c6 100%)}
+:root[data-layout="d"] .cover{margin-inline:0;border-radius:10px;height:260px}
+.cover .board{position:absolute;inset:14px 42% 52px 14px;border:6px solid #7a5a3a;border-radius:4px;background:radial-gradient(400px 160px at 30% 30%,#3c5b48,#2a4434)}
+.cover .chalk{position:absolute;color:rgba(255,255,255,.55);font:500 13px/1.2 ui-monospace,monospace;white-space:nowrap}
+.cover .desk{position:absolute;left:0;right:0;bottom:0;height:52px;background:linear-gradient(#a37b52,#7d5a3a)}
+.cover .sun{position:absolute;right:0;top:0;bottom:52px;width:42%;background:linear-gradient(115deg,rgba(255,240,200,.0) 30%,rgba(255,236,190,.65) 60%,rgba(255,255,255,.0) 85%)}
+.cover .title{position:absolute;right:4%;top:16%;font:400 clamp(30px,8vw,64px)/1.1 "Huninn","Noto Sans TC",sans-serif;color:#3a2a1a;letter-spacing:.06em;text-align:right}
+.cover .title small{display:block;font-size:.34em;letter-spacing:.1em;color:#6b5136;margin-top:6px}
+.cover .who{position:absolute;left:4%;bottom:0;height:92%;width:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.cover .c2{display:none}:root[data-layout="d"] .cover .c2{display:block}
+.values{margin-bottom:22px!important}
+.cover .flask{position:absolute;bottom:52px;font-size:28px}
+.page-ico{position:relative;width:64px;height:64px;margin:-34px 0 6px 6px;border-radius:14px;background:#e16259;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.4);z-index:2}
+.page-ico::after{content:"";border-left:20px solid #fff;border-top:13px solid transparent;border-bottom:13px solid transparent;margin-left:5px}
+.page-title{font-size:30px;margin:8px 0 6px}
+.intro{color:var(--ink);font-size:15px;margin:0 0 6px}
+.intro b{color:#fff}
+.values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 6px}
+.val{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.val svg{width:min(96px,24vw);height:auto}
+.val b{font-size:17px}
+.val span{font-size:12px;color:var(--muted);line-height:1.5}
+:root[data-layout="m"] .val span{display:none}
+
+/* cards: flat Notion blocks */
+.hud,.mbtn,.vid,.lk,.quest,.pager a,.isle .info,.tabs button,.stage,.world{border:1px solid var(--line)!important;border-radius:10px}
+.mbtn{border-bottom-width:1px!important;background:var(--panel)}
+.mbtn:hover,.vid:hover,.lk:hover,.quest:hover,.pager a:hover{background:#2f2f2f;border-color:#3a3a3a!important}
+.mbtn:active{transform:none}
+.tabs button[aria-selected="true"]{background:#fff;color:#191919;border-color:#fff!important}
+.world{background:#202020!important}
+.moon{display:none}
+.isle .info{background:rgba(32,32,32,.95)}
+.isle .num{color:#fff;font-weight:700}
+.xp{border:0;background:#2f2f2f;height:8px}
+.xp i{background:var(--sea)}
+.lv{color:var(--sea)}
+.play{background:#e16259;color:#fff;border-radius:8px}
+.vid .t,.lk{font-weight:500}
+.boss{border-radius:10px;border-bottom-width:2px}
+.boss.game{background:var(--hl-green);color:#fff;border-color:#2f5a44}
+.boss.quiz{background:var(--hl-yellow);color:#fff;border-color:#7a7550}
+.boss.isl{background:var(--hl-pink);color:#fff;border-color:#6e3d55}
+.boss.off{background:var(--panel)}
+.clearbtn{border-width:1px;border-bottom-width:1px;border-radius:10px;border-color:var(--sea);color:var(--sea)}
+.clearbtn[aria-pressed="true"]{background:var(--sea);color:var(--sea-ink)}
+.stage{background:var(--panel)}
+.bubble{background:#2f2f2f;color:var(--ink)}.bubble::after{border-right-color:#2f2f2f}.bubble span{color:var(--muted)}
+.win{background:var(--hl-yellow);border:0}
 </style>
 </head>
 <body>
@@ -299,7 +371,7 @@ function home(){
   const total=flat.length, cleared=flat.filter(c=>state(c.id)==="clear").length;
   const lv=1+cleared;
   return `
-  <div class="guide">${mascot("point","lg")}<div class="bubble"><b>嗨！今天要攻略哪一關？</b><span>選一座島開始，看完影片、打倒基會 Boss 就能通關。</span></div></div>
+  <div class="cover" role="img" aria-label="阿豪老師在教室裡拿著平板"><div class="board"><span class="chalk" style="left:62%;top:12%">F = ma</span><span class="chalk c2" style="left:40%;top:40%">E = mc²</span><span class="chalk" style="left:64%;top:62%">V = IR</span></div><div class="sun"></div><div class="desk"></div><span class="flask" style="left:46%">⚗️</span><span class="flask" style="left:52%">🧪</span><span class="flask" style="right:5%">🔬</span><div class="title">阿豪自然<small>阿豪自然 學好不難</small></div><img class="who" src="${CHAR.tablet}" alt=""></div><div class="page-ico" aria-hidden="true"></div><h1 class="page-title">阿豪的自然教學網頁</h1><p class="intro">我是 <b>豪強 No.1 教師——阿豪</b>。這裡不是傳統的填鴨教室，而是你的大腦健身房。我們透過 <b>「學思達開放教室」</b> 的講義與影片，把學習的發球權交回你手上，讓你從被動聽講變成主動思考的探究者。</p><div class="values"><div class="val"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a33ed1"/><stop offset="1" stop-color="#f08a2c"/></linearGradient><filter id="glffd23f"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="60" cy="60" r="55" fill="#0d0d0d" stroke="url(#rg)" stroke-width="6"/><g fill="none" stroke="#ffd23f" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glffd23f)"><path d="M48 78c0-8-10-12-10-26a22 22 0 0 1 44 0c0 14-10 18-10 26z"/><path d="M49 84h22M51 90h18M55 96h10"/><path d="M52 48c0-5 4-8 8-8s8 3 8 8M60 40v26M52 56c3 2 5 2 8 0M60 58c3 2 5 2 8 0"/><path d="M60 14v6M33 26l4 4M87 26l-4 4M24 52h6M90 52h6"/></g></svg><b>學思達</b><span>影片自學、思考、表達，練帶得走的能力</span></div><div class="val"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a33ed1"/><stop offset="1" stop-color="#f08a2c"/></linearGradient><filter id="gl6dff6a"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="60" cy="60" r="55" fill="#0d0d0d" stroke="url(#rg)" stroke-width="6"/><g fill="none" stroke="#6dff6a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#gl6dff6a)"><path d="M60 96V44"/><path d="M60 70c-8-2-14-8-16-16 8 0 14 6 16 16zM60 62c8-2 14-8 16-16-8 0-14 6-16 16z"/><path d="M44 74V38M38 44l6-6 6 6M76 74V34M70 40l6-6 6 6M60 34l-6 6M60 34l6 6"/><path d="M40 96h40"/></g></svg><b>七個習慣</b><span>從主動積極到不斷更新，學會管理時間</span></div><div class="val"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a33ed1"/><stop offset="1" stop-color="#f08a2c"/></linearGradient><filter id="gl33e6ff"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="60" cy="60" r="55" fill="#0d0d0d" stroke="url(#rg)" stroke-width="6"/><g fill="none" stroke="#33e6ff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#gl33e6ff)"><path d="M22 64h76"/><path d="M42 64l10-26 6 8 6-14 14 32"/><path d="M38 64l8 22 14 10 16-12 6-20" stroke-dasharray="0"/><path d="M55 42l3 6 4-4"/></g></svg><b>薩提爾</b><span>看見內在冰山，在安全溫暖中學習</span></div></div>
   <div class="hud">
     <div class="hud-row"><span><span class="pixel lv">LV.${lv}</span>　自然冒險者</span><span class="sub">已通關 ${cleared} / ${total} 座島</span></div>
     <div class="xp" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${cleared}"><i style="width:${Math.max(3,cleared/total*100)}%"></i></div>
@@ -312,7 +384,7 @@ function home(){
   </div>
 
   <section class="block" id="map">
-    <div class="block-head"><h2>冒險地圖</h2><span class="sub">每章是一座島</span></div>
+    <div class="block-head"><h2>冒險<mark class="hl pink">地圖</mark></h2><span class="sub">每章是一座島</span></div>
     <div class="tabs" role="tablist">${DATA.map(x=>`<button role="tab" id="tab-${x.g}" data-g="${x.g}" aria-selected="${x.g===G.g}">${x.label}</button>`).join("")}</div>
     <div class="worlds">${G.sems.map(S=>`<div class="world"><div class="world-head"><div><h3>${S.label}群島</h3><span class="pixel sub">${S.ch.length} ISLANDS</span></div><span class="moon" aria-hidden="true"></span></div>
       <div class="trail">${S.ch.map(C=>isle(byId(`${G.g}-${S.s}-${C.c}`))).join("")}</div></div>`).join("")}</div>
@@ -320,12 +392,12 @@ function home(){
   </section>
 
   <section class="block" id="videos">
-    <div class="block-head"><h2>新影片</h2><span class="sub">每天自動從 YouTube 更新</span></div>
+    <div class="block-head"><h2><mark class="hl green">新影片</mark> | Videos</h2><span class="sub">每天自動從 YouTube 更新</span></div>
     <div class="vids">${VIDEOS.filter(v=>v.chapter).slice(0,5).map((v,i)=>{const c=byId(v.chapter);return `<a class="vid" href="${WATCH(v.id)}" target="_blank" rel="noopener"><span class="play" aria-hidden="true">▶</span><span class="t">${esc(v.title)}<small>${i<2?'<span class="new">NEW</span>　':""}${v.date||""}　${c?`${c.sl} Ch.${c.c} ${esc(c.n)}`:""}</small></span></a>`}).join("")}</div>
   </section>
 
   <section class="block" id="exam">
-    <div class="block-head"><h2>會考大魔王</h2><span class="sub">九年級最終關卡</span></div>
+    <div class="block-head"><h2>會考<mark class="hl yellow">大魔王</mark></h2><span class="sub">九年級最終關卡</span></div>
     <div class="links">
       <a class="lk" href="play/exam-110-115/">🏆 110～115 會考自然解析<small>歷屆試題逐題解析</small></a>
       <a class="lk" href="play/mock-answers/">📝 模擬考詳解<small>每次模擬考的題目解說</small></a>
@@ -333,7 +405,7 @@ function home(){
   </section>
 
   <section class="block" id="tools">
-    <div class="block-head"><h2>教室工具</h2><span class="sub">上課時用</span></div>
+    <div class="block-head"><h2><mark class="hl blue">教室工具</mark></h2><span class="sub">上課時用</span></div>
     <div class="links">
       <a class="lk" href="play/exam-schedule/">🗓️ 考試時程<small>本學期段考日期與範圍</small></a>
       <a class="lk" href="play/mock-schedule/">🗓️ 模擬考時程<small>九年級模擬考日期</small></a>
@@ -354,10 +426,10 @@ function level(id){
     <div class="xp"><i style="width:${Math.max(3,done/Math.max(1,vs.length)*100)}%"></i></div>
   </div>
   <div class="cgrid">
-    <section><div class="block-head"><h2>影片任務</h2><span class="sub">看完打勾</span></div>
+    <section><div class="block-head"><h2><mark class="hl green">影片</mark>任務</h2><span class="sub">看完打勾</span></div>
       <div class="vids">${vs.length?vs.map(v=>{const d=(p.q||[]).includes(v.id);return `<div class="quest ${d?"done":""}"><button class="chk" data-k="${v.id}" aria-pressed="${d}" aria-label="標記看完：${esc(v.title)}">${d?"✓":""}</button>
         <a href="${WATCH(v.id)}" target="_blank" rel="noopener"><span class="play" aria-hidden="true">▶</span><span class="t">${esc(v.title)}<small>${v.kind}${v.date?"　"+v.date:""}</small></span></a></div>`}).join(""):`<div class="boss off"><span class="ico">🎬</span><span>影片整理中<small>阿豪老師上傳後會自動出現</small></span></div>`}</div></section>
-    <section><div class="boss-head"><h2>Boss 戰</h2><img src="${CHAR.hazmat}" alt=""></div>
+    <section><div class="boss-head"><h2><mark class="hl pink">Boss</mark> 戰</h2><img src="${CHAR.hazmat}" alt=""></div>
       <div class="vids">
         ${c.game?`<a class="boss game" href="${P(c.game)}"><span class="ico">🎮</span><span>互動小遊戲<small>邊玩邊複習觀念</small></span></a>`:`<div class="boss off"><span class="ico">🎮</span><span>互動小遊戲<small>這座島還沒有</small></span></div>`}
         ${c.quiz?`<a class="boss quiz" href="${P(c.quiz)}"><span class="ico">👑</span><span>基會試煉<small>會考程度的 Boss</small></span></a>`:`<div class="boss off"><span class="ico">👑</span><span>基會試煉<small>這座島還沒有</small></span></div>`}
