@@ -1,0 +1,10 @@
+{
+ "sheet": {"progress": "", "tips": ""},
+ "progress": [
+  {"grade": "7", "week": "", "note": "", "exam": "", "range": ""},
+  {"grade": "8", "week": "", "note": "", "exam": "", "range": ""},
+  {"grade": "9", "week": "", "note": "", "exam": "", "range": ""}
+ ],
+ "tips": {},
+ "ask": ""
+}

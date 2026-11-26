@@ -235,6 +235,31 @@ h2{font-size:22px}
 .stage{background:var(--panel)}
 .bubble{background:#2f2f2f;color:var(--ink)}.bubble::after{border-right-color:#2f2f2f}.bubble span{color:var(--muted)}
 .win{background:var(--hl-yellow);border:0}
+
+/* this week / exam range / search / parents */
+.now{display:grid;gap:10px}
+.nowcard{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.nowcard img{width:64px;height:auto;flex:none}
+.nowcard .k{font-size:12px;color:var(--muted)}
+.nowcard b{display:block;font-size:18px;line-height:1.35}
+.nowcard p{margin:4px 0 0;font-size:14px;color:var(--ink)}
+.nowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;border-radius:8px;padding:8px 12px;font-size:14px;font-weight:700;background:#fff;color:#191919}
+.btn.ghost{background:#2f2f2f;color:var(--ink)}
+.rangecard{display:flex;gap:10px;align-items:center;text-decoration:none;background:var(--hl-orange);border-radius:10px;padding:12px 14px}
+.rangecard b{flex:1}.rangecard small{display:block;font-weight:400;color:rgba(255,255,255,.75);font-size:12px}
+.empty{font-size:14px;color:var(--muted);background:var(--panel);border:1px dashed #3a3a3a;border-radius:10px;padding:12px 14px}
+.search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.search:focus-within{border-color:#5a5a5a}
+.search input{flex:1;min-width:0;background:none;border:0;color:var(--ink);font:inherit;font-size:16px;outline:none}
+#sr{display:grid;gap:8px;margin-top:8px}
+#sr .chips{display:flex;gap:6px;flex-wrap:wrap}
+#sr .chip{text-decoration:none;font-size:13px;background:#2f2f2f;border-radius:6px;padding:4px 8px}
+.rgroup{margin-top:18px}.rgroup h3{font-size:17px;margin-bottom:8px}
+.parents{display:grid;gap:10px}
+.parents .lk b{display:block;margin-bottom:2px}
+.parents .lk{font-weight:400;font-size:14px;line-height:1.7}
+:root[data-layout="d"] .parents{grid-template-columns:repeat(2,minmax(0,1fr))}
 </style>
 </head>
 <body>
@@ -253,7 +278,7 @@ h2{font-size:22px}
     </div>
   </header>
   <main id="view"></main>
-  <div class="foot">阿豪自然 · 每天自動從 YouTube 更新影片</div>
+  <div class="foot">阿豪自然 · 每天自動從 YouTube 更新影片 · <a href="#parents">給家長</a></div>
 </div>
 
 
@@ -372,7 +397,9 @@ function home(){
   const lv=1+cleared;
   return `
   <div class="cover" role="img" aria-label="阿豪老師在教室裡拿著平板"><div class="board"><span class="chalk" style="left:62%;top:12%">F = ma</span><span class="chalk c2" style="left:40%;top:40%">E = mc²</span><span class="chalk" style="left:64%;top:62%">V = IR</span></div><div class="sun"></div><div class="desk"></div><span class="flask" style="left:46%">⚗️</span><span class="flask" style="left:52%">🧪</span><span class="flask" style="right:5%">🔬</span><div class="title">阿豪自然<small>阿豪自然 學好不難</small></div><img class="who" src="${CHAR.tablet}" alt=""></div><div class="page-ico" aria-hidden="true"></div><h1 class="page-title">阿豪的自然教學網頁</h1><p class="intro">我是 <b>豪強 No.1 教師——阿豪</b>。這裡不是傳統的填鴨教室，而是你的大腦健身房。我們透過 <b>「學思達開放教室」</b> 的講義與影片，把學習的發球權交回你手上，讓你從被動聽講變成主動思考的探究者。</p><div class="values"><div class="val"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a33ed1"/><stop offset="1" stop-color="#f08a2c"/></linearGradient><filter id="glffd23f"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="60" cy="60" r="55" fill="#0d0d0d" stroke="url(#rg)" stroke-width="6"/><g fill="none" stroke="#ffd23f" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glffd23f)"><path d="M48 78c0-8-10-12-10-26a22 22 0 0 1 44 0c0 14-10 18-10 26z"/><path d="M49 84h22M51 90h18M55 96h10"/><path d="M52 48c0-5 4-8 8-8s8 3 8 8M60 40v26M52 56c3 2 5 2 8 0M60 58c3 2 5 2 8 0"/><path d="M60 14v6M33 26l4 4M87 26l-4 4M24 52h6M90 52h6"/></g></svg><b>學思達</b><span>影片自學、思考、表達，練帶得走的能力</span></div><div class="val"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a33ed1"/><stop offset="1" stop-color="#f08a2c"/></linearGradient><filter id="gl6dff6a"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="60" cy="60" r="55" fill="#0d0d0d" stroke="url(#rg)" stroke-width="6"/><g fill="none" stroke="#6dff6a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#gl6dff6a)"><path d="M60 96V44"/><path d="M60 70c-8-2-14-8-16-16 8 0 14 6 16 16zM60 62c8-2 14-8 16-16-8 0-14 6-16 16z"/><path d="M44 74V38M38 44l6-6 6 6M76 74V34M70 40l6-6 6 6M60 34l-6 6M60 34l6 6"/><path d="M40 96h40"/></g></svg><b>七個習慣</b><span>從主動積極到不斷更新，學會管理時間</span></div><div class="val"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a33ed1"/><stop offset="1" stop-color="#f08a2c"/></linearGradient><filter id="gl33e6ff"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="60" cy="60" r="55" fill="#0d0d0d" stroke="url(#rg)" stroke-width="6"/><g fill="none" stroke="#33e6ff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#gl33e6ff)"><path d="M22 64h76"/><path d="M42 64l10-26 6 8 6-14 14 32"/><path d="M38 64l8 22 14 10 16-12 6-20" stroke-dasharray="0"/><path d="M55 42l3 6 4-4"/></g></svg><b>薩提爾</b><span>看見內在冰山，在安全溫暖中學習</span></div></div>
-  <div class="hud">
+  ${nowBlock()}
+  ${searchBlock()}
+  <div class="hud" style="margin-top:24px">
     <div class="hud-row"><span><span class="pixel lv">LV.${lv}</span>　自然冒險者</span><span class="sub">已通關 ${cleared} / ${total} 座島</span></div>
     <div class="xp" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${cleared}"><i style="width:${Math.max(3,cleared/total*100)}%"></i></div>
   </div>
@@ -410,8 +437,97 @@ function home(){
       <a class="lk" href="play/exam-schedule/">🗓️ 考試時程<small>本學期段考日期與範圍</small></a>
       <a class="lk" href="play/mock-schedule/">🗓️ 模擬考時程<small>九年級模擬考日期</small></a>
     </div>
-  </section>`;
+  </section>
+  ${parentsBlock()}`;
 }
+
+
+// ===== settings: this week / exam range / chapter tips (Google Sheet or data/settings.json) =====
+const GN={"7":"七年級","8":"八年級","9":"九年級"};
+let CFG={progress:{},tips:{},ask:""};
+const CNUM={"七":"7","八":"8","九":"9","上":"1","下":"2"};
+function ref1(t,base){
+  t=String(t||"").replace(/\s+/g,"");if(!t)return null;
+  let m=t.match(/^G?([789])[-_]([12])[-_]C?(\d{1,2})(?:[-_](\d{1,2}))?$/i);
+  if(m) return {g:m[1],s:m[2],c:+m[3],sec:m[4]?+m[4]:null};
+  m=t.match(/^([七八九])([上下])(?:自然)?(?:Ch\.?|C|第)?(\d{1,2})章?(?:[-.](\d{1,2}))?$/i);
+  if(m) return {g:CNUM[m[1]],s:CNUM[m[2]],c:+m[3],sec:m[4]?+m[4]:null};
+  m=t.match(/^(?:Ch\.?|C|第)?(\d{1,2})章?(?:[-.](\d{1,2}))?$/i);
+  if(m&&base) return {g:base.g,s:base.s,c:+m[1],sec:m[2]?+m[2]:null};
+  return null;
+}
+function parseRange(str){
+  const out=[];let base=null;
+  const add=(r,sec)=>{const id=`${r.g}-${r.s}-${r.c}`;if(!byId(id))return;let e=out.find(x=>x.id===id);
+    if(!e){e={id,secs:sec==null?null:new Set()};out.push(e)} if(sec==null)e.secs=null;else if(e.secs)e.secs.add(sec)};
+  for(const part of String(str||"").split(/[,，、;；\n]+/)){
+    const [a,b]=part.split(/~|～|到|至/);const A=ref1(a,base);if(!A)continue;base=A;
+    if(b!=null){const B=ref1(b,A);if(!B)continue;
+      if(B.c===A.c&&A.sec!=null&&B.sec!=null){for(let x=A.sec;x<=B.sec;x++)add(A,x)}
+      else for(let c=A.c;c<=B.c;c++)add({...A,c},null);continue}
+    add(A,A.sec);
+  }
+  return out;
+}
+function csv(t){const rows=[];let row=[],f="",q=false;for(let i=0;i<t.length;i++){const ch=t[i];
+  if(q){if(ch=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=ch}
+  else if(ch=='"')q=true;else if(ch==","){row.push(f);f=""}else if(ch=="\n"){row.push(f);rows.push(row);row=[];f=""}else if(ch!="\r")f+=ch}
+  if(f||row.length){row.push(f);rows.push(row)}return rows}
+const gradeOf=v=>{v=String(v||"").trim();return CNUM[v[0]]||(/^[789]/.test(v)?v[0]:"")};
+function useSettings(s){
+  (s.progress||[]).forEach(r=>{const g=gradeOf(r.grade);if(g)CFG.progress[g]=r});
+  Object.assign(CFG.tips,s.tips||{});if(s.ask)CFG.ask=s.ask;
+}
+async function loadSettings(){
+  let s={};try{s=await fetch("data/settings.json",{cache:"no-store"}).then(r=>r.json())}catch(e){}
+  useSettings(s);
+  const sh=s.sheet||{};
+  const get=u=>fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now()).then(r=>r.ok?r.text():"").then(csv).catch(()=>[]);
+  const [pr,tp]=await Promise.all([sh.progress?get(sh.progress):[],sh.tips?get(sh.tips):[]]);
+  if(pr.length>1){const rows=pr.slice(1).map(r=>({grade:r[0],week:r[1],note:r[2],exam:r[3],range:r[4],ask:r[5]}));
+    useSettings({progress:rows});const a=rows.find(r=>(r.ask||"").startsWith("http"));if(a)CFG.ask=a.ask.trim()}
+  tp.slice(1).forEach(r=>{const A=ref1(r[0]);if(A&&r[1])CFG.tips[`${A.g}-${A.s}-${A.c}`]=r[1].trim()});
+}
+const done=(cid,vid)=>(prog[cid]?.q||[]).includes(vid);
+function rangeVids(e){const c=byId(e.id);return vidsOf(c).filter(v=>!e.secs||v.section==null||e.secs.has(v.section))}
+function nowBlock(){
+  const P=CFG.progress[grade]||{};const wk=parseRange(P.week)[0];const c=wk&&byId(wk.id);
+  const rng=parseRange(P.range);const rv=rng.flatMap(e=>rangeVids(e).map(v=>[e.id,v]));const rdone=rv.filter(([cid,v])=>done(cid,v.id)).length;
+  let card;
+  if(c){const vs=vidsOf(c).filter(v=>!wk.secs||v.section==null||wk.secs.has(v.section));const nx=vs.find(v=>!done(c.id,v.id));
+    card=`<div class="nowcard">${mascot("point")}<div style="min-width:0;flex:1"><span class="k">${GN[grade]} · 這週上到</span><b>${c.sl} Ch.${c.c} ${esc(c.n)}${wk.secs?`<span class="sub"> · ${[...wk.secs].map(x=>c.c+"-"+x).join("、")}</span>`:""}</b>${P.note?`<p>${esc(P.note)}</p>`:""}
+      <div class="nowbtns"><a class="btn" href="#ch-${c.id}">去這一章</a>${nx?`<a class="btn ghost" href="${WATCH(nx.id)}" target="_blank" rel="noopener">▶ 下一支：${esc(nx.title.slice(0,18))}</a>`:""}</div></div></div>`}
+  else card=`<div class="empty">${GN[grade]}這週的進度還沒更新，先從下面的冒險地圖挑一章吧！</div>`;
+  const ex=P.exam&&rng.length?`<a class="rangecard" href="#range-${grade}"><span style="font-size:24px">📝</span><b>${esc(P.exam)} 範圍<small>${rng.length} 章 · ${rv.length} 支影片 · 已看 ${rdone}</small></b><span>›</span></a>`:"";
+  return `<section class="block" id="now"><div class="block-head"><h2>這週<mark class="hl orange">上到哪</mark></h2></div>
+    <div class="tabs" role="tablist">${DATA.map(x=>`<button role="tab" data-g="${x.g}" data-stay="1" aria-selected="${x.g===grade}">${x.label}</button>`).join("")}</div>
+    <div class="now">${card}${ex}</div></section>`;
+}
+let query="";
+function searchBlock(){return `<section class="block" id="search"><div class="search"><span aria-hidden="true">🔍</span><input id="q" type="search" placeholder="搜尋影片，例如：比熱、歐姆定律" value="${esc(query)}" autocomplete="off" enterkeyhint="search" aria-label="搜尋影片"></div><div id="sr"></div></section>`}
+function searchResults(q){
+  const n=s=>String(s).toLowerCase().replace(/[\s\-_]/g,"");const k=n(q);if(!k)return "";
+  const chs=flat.filter(c=>n(c.n).includes(k)||c.sec.some(x=>n(x).includes(k)));
+  const vs=VIDEOS.filter(v=>v.chapter&&n(v.title).includes(k)).slice(0,20);
+  if(!chs.length&&!vs.length)return `<div class="empty">找不到「${esc(q)}」，換個關鍵字試試看，例如章節名稱。</div>`;
+  return (chs.length?`<div class="chips">${chs.map(c=>`<a class="chip" href="#ch-${c.id}">🏝️ ${c.sl} Ch.${c.c} ${esc(c.n)}</a>`).join("")}</div>`:"")+
+    vs.map(v=>{const c=byId(v.chapter);return `<a class="vid" href="${WATCH(v.id)}" target="_blank" rel="noopener"><span class="play" aria-hidden="true">▶</span><span class="t">${esc(v.title)}<small>${c?`${c.sl} Ch.${c.c} ${esc(c.n)}`:""}　${v.kind}</small></span></a>`}).join("");
+}
+function rangePage(g){
+  const P=CFG.progress[g]||{};const rng=parseRange(P.range);
+  if(!P.exam||!rng.length)return `<div class="crumb"><a href="#home">首頁</a></div><div class="empty">${GN[g]||""}目前沒有設定段考範圍。</div>`;
+  return `<div class="crumb"><a href="#home">首頁</a> › ${GN[g]}</div>
+  <div class="stage"><div class="stage-top">${mascot("book")}<div><span class="sub">${GN[g]}</span><h1>${esc(P.exam)} 範圍</h1><span class="sub">${esc(P.range)}</span></div></div></div>
+  ${rng.map(e=>{const c=byId(e.id);const vs=rangeVids(e);return `<div class="rgroup"><h3><a href="#ch-${c.id}" style="text-decoration:none">${c.sl} Ch.${c.c} ${esc(c.n)} ›</a></h3><div class="vids">${vs.length?vs.map(v=>{const d=done(c.id,v.id);return `<div class="quest ${d?"done":""}"><button class="chk" data-c="${c.id}" data-k="${v.id}" aria-pressed="${d}" aria-label="標記看完：${esc(v.title)}">${d?"✓":""}</button>
+    <a href="${WATCH(v.id)}" target="_blank" rel="noopener"><span class="play" aria-hidden="true">▶</span><span class="t">${esc(v.title)}<small>${v.kind}</small></span></a></div>`}).join(""):`<div class="empty">這一章的影片整理中</div>`}</div></div>`}).join("")}`;
+}
+function parentsBlock(){return `<section class="block" id="parents"><div class="block-head"><h2>給<mark class="hl purple">家長</mark></h2><span class="sub">孩子可以怎麼用這個網站</span></div>
+  <div class="parents">
+    <div class="lk"><b>📚 這是什麼網站？</b>阿豪老師的國中自然教學網站。依照課本章節整理老師錄的講解影片、重點整理、習作解題，還有互動遊戲和基會試煉，全部免費。</div>
+    <div class="lk"><b>🗺️ 孩子怎麼用？</b>先看「這週上到哪」，看完影片打勾，再玩互動遊戲、挑戰基會試煉，就能點亮那一章的島嶼。段考前打開「段考範圍」，照清單複習。</div>
+    <div class="lk"><b>🔒 需要註冊嗎？</b>不用註冊、不用登入。看影片的打勾紀錄只存在這台手機或電腦的瀏覽器裡，不會上傳；換裝置或清除瀏覽紀錄就會重新開始。</div>
+    <div class="lk"><b>🎬 影片在哪裡？</b>影片都放在 YouTube 頻道「Chihhao Chen」，網站每天早上自動更新新上傳的影片。${CFG.ask?`<br>有問題可以從<a href="${esc(CFG.ask)}" target="_blank" rel="noopener">這裡問阿豪老師</a>。`:""}</div>
+  </div></section>`}
 
 const TIPS=["先看影片再挑戰 Boss，通關率會高很多喔！","看完一支就打勾，地圖上的島會慢慢亮起來。","卡關了？回去看那一節的影片，再來一次！"];
 function level(id){
@@ -425,6 +541,7 @@ function level(id){
       <div><span class="pixel sub">${c.sl} · CH${c.c}</span><h1>${esc(c.n)}</h1><span class="sub">影片任務 ${done} / ${vs.length}</span></div></div>
     <div class="xp"><i style="width:${Math.max(3,done/Math.max(1,vs.length)*100)}%"></i></div>
   </div>
+  ${CFG.tips[c.id]?`<div class="guide" style="margin-top:16px">${mascot("idea")}<div class="bubble"><b>阿豪老師的重點</b><span>${esc(CFG.tips[c.id])}</span></div></div>`:""}
   <div class="cgrid">
     <section><div class="block-head"><h2><mark class="hl green">影片</mark>任務</h2><span class="sub">看完打勾</span></div>
       <div class="vids">${vs.length?vs.map(v=>{const d=(p.q||[]).includes(v.id);return `<div class="quest ${d?"done":""}"><button class="chk" data-k="${v.id}" aria-pressed="${d}" aria-label="標記看完：${esc(v.title)}">${d?"✓":""}</button>
@@ -437,21 +554,22 @@ function level(id){
       </div>
       ${st==="clear"?`<div class="win"><img src="${CHAR.cheer}" alt="阿豪老師歡呼"><div><b>恭喜通關！</b><span class="sub">這座島已經點亮了</span></div></div>`:""}
       <button class="clearbtn" id="clear" aria-pressed="${st==="clear"}">${st==="clear"?"★ 已通關（再按一次取消）":"我通關了！點亮這座島"}</button>
-      <div class="guide" style="margin-top:16px">${mascot(POSE[c.id]||(i%2?"idea":"think"))}<div class="bubble"><b>阿豪老師提示</b><span>${TIPS[i%TIPS.length]}</span></div></div>
+      ${CFG.tips[c.id]?"":`<div class="guide" style="margin-top:16px">${mascot(POSE[c.id]||(i%2?"idea":"think"))}<div class="bubble"><b>阿豪老師提示</b><span>${TIPS[i%TIPS.length]}</span></div></div>`}
     </section>
   </div>
   <div class="pager">${prev?`<a href="#ch-${prev.id}"><small>‹ 上一座島</small>${prev.sl} Ch.${prev.c} ${esc(prev.n)}</a>`:"<span></span>"}${next?`<a href="#ch-${next.id}"><small>下一座島 ›</small>${next.sl} Ch.${next.c} ${esc(next.n)}</a>`:"<span></span>"}</div>`;
 }
 
 function render(){
-  const h=location.hash.slice(1), m=h.match(/^ch-(\d-\d-\d)/), view=document.getElementById("view");
-  view.innerHTML=m?level(m[1]):home();
-  view.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{grade=b.dataset.g;store.set("ahao-grade",grade);render();document.getElementById("map").scrollIntoView()}));
-  if(m){
-    const id=m[1];
-    view.querySelectorAll(".chk").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.k;const p=prog[id]||(prog[id]={q:[]});p.q=p.q||[];
+  const h=location.hash.slice(1), m=h.match(/^ch-(\d-\d-\d)/), rg=h.match(/^range-([789])$/), view=document.getElementById("view");
+  view.innerHTML=m?level(m[1]):rg?rangePage(rg[1]):home();
+  view.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{grade=b.dataset.g;store.set("ahao-grade",grade);render();if(!b.dataset.stay)document.getElementById("map").scrollIntoView()}));
+  view.querySelectorAll(".chk").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.c||m[1],k=b.dataset.k;const p=prog[id]||(prog[id]={q:[]});p.q=p.q||[];
       p.q=p.q.includes(k)?p.q.filter(x=>x!==k):[...p.q,k];save();render()}));
-    document.getElementById("clear").addEventListener("click",()=>{const p=prog[id]||(prog[id]={q:[]});p.clear=p.clear?0:1;save();render()});
+  const qi=document.getElementById("q");if(qi){const sr=document.getElementById("sr");const upd=()=>{query=qi.value;sr.innerHTML=searchResults(query)};qi.addEventListener("input",upd);if(query)upd()}
+  if(m||rg){
+    const id=m&&m[1];
+    if(m)document.getElementById("clear").addEventListener("click",()=>{const p=prog[id]||(prog[id]={q:[]});p.clear=p.clear?0:1;save();render()});
     if(!render.keep) window.scrollTo(0,0);
   } else if(h && h!=="home"){const el=document.getElementById(h);el&&el.scrollIntoView()} else window.scrollTo(0,0);
 }
@@ -467,7 +585,7 @@ function stars(){
   for(let i=0;i<Math.round(w*h/5000);i++){x.fillStyle=`rgba(238,241,255,${.25+rnd()*.6})`;const r=rnd()*1.4+.3;x.beginPath();x.arc(rnd()*w,rnd()*h,r,0,7);x.fill()}
 }
 applyLayout();stars();
-fetch("data/videos.json").then(r=>r.json()).then(v=>{VIDEOS=v}).catch(()=>{}).finally(()=>render());
+Promise.all([fetch("data/videos.json").then(r=>r.json()).then(v=>{VIDEOS=v}).catch(()=>{}),loadSettings().catch(()=>{})]).finally(()=>render());
 </script>
 
 </body>
